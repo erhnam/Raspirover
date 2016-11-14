@@ -6,6 +6,11 @@ from sensorGas import *
 
 #Variables globales
 driver=0
+dbtemperatura=' '
+dbhumedad=' '
+dbgas=' '
+dbluz=' '
+dbtiempo=' '
 sensordth=0
 sensorgas=0
 sensorluz=0

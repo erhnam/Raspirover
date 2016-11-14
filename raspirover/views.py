@@ -70,30 +70,55 @@ def explorar(request):
 			globales.camara = cleaned_data.get('camara')
 			tiempo = cleaned_data.get('tiempo')
 			nombre = cleaned_data.get('nombre')
+			descripcion = cleaned_data.get('descripcion')
+	
+			usuario=request.user.user_profile
 
-#			usuario=UserProfile.objects.get(user=request.user)
-#			username = usuario.user
-			
+			explo=Exploracion(nombre=nombre, tiempo=tiempo, usuario=usuario, descripcion=descripcion)
+
 			if globales.stemperatura == True or globales.shumedad == True:
 				sensordth = SensorTemperatura(14)	
 				timerdth = TimerRecurrente(float(tiempo)-0.2, sensordth.read)
 				timerdth.start_timer()
+				if globales.stemperatura == True:
+					globales.dbtemperatura=SensorTemperatura()
+					globales.dbtemperatura.enable=True
+					globales.dbtemperatura.save()
+					explo.sensorTemperatura=globales.dbtemperatura
+				if globales.shumedad == True:
+					globales.dbhumedad=SensorHumedad()
+					globales.dbhumedad.enable=True					
+					globales.dbhumedad.save()
+					explo.sensorHumedad=globales.dbhumedad
+
 			if globales.sgas == True:
 				sensorgas = SensorGas(26)
 				timerluz = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
 				timerluz.start_timer()
+				globales.dbgas=SensorGas()
+				globales.dbgas.enable=True
+				globales.dbgas.save()
+				explo.sensorGas=globales.dbgas
+
 			if globales.sluz == True:
 				sensorluz = SensorLuz(21,20)
 				timergas = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
 				timergas.start_timer()
+				globales.dbluz=SensorLuz()
+				globales.dbluz.enable=True
+				globales.dbluz.save()
+				explo.sensorLuz=globales.dbluz
+
 			if globales.camara == True:
 				camara_start()
+
 			if tiempo == True:
 				trigger = TimerRecurrente(float(tiempo), BBDD)
 				trigger.start_timer()
+				globales.dbtiempo.save()
+				explo.tiempo=globales.dbtiempo
 
-			#se crea exploracion
-#			exploracion.objects.create(nombre=nombre, username=usuario)
+			explo.save()
 			
 			if request.method=='POST' and 'manual' in request.POST:
 				return redirect(reverse('manual'))
@@ -108,17 +133,15 @@ def explorar(request):
 	return render(request, 'explorar.html', context)
 
 #funcion para insertar valor de sensores en base de datos
-@login_required
 def BBDD():
 	if globales.stemperatura == True:
-		st=sensorTemperatura.objects.create(nombre='Sensor temperatura del salon', descripcion='Proporciona la temperatura del salon',temperatura=globales.temperatura)
-		st.save() 
+		dbtemperatura.add(temperatura=globales.temperatura)
 	if globales.shumedad == True:
-		sensorHumedad.objects.create(humedad=globales.humedad)
+		dbhumedad.add(humedad=globales.humedad)
 	if globales.sgas == True:
-		sensorGas.objects.create(gas=globales.gas)
+		dbgas.add(gas=globales.gas)
 	if globales.sluz == True:
-		sensorLuz.objects.create(luz=globales.luz)
+		dbluz.add(luz=globales.luz)
 
 #funcion Analizar
 @login_required

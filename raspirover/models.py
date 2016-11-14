@@ -28,6 +28,7 @@ class Sensor(models.Model):
 	nombre = models.CharField(max_length=50)
 	descripcion = models.CharField(max_length=140)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
+	enable = models.BooleanField(default=False)
 
 class SensorTemperatura(Sensor):
 	temperatura = models.FloatField(null=True,
@@ -35,7 +36,6 @@ class SensorTemperatura(Sensor):
 			MinValueValidator(-10),
 			MaxValueValidator(50)
 		])	
-	enable = models.BooleanField(default=False)
 
 	def __unicode__(self):
 		return u'%s' % (self.nombre)
@@ -57,8 +57,7 @@ class SensorHumedad(Sensor):
 			MinValueValidator(-10),
 			MaxValueValidator(50)
 		])	
-	enable = models.BooleanField(default=False)
-
+	
 	def __unicode__(self):
 		return u'%s' % (self.nombre)
 	
@@ -74,8 +73,7 @@ class SensorHumedad(Sensor):
 				
 class SensorLuz(Sensor):
 	luz = models.IntegerField(null=True)
-	enable = models.BooleanField(default=False)
-
+	
 	def __unicode__(self):
 		return u'%s' % (self.nombre)
 
@@ -91,8 +89,7 @@ class SensorLuz(Sensor):
 
 class SensorGas(Sensor):
 	gas = models.IntegerField(null=True)
-	enable = models.BooleanField(default=False)
-
+	
 	def __unicode__(self):
 		return u'%s' % (self.nombre)
 
@@ -108,8 +105,11 @@ class SensorGas(Sensor):
 
 class Exploracion(models.Model):
 	id_exploracion = models.AutoField(primary_key=True)
-	sensor = models.ManyToManyField(Sensor)
-	username = models.ForeignKey(UserProfile)	
+	sensorTemperatura = models.ManyToManyField(SensorTemperatura, null=True, blank=True)
+	sensorHunedad = models.ManyToManyField(SensorHumedad, null=True, blank=True)
+	sensorLuz = models.ManyToManyField(SensorLuz, null=True, blank=True)
+	sensorGas = models.ManyToManyField(SensorGas, null=True, blank=True)
+	usuario = models.ForeignKey(UserProfile, null=False)
 	nombre = models.CharField(max_length=50, blank=False)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	descripcion = models.CharField(max_length=140)
@@ -125,4 +125,6 @@ class Sensores(models.Model):
 	gas = models.BooleanField()
 	luz = models.BooleanField()
 	camara = models.BooleanField()
+	descripcion = models.CharField(max_length=100)
 	tiempo = models.DecimalField(max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)], null=True)
+
