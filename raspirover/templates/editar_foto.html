@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar foto{% endblock title %}
+
+{% block content %}
+
+	<div>
+		<h2><img src="{% if seguido.photo %}{{ MEDIA_URL }}{{ seguido.photo }}{% else %}{{ MEDIA_URL }}default.png{% endif %}" width="60" height="" ="60"/> Perfil de usuario </h2>
+	</div>
+	<div class="col-sm-4">
+	    <h3 class="page-header">Cambiar Foto</h3>
+	    <form method="POST" action="{% url 'editar_foto' %}" enctype="multipart/form-data">
+	        {% csrf_token %}
+	        {{ form.as_p }}
+	        <button class="btn btn-primary" type="submit">Actualizar foto</button>
+	        <a href="{% url 'home' %}" class="btn btn-warning" type="submit">Cancelar</a>
+	    </form>
+	</div>
+	
+{% endblock content %}

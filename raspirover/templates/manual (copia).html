@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Proyecto RaspiRover{% endblock title %}
+
+            
+{% block content %}
+	
+    <div id="content" align="center">
+	<img width="640" height="480" src="http://192.168.1.99:8554/?action=stream" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/NASA_Mars_Rover.jpg/250px-NASA_Mars_Rover.jpg' ">			
+        
+        Control de Cámara	
+	    
+        <div id="servo">
+            <table border="0" cellpadding="1" cellspacing="0">
+                <tr>
+                <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="camleft();">
+                     <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
+                </button>
+                </tr>
+                 <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="camcenter();">
+                     <span class="glyphicon glyphicon-stop" style="color:green" aria-hidden="true"></span>
+                </button>
+                <tr>
+                <button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" onclick="camright();">
+                     <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
+                </button>
+            </table>
+        </div>
+    
+        Control de Dirección
+        
+        <div style="width:150px;height:100px auto;">       
+
+            <table border="0" cellpadding="3" cellspacing="0">
+                <tr>
+                <button type="button" class="btn btn-default btn-mv" aria-label="Top Arrow" onclick="fwd();">
+                    <span class="glyphicon glyphicon-arrow-up" style="color:green" aria-hidden="true"></span>
+                </button> 
+                </tr><br>
+                <tr>
+                <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="left();">
+                     <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
+                </button>
+                </tr>
+                 <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="stop();">
+                     <span class="glyphicon glyphicon-stop" style="color:red" aria-hidden="true"></span>
+                </button>
+                <tr>
+                <button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" onclick="right();">
+                     <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
+                </button>
+                </tr><br>
+                <button type="button" class="btn btn-default btn-mv" aria-label="Bottom Arrow" onclick="bwd();">
+                     <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
+                </button>
+            </table>
+        </div>
+    </div>
+
+{% endblock content %}

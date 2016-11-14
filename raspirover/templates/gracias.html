@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Gracias{% endblock title %}
+
+{% block content %}
+
+    {% if mensaje %}
+        <div class="alert alert-danger">
+            {{ mensaje }}
+        </div>
+    {% endif %}
+
+	{% if login == '1' %}
+	    <h2>{{ username }} gracias por registrarte!</h2>
+	    <h3> Ya puedes iniciar sesión </h3>
+	    
+    {% elif login == '0' %}
+	    <h2>{{ username }} gracias por haber usado Rumor</h2>
+	    <h3> Te echaremos de menos... </h3>
+
+    {% elif login == '2' %}
+        <h2>{{ username }} gracias por ponerse en contacto con nosotros</h2>
+        <h3> Le responderemos lo mas rápidamente posible... </h3>
+    {% endif %}
+
+{% endblock content %}

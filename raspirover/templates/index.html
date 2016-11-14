@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %} Index {% endblock title %}
+
+{% block content %}
+
+    {% if user.is_authenticated %}
+        <div class="content" align="center">
+	        <img width="640" height="480" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
+        </div>
+        <div class="servo" align="center">
+	        <a href="{% url 'explorar' %}"><button type="button">Explorar</button></a>
+            <a href="{% url 'analizar' %}"><button type="button">Analizar</button></a>
+        </div>
+    {% else %}
+		<div class="content" align="center">
+		    <h2>No estás registrado</h2>
+	    </div>
+
+	{% endif %}
+
+{% endblock content %}
+
+
