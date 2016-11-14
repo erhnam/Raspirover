@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime
@@ -112,7 +113,7 @@ class Exploracion(models.Model):
 	usuario = models.ForeignKey(UserProfile, null=False)
 	nombre = models.CharField(max_length=50, blank=False)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
-	descripcion = models.CharField(max_length=140)
+	descripcion = models.CharField(max_length=140, null=True)
 	tiempo = models.DecimalField(max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)], null=True)
 
 	def __unicode__(self):
@@ -125,6 +126,6 @@ class Sensores(models.Model):
 	gas = models.BooleanField()
 	luz = models.BooleanField()
 	camara = models.BooleanField()
-	descripcion = models.CharField(max_length=100)
+	descripcion = models.CharField(max_length=140, null=True)
 	tiempo = models.DecimalField(max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)], null=True)
 
