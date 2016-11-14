@@ -77,26 +77,11 @@ class HorizRadioRenderer(forms.RadioSelect.renderer):
             """Outputs radios"""
             return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
 
-
-
-#Formulario de exploracion
-#class ExploracionForm(forms.ModelForm):
-#
-#	class Meta:
-#		model = Exploracion
-#		fields = '__all__'
-#
-#	def __init__(self, *args, **kwargs):
-#		super(ExploracionForm, self).__init__(*args, **kwargs)
-#
-#		for field in self.fields:
-#			self.fields[field].error_messages = {'required': 'Nombre de la exploración es obligatorio'}
-
-
 #Formulario de exploracion
 class ExploracionForm(forms.Form):
 
-	nombre = forms.CharField(label='Nombre de la exploración', min_length=2, max_length=12)    
+	nombre = forms.CharField(label='Título de exploración', min_length=2, max_length=12)
+	descripcion = forms.CharField(label='Descripción', required=False, max_length=140)
 	tiempo = forms.DecimalField(label='Tiempo de disparo de la BBDD',required=False, max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)])
 	temperatura = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
 	humedad = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
