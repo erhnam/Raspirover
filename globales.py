@@ -3,14 +3,14 @@ from sensorDistancia import *
 from sensorLuz import *
 from sensorTemperatura import *
 from sensorGas import *
-
+from raspirover import models 
 #Variables globales
 driver=0
-dbtemperatura=' '
-dbhumedad=' '
-dbgas=' '
-dbluz=' '
-dbtiempo=' '
+dbtemperatura=''
+dbhumedad=''
+dbgas=''
+dbluz=''
+dbtiempo=0
 sensordth=0
 sensorgas=0
 sensorluz=0

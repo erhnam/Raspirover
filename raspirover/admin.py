@@ -6,10 +6,10 @@ from .models import UserProfile
 from .models import *
 
 admin.site.register(Sensor)
-admin.site.register(SensorTemperatura)
-admin.site.register(SensorHumedad)
-admin.site.register(SensorLuz)
-admin.site.register(SensorGas)
+admin.site.register(sensorTemperatura)
+admin.site.register(sensorHumedad)
+admin.site.register(sensorLuz)
+admin.site.register(sensorGas)
 admin.site.register(Exploracion)
 admin.site.register(UserProfile)
 admin.site.register(Sensores)

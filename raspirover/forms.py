@@ -10,10 +10,10 @@ from django.forms import ModelForm
 
 class RegistroUserForm(forms.Form):
  
-	username = forms.CharField(min_length=5,widget=forms.TextInput(attrs={'class': 'form-control'}))
+	username = forms.CharField(min_length=4,widget=forms.TextInput(attrs={'class': 'form-control'}))
 	email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
-	password = forms.CharField(min_length=5,widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-	repetir_password = forms.CharField(min_length=5,widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+	password = forms.CharField(min_length=4,widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+	repetir_password = forms.CharField(min_length=4,widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 	photo = forms.ImageField(required=False)
  
 	def clean_username(self):
@@ -82,7 +82,7 @@ class ExploracionForm(forms.Form):
 
 	nombre = forms.CharField(label='Título de exploración', min_length=2, max_length=12)
 	descripcion = forms.CharField(label='Descripción', required=False, max_length=140)
-	tiempo = forms.DecimalField(label='Tiempo de disparo de la BBDD',required=False, max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)])
+	tiempo = forms.FloatField(label='Tiempo de disparo de la BBDD',required=False)
 	temperatura = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
 	humedad = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
 	gas = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))

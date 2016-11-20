@@ -1,6 +1,5 @@
 import time
 import RPi.GPIO as GPIO
-import globales
 
 
 class SensorDistancia(object):
