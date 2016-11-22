@@ -80,7 +80,7 @@ class HorizRadioRenderer(forms.RadioSelect.renderer):
 #Formulario de exploracion
 class ExploracionForm(forms.Form):
 
-	nombre = forms.CharField(label='Título de exploración', min_length=2, max_length=12)
+	nombre = forms.CharField(label='Título de exploración', min_length=2, max_length=50)
 	descripcion = forms.CharField(label='Descripción', required=False, max_length=140)
 	tiempo = forms.FloatField(label='Tiempo de disparo de la BBDD',required=False)
 	temperatura = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))

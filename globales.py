@@ -3,7 +3,7 @@ from sensorDistancia import *
 from sensorLuz import *
 from sensorTemperatura import *
 from sensorGas import *
-from raspirover import models 
+
 #Variables globales
 driver=0
 dbtemperatura=''
@@ -18,8 +18,8 @@ sensordistancia=0
 distancia=0.0
 temperatura=0.0
 humedad= 0
-gas= ' '
-luz= ' '
+gas= False
+luz= False
 camara= ' '
 trigger= ' '
 nombre= ' '
@@ -38,6 +38,10 @@ tiempo=False
 nombre=False
 
 def inicializar():
+	dbtemperatura=''
+	dbhumedad=''
+	dbgas=''
+	dbluz=''
 	sensordth=0
 	sensorgas=0
 	sensorluz=0

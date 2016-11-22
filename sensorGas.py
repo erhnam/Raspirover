@@ -10,11 +10,11 @@ class SensorGas(object):
 	def comprobarGas(self):
 		if GPIO.input(self.pinGas) == 0:
 			print ("!!! Peligro: Se han Detectado Gases !!!")
-			globales.gas=0
+			globales.gas=False
 
 		else:
 			print ("Fuera de Peligro")
-			globales.gas=1
+			globales.gas=True
 
 	def __del__(self):
 		print ("Sensor de Gas destruido")

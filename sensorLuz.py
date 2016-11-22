@@ -14,11 +14,11 @@ class SensorLuz(object):
 		if (GPIO.input(self.sensor) == 0):
 			print ("Hay Luz")
 			GPIO.output(self.led,GPIO.HIGH)
-			globales.luz = 0
+			globales.luz = False
 		else:
 			print ("No hay luz")
 			GPIO.output(self.led,GPIO.LOW)
-			globales.luz = 1
+			globales.luz = True
 
 	def __del__(self):
 		print ("Sensor de Luz destruido")

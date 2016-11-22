@@ -16,63 +16,46 @@ class UserProfile(models.Model):
 	def __unicode__(self):
 		return self.user.username
 
-
 class Sensor(models.Model):
-	nombre = models.CharField(max_length=50, null=True)
-#	exploraciones=models.ManyToManyField(Exploracion)
+	tipo = models.CharField(max_length=20, null=True)
 	descripcion = models.CharField(max_length=140)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	enable = models.BooleanField(default=False)
 
+	def __unicode__(self):
+		return u'%s' % (self.tipo)	
+
 class Exploracion(models.Model):
 	sensores = models.ManyToManyField(Sensor)
 	usuario = models.ForeignKey(UserProfile, null=True)
-	nombre = models.CharField(max_length=50, blank=False)
+	nombre = models.CharField(max_length=150, unique=True, blank=False)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	descripcion = models.CharField(max_length=140, null=True)
 	tiempo = models.DecimalField(max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)], null=True)
-#	tiempo = models.FloatField(null=True, blank=True)
 
 	def __unicode__(self):
 		return u'%s' % (self.nombre)	
 		
-
 class sensorTemperatura(Sensor):
-	date = models.DateTimeField(auto_now_add=True, null=True)
-	temperatura = models.FloatField(null=True,
+	temperatura = models.DecimalField(max_digits=3, decimal_places=1, null=True,
 		validators=[
 			MinValueValidator(-10),
 			MaxValueValidator(50)
 		])	
-
-	def __unicode__(self):
-		return u'%s' % (self.nombre)
-
 
 class sensorHumedad(Sensor):
-	humedad = models.FloatField(null=True,
+	humedad = models.DecimalField(max_digits=3, decimal_places=1, null=True,
 		validators=[
 			MinValueValidator(-10),
 			MaxValueValidator(50)
 		])	
 	
-	def __unicode__(self):
-		return u'%s' % (self.nombre)
-	
 class sensorLuz(Sensor):
-	luz = models.IntegerField(null=True)
+	luz = models.BooleanField(default=False)
 	
-	def __unicode__(self):
-		return u'%s' % (self.nombre)
-
 class sensorGas(Sensor):
-	gas = models.IntegerField(null=True)
+	gas = models.IntegerField(default=False)
 	
-	def __unicode__(self):
-		return u'%s' % (self.nombre)
-
-
-
 class Sensores(models.Model):
 	nombre = models.CharField(max_length=12, blank=False)
 	temperatura = models.BooleanField()

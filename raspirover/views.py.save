@@ -42,14 +42,12 @@ from subprocess import call
 import datetime
 import globales 
 
-
-#variables para bases de datos
 dbtemperatura=sensorTemperatura()
 dbhumedad=sensorHumedad()
 dbgas=sensorGas()
 dbluz=sensorLuz()
-dbexplo=Exploracion()
-trigger = ' '
+explo=Exploracion(nombre="demo")
+
 
 def index(request):
 	dbtemperatura=sensorTemperatura()
@@ -68,8 +66,6 @@ def index(request):
 #Funcion explorar
 @login_required
 def explorar(request):
-	global dbexplo
-	global trigger
 	
 	if request.method == "POST":
 		form = ExploracionForm(request.POST)
@@ -88,7 +84,8 @@ def explorar(request):
 			usuario=request.user.userprofile
 			usuario=UserProfile.objects.get(user=request.user)
 
-			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuario=usuario, descripcion=descripcion)
+			explo=Exploracion(nombre=nombre, tiempo=tiempo, usuario=usuario, descripcion=descripcion)
+			explo.save()
 			
 			if globales.stemperatura == True or globales.shumedad == True:
 				sensordth = SensorTemperatura(14)
@@ -98,33 +95,48 @@ def explorar(request):
 				else:
 					timerdth = TimerRecurrente(float(tiempo)-0.2, sensordth.read)
 					timerdth.start_timer()
+
+				if globales.stemperatura == True:
+					dbtemperatura.nombre="Temperatura"
+					dbtemperatura.enable=T					dbtemperatura.save()
+					explo.sensores.add(dbtemperatura)
+				if globales.shumedad == True:
+					dbhumedad.nombre="Humedad"
+					dbhumedad.enable=True					
+					dbhumedad.save()
+					explo.sensores.add(dbhumedad)
 					
 			if globales.sluz == True:
 				sensorluz = SensorLuz(21,20)
 				if tiempo is None:	
-					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
+					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
 					timerluz.start_timer()
 				else:
-					timerluz = TimerRecurrente(1.0, sensorluz.comprobarLuz)
+					timerluz = TimerRecurrente(1.0, sensorgas.comprobarGas)
 					timerluz.start_timer()
 
+				dbluz.enable=True
+				dbluz.save()
+
 			if globales.sgas == True:
-				sensorgas = SensorGas(26)
+				sensorgas = SensorLuz(26)
 				if tiempo is not None:	
-					timergas = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
+					timergas = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
 					timergas.start_timer()
 				else:
-					timergas = TimerRecurrente(1.0, sensorgas.comprobarGas)
+					timergas = TimerRecurrente(1.0, sensorluz.comprobarLuz)
 					timergas.start_timer()
+				dbgas.enable=True
+				dbgas.save()
 
 			if globales.camara == True:
 				camara_start()
 
-			dbexplo.save()
-
 			if tiempo is not None:
-				trigger = TimerRecurrente(float(tiempo) , BBDD)
+				trigger = TimerRecurrente(float(tiempo), BBDD)
 				trigger.start_timer()
+
+			explo.save()
 
 			if request.method=='POST' and 'manual' in request.POST:
 				return redirect(reverse('manual'))
@@ -140,27 +152,26 @@ def explorar(request):
 
 #funcion para insertar valor de sensores en base de datos
 def BBDD():
-	global dbexplo
-
+	
 	if globales.stemperatura == True:
-		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True )
+		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, nombre="Temperatura",enable=True )
 		dbtemperatura.save()
-		dbexplo.sensores.add(dbtemperatura)
+		explo.sensores.add(dbtemperatura)
 				
 	if globales.shumedad == True:
-		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
+		dbhumedad = sensorHumedad(humedad=globales.humedad, nombre="Humedad",enable=True)
 		dbhumedad.save()
-		dbexplo.sensores.add(dbhumedad)
+		explo.sensores.add(dbhumedad)
 
 	if globales.sgas == True:
-		dbgas = sensorGas(gas=globales.gas, tipo="Gas", enable=True)
+		dbgas = sensorGas(gas=globales.gas, nombre="Gas",enable=True)
 		dbgas.save()
-		dbexplo.sensores.add(dbgas)
+		explo.sensores.add(dbgas)
 
 	if globales.sluz == True:
-		dbluz = sensorLuz(luz=globales.luz, tipo="Luz", enable=True)
+		dbluz = sensorLuz(luz=globales.luz, nombre="Luz",enable=True)
 		dbluz.save()
-		dbexplo.sensores.add(dbluz)
+		explo.sensores.add(dbluz)
 
 
 #funcion Analizar
@@ -171,11 +182,6 @@ def analizar(request):
 
 @login_required
 def salir(request):
-	global dbexplo
-	global trigger
-
-	trigger.destroy_timer()
-
 	del globales.driver
 	if globales.auto == True:
 		del globales.automatic
