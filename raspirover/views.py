@@ -183,12 +183,12 @@ def BBDD():
 	if globales.stemperatura == True:
 		dbtemperatura = temperatura(temperatura=globales.temperatura)
 		dbtemperatura.save()
-		dbexplo.sensores.temperatura.add(dbtemperatura)
+		dbexplo.sensores.temperaturafk.add(dbtemperatura)
 				
 	if globales.shumedad == True:
 		dbhumedad = humedad(humedad=globales.humedad)
 		dbhumedad.save()
-		dbexplo.sensores.humedad.add(dbhumedad)
+		dbexplo.sensores.humedadfk.add(dbhumedad)
 
 	if globales.sgas == True:
 		dbgas = gas(gas=globales.gas)
