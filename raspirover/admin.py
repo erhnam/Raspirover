@@ -15,7 +15,7 @@ from .models import *
 admin.site.register(Sensores)
 admin.site.register(temperatura)
 admin.site.register(humedad)
-admin.site.register(luz)
+admin.site.register(luminosidad)
 admin.site.register(gas)
 
 
