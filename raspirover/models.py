@@ -65,13 +65,13 @@ class temperatura(models.Model):
 		
 #Sensor de Temperatura		
 class sensorTemperatura(Sensor):
-	temperaturafk = models.ForeignKey(Temperatura, db_column='TemperaturaFK')
+	temperaturafk = models.ForeignKey(temperatura, db_column='TemperaturaFK')
 
 	class Meta:
 		db_table = 'SensorTemperatura'
 	
 #Medida de humedad	
-class Humedad(models.Model):
+class humedad(models.Model):
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	humedad = models.DecimalField(max_digits=3, decimal_places=1, null=True,
 		validators=[
@@ -84,13 +84,13 @@ class Humedad(models.Model):
 
 #Sensor de Humedad
 class sensorHumedad(Sensor):
-	humedadfk = models.ForeignKey(Humedad, db_column='HumedadFK')
+	humedadfk = models.ForeignKey(humedad, db_column='HumedadFK')
 
 	class Meta:
 		db_table = 'SensorHumedad'
 
 #Medidas de luz
-class Luminosidad(models.Model):
+class luminosidad(models.Model):
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	luminosidad = models.BooleanField(default=False)
 	
@@ -99,13 +99,13 @@ class Luminosidad(models.Model):
 
 #Sensor de Luz
 class sensorLuz(Sensor):
-	luminosidad = models.ForeignKey(Luminosidad, db_column='LuminosidadFK')
+	luminosidad = models.ForeignKey(luminosidad, db_column='LuminosidadFK')
 
 	class Meta:
 		db_table = 'SensorLuz'
 
 #medida de gas
-class Gas(models.Model):
+class gas(models.Model):
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	gas = models.BooleanField(default=False)
 	
@@ -113,7 +113,7 @@ class Gas(models.Model):
 		db_table = 'Gas'
 #Sensor de Gas
 class sensorGas(Sensor):
-	gas = models.ForeignKey(Gas, db_column='GasFK')
+	gas = models.ForeignKey(gas, db_column='GasFK')
 
 	class Meta:
 		db_table = 'SensorGas'
