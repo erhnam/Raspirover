@@ -181,16 +181,9 @@ def BBDD():
 	global dbexplo
 
 	if globales.stemperatura == True:
-		#se crea un nuevo registro de temperatura
 		dbtemperatura = temperatura(temperatura=globales.temperatura)
-		#se agrega a la base de datos
 		dbtemperatura.save()
-		sensores=dbexplo.sensores
-		st=sensores.objects.filter(tipo="Temperatura")
-		st.add(dbtemperatura)
-		st.save()
-		#se agrega al sensore temperatura
-		#dbexplo.sensores.temperaturafk.add(dbtemperatura)
+		dbexplo.sensores.temperaturafk.add(dbtemperatura)
 				
 	if globales.shumedad == True:
 		dbhumedad = humedad(humedad=globales.humedad)
@@ -217,9 +210,9 @@ def analizar(request):
 	context= sensorTemperatura.objects.all()
 	return render(request, 'analizar.html', {'explo': explo})
 
-#funcion para salir del modo de control
 @login_required(login_url='/')
 def salir(request):
+	global dbexplo
 	global trigger
 	global timerdth
 	global timerluz
@@ -244,6 +237,7 @@ def salir(request):
 	globales.inicializar()
 	return redirect(reverse('index'))
 
+#Para mostrar los valores por pantalla
 @login_required(login_url='/')
 def mostrardatos(request):
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
