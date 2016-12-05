@@ -101,28 +101,57 @@ def explorar(request):
 			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
 			
 			if globales.stemperatura == True or globales.shumedad == True:
+				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
 				sensordth = SensorTemperatura(14)
+				#Se crea una tabla sensor de temperatura asociada a la exploracion
+				if globales.stemperatura == True:
+					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True )
+					dbtemperatura.save()
+					dbexplo.sensores.add(dbtemperatura)
+
+				#Se crea una tabla sensor de humedad asociada a la exploracion	
+				if globales.shumedad == True:
+					dbhumedad = sensorHumedad(tipo="Humedad", enable=True)
+					dbhumedad.save()
+					dbexplo.sensores.add(dbhumedad)
+
+				#Si el tiempo es null se ejecuta el sensor cada segundo			
 				if tiempo is  None:	
 					timerdth = TimerRecurrente(1.0, sensordth.read)
 					timerdth.start_timer()
+				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				else:
 					timerdth = TimerRecurrente(float(tiempo)-0.2, sensordth.read)
 					timerdth.start_timer()
 					
 			if globales.sluz == True:
+				#Se crea sensor de Luz para manejar con Raspberry
 				sensorluz = SensorLuz(21,20,16)
+				#Se crea una tabla sensor de luz asociada a la exploracion	
+				dbluz = sensorLuz(tipo="Luz", enable=True)
+				dbluz.save()
+				dbexplo.sensores.add(dbluz)
+				#Si el tiempo es null se ejecuta el sensor cada segundo			
 				if tiempo is None:	
 					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
 					timerluz.start_timer()
+				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				else:
 					timerluz = TimerRecurrente(1.0, sensorluz.comprobarLuz)
 					timerluz.start_timer()
 
 			if globales.sgas == True:
+				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
 				sensorgas = SensorGas(26)
+				#Se crea una tabla sensor de gas asociada a la exploracion	
+				dbgas = sensorGas(tipo="Gas", enable=True)
+				dbgas.save()
+				dbexplo.sensores.add(dbgas)
+				#Si el tiempo es null se ejecuta el sensor cada segundo			
 				if tiempo is not None:	
 					timergas = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
 					timergas.start_timer()
+				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				else:
 					timergas = TimerRecurrente(1.0, sensorgas.comprobarGas)
 					timergas.start_timer()
@@ -152,24 +181,24 @@ def BBDD():
 	global dbexplo
 
 	if globales.stemperatura == True:
-		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True )
+		dbtemperatura = temperatura(temperatura=globales.temperatura)
 		dbtemperatura.save()
-		dbexplo.sensores.add(dbtemperatura)
+		dbexplo.sensores.temperatura.add(dbtemperatura)
 				
 	if globales.shumedad == True:
-		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
+		dbhumedad = humedad(humedad=globales.humedad)
 		dbhumedad.save()
-		dbexplo.sensores.add(dbhumedad)
+		dbexplo.sensores.humedad.add(dbhumedad)
 
 	if globales.sgas == True:
-		dbgas = sensorGas(gas=globales.gas, tipo="Gas", enable=True)
+		dbgas = gas(gas=globales.gas)
 		dbgas.save()
-		dbexplo.sensores.add(dbgas)
+		dbexplo.sensores.gas.add(dbgas)
 
 	if globales.sluz == True:
-		dbluz = sensorLuz(luz=globales.luz, tipo="Luz", enable=True)
+		dbluz = luminosidad(luz=globales.luz)
 		dbluz.save()
-		dbexplo.sensores.add(dbluz)
+		dbexplo.sensores.luminosidad.add(dbluz)
 
 
 #funcion Analizar
