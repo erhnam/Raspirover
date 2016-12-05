@@ -1,6 +1,5 @@
 #!/usr/bin/env python3.4
 # -*- encoding: utf-8 -*- 
-from chartit import DataPool, Chart
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
@@ -42,6 +41,7 @@ from subprocess import call
 import datetime
 import globales 
 
+sensorDistancia=SensorDistancia(23,24)
 
 #variables para bases de datos
 dbtemperatura=sensorTemperatura()
@@ -51,14 +51,22 @@ dbluz=sensorLuz()
 dbexplo=Exploracion()
 trigger = ' '
 
+def demo():
+	pass
+
+timerdth = TimerRecurrente(0, demo )
+timergas = TimerRecurrente(0, demo )
+timerluz = TimerRecurrente(0, demo )
+trigger = TimerRecurrente(0, demo )
+
 def index(request):
 	dbtemperatura=sensorTemperatura()
 	dbhumedad=sensorHumedad()
 	dbgas=sensorGas()
 	dbluz=sensorLuz()
 	#Creacion de los motores por parejas
-	motorIzq = Motor (27,22,4,70)
-	motorDer = Motor (5,6,17,70)
+	motorIzq = Motor (27,22,4,100)
+	motorDer = Motor (5,6,17,100)
 
 	#Creacion del driver L298N
 	globales.driver = DriverDosMotores (motorIzq, motorDer)
@@ -66,10 +74,13 @@ def index(request):
 	return render(request, 'index.html')
 
 #Funcion explorar
-@login_required
+@login_required(login_url='/')
 def explorar(request):
 	global dbexplo
 	global trigger
+	global timerdth
+	global timergas
+	global timerluz
 	
 	if request.method == "POST":
 		form = ExploracionForm(request.POST)
@@ -85,10 +96,9 @@ def explorar(request):
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
-			usuario=request.user.userprofile
-			usuario=UserProfile.objects.get(user=request.user)
+			#usuario=Usuario.objects.get(usuario=request.user)
 
-			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuario=usuario, descripcion=descripcion)
+			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
 			
 			if globales.stemperatura == True or globales.shumedad == True:
 				sensordth = SensorTemperatura(14)
@@ -100,7 +110,7 @@ def explorar(request):
 					timerdth.start_timer()
 					
 			if globales.sluz == True:
-				sensorluz = SensorLuz(21,20)
+				sensorluz = SensorLuz(21,20,16)
 				if tiempo is None:	
 					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
 					timerluz.start_timer()
@@ -131,7 +141,6 @@ def explorar(request):
 
 			if request.method=='POST' and 'automatico' in request.POST:
 				globales.auto=True
-				globales.sensordistancia = SensorDistancia(23,24)
 				return redirect(reverse('auto'))		
 	else:
 		form = ExploracionForm()
@@ -164,26 +173,43 @@ def BBDD():
 
 
 #funcion Analizar
-@login_required
+@login_required(login_url='/')
 def analizar(request):
-	context= sensorTemperatura.objects.all()
-	return render(request, 'analizar.html', {'chart': context})
+#	explo=Exploracion.objects.filter(usuariofk=request.user)
+	explo=Exploracion.objects.all()
 
-@login_required
+	context= sensorTemperatura.objects.all()
+	return render(request, 'analizar.html', {'explo': explo})
+
+@login_required(login_url='/')
 def salir(request):
 	global dbexplo
 	global trigger
+	global timerdth
+	global timerluz
+	global timergas
+
+	GPIO.cleanup()
+	if globales.stemperatura == True or globales.shumedad == True:
+		timerdth.destroy_timer()
+	if globales.sgas == True:
+		timergas.destroy_timer()
+	if globales.sluz == True:
+		timerluz.destroy_timer()
 
 	trigger.destroy_timer()
+	camara_stop()
 
 	del globales.driver
+	
+
 	if globales.auto == True:
 		del globales.automatic
 		globales.auto = False
 	globales.inicializar()
 	return redirect(reverse('index'))
 
-@login_required
+@login_required(login_url='/')
 def mostrardatos(request):
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
 	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
@@ -208,7 +234,7 @@ def Izquierda():
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga():
 	driver=globales.driver
-	sensorDistancia = globales.sensordistancia
+	global sensorDistancia
 	
 	driver.Parar()
 	time.sleep(1)
@@ -236,7 +262,7 @@ def BuscarDistanciaMasLarga():
 		driver.Parar()
 
 #funcion Manual
-@login_required
+@login_required(login_url='/')
 def manual(request):
 
 	t = get_template('manual.html')
@@ -272,14 +298,13 @@ def manual(request):
 	return render_to_response(template, context, context_instance=RequestContext(request))
 
 def automatico():
-	
+	global sensorDistancia	
 	print("entro en modo auto")
-	sensorDistancia = globales.sensordistancia
-	
+	print("He creado el sensor y entro a bucle")
 	#Comienzo de la automatización
 	while True:
-		
-		globales.distancia = float( sensorDistancia.precisionDistancia() - 20 )	
+		print("estoy en bucle")
+		globales.distancia = float(sensorDistancia.precisionDistancia() - 20 )	
 		print ("Distancia: %.2f" % globales.distancia)
 		if globales.distancia < 30.0:
 			BuscarDistanciaMasLarga()
@@ -287,7 +312,7 @@ def automatico():
 			globales.driver.Adelante()
 
 
-@login_required
+@login_required(login_url='/')
 def auto(request):
 
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
@@ -295,34 +320,47 @@ def auto(request):
 
 	globales.automatic=threading.Thread(target=automatico)
 	globales.automatic.start()
-					
+	print("creo hilo")					
 	template = "auto.html"
 	return render(request, template, context)
-
-
-#registrar usuario
+	
 def registro(request):
-	if request.method == 'POST':
-		form = RegistroUserForm(request.POST, request.FILES)
- 
-		if form.is_valid():
-			cleaned_data = form.cleaned_data
-			username = cleaned_data.get('username')
-			password = cleaned_data.get('password')
-			email = cleaned_data.get('email')
-			photo = cleaned_data.get('photo')
-			user_model = User.objects.create_user(username=username, password=password)
-			user_model.email = email
-			user_model.save()
-			user_profile = UserProfile()
-			user_profile.user = user_model
-			user_profile.photo = photo
-			user_profile.save()
-			return redirect(reverse('gracias', kwargs={'username': username}))
+		
+	#Si el formulario ha sido enviado
+	if request.method=='POST':	
+		#Se vinculan los datos POST con el formulario UsuarioForm
+		form = UsuarioForm(request.POST,request.FILES) 
+			
+		#Si el formulario pasa todas las reglas de validacion se recogen los datos y se procesan")
+		if form.is_valid(): 
+			email=form.cleaned_data['email']
+			photo = form.cleaned_data.get('photo')
+			user=Usuario.objects.filter(email=email)
+			#Se comprueba que no exista un usuario con el email introducido
+			if(user):
+				form._errors['email']="Ya existe un usuario con ese email"
+				return render_to_response('registro.html',{'form':form}, context_instance=RequestContext(request))
+		
+			#Antes de guardar el nuevo usuario en la base de datos
+			nuevo_usuario=form.save(commit=False)	
+			nuevo_usuario.photo = photo
+			nuevo_usuario.save()
+			username=nuevo_usuario.username
+			login='1'
+			return redirect(reverse('gracias', kwargs={'username': username , 'login' : login } ))
+			
+			#Cuando se registra un usuario nuevo se logea automaticamente
+			#acceso=authenticate(username=nuevo_usuario.username,password=form.cleaned_data['password'])
+			#if acceso is not None:	# Usuario válido
+			#	if acceso.is_active:
+			#		login(request,acceso)
+			#		return HttpResponseRedirect('index/')
+			#
+			#return HttpResponseRedirect('/')
 	else:
-		form = RegistroUserForm()
-	context = {'form': form}
-	return render(request, 'registro.html', context)
+		form=UsuarioForm()	#Formulario vacio
+	return render_to_response('registro.html',{'form':form}, context_instance=RequestContext(request))
+
 
 # para loguear al usuario
 def login(request):
@@ -343,16 +381,14 @@ def login(request):
 	return render(request, 'login.html', {'mensaje': mensaje})
  
 #desloguear usuario
-@login_required
+@login_required(login_url='/')
 def logout(request):
-	try:
-		del request.session['member_id']
-	except KeyError:
-		pass
-	return redirect('/')
+#	logout(request)
+	auth.logout(request)
+	return HttpResponseRedirect('/')
 
 #editar contraseña
-@login_required
+@login_required(login_url='/')
 def editar_contrasena(request):
 	q=UserProfile.objects.get(user=request.user)    
 	if request.method == 'POST':
@@ -368,7 +404,7 @@ def editar_contrasena(request):
 	return render(request, 'editar_contrasena.html', {'form': form, 'seguido': q})    
  
 #editar foto
-@login_required
+@login_required(login_url='/')
 def editar_foto(request):
 	if request.method == 'POST':
 		form = EditarFotoForm(request.POST, request.FILES)
@@ -381,9 +417,9 @@ def editar_foto(request):
 	return render(request, 'editar_foto.html', {'form': form, 'seguido': request.user.user_profile}) 
  
 #dar de baja a un usuario
-@login_required
+@login_required(login_url='/')
 def eliminar_usuario(request):
-	usuario=User.objects.get(username=request.user.username)
+	usuario=Usuario.objects.get(username=request.user.username)
 	username=usuario.username
 	usuario.delete()
 	login='0'

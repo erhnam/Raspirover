@@ -6,17 +6,29 @@ from django.conf import settings
 from django.contrib.auth.models import User 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import AbstractUser, UserManager
 
 # Create your models here.
 
-class UserProfile(models.Model):
-	user = models.OneToOneField(settings.AUTH_USER_MODEL,primary_key=True)
+class Usuario(AbstractUser):
+	id_usuario = models.AutoField(db_column='ID_Usuario', primary_key=True)
 	photo = models.ImageField(upload_to='profiles', blank=True, null=True)
+
+	objects = UserManager()
+
+	class Meta:
+		db_table = 'Usuario'
+
+
+#class UserProfile(models.Model):
+#	user = models.OneToOneField(settings.AUTH_USER_MODEL,primary_key=True)
+#	photo = models.ImageField(upload_to='profiles', blank=True, null=True)
 	
-	def __unicode__(self):
-		return self.user.username
+#	def __unicode__(self):
+#		return self.user.username
 
 class Sensor(models.Model):
+	id_sensor = models.AutoField(db_column='ID_Sensor', primary_key=True)
 	tipo = models.CharField(max_length=20, null=True)
 	descripcion = models.CharField(max_length=140)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
@@ -25,16 +37,27 @@ class Sensor(models.Model):
 	def __unicode__(self):
 		return u'%s' % (self.tipo)	
 
+	class Meta:
+		db_table = 'Sensor'
+
+#La solucion es añadir este constraint para que no haya dos parejas iguales
 class Exploracion(models.Model):
+	id_exploracion = models.AutoField(db_column='ID_Exploracion', primary_key=True)
 	sensores = models.ManyToManyField(Sensor)
-	usuario = models.ForeignKey(UserProfile, null=True)
-	nombre = models.CharField(max_length=150, unique=True, blank=False)
+	usuariofk = models.ForeignKey(Usuario, db_column='UsuarioFK')
+	nombre = models.CharField(max_length=150, blank=False)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	descripcion = models.CharField(max_length=140, null=True)
 	tiempo = models.DecimalField(max_digits=3, decimal_places=1, validators=[MaxValueValidator(10)], null=True)
 
 	def __unicode__(self):
 		return u'%s' % (self.nombre)	
+
+	class Meta:
+		db_table = 'Exploracion'	
+		#La solucion es añadir este constraint para que no haya dos parejas iguales
+		#unique_together = (("usuariofk", "id_exploracion"),)	
+	
 		
 class sensorTemperatura(Sensor):
 	temperatura = models.DecimalField(max_digits=3, decimal_places=1, null=True,

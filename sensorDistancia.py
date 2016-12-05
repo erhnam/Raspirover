@@ -25,6 +25,7 @@ class SensorDistancia(object):
 
 		transcurrido = fin-inicio
 		distancia = (transcurrido * 34300)/2
+		globales.distancia = distancia		
 		return distancia
 
 	def precisionDistancia(self):
@@ -33,6 +34,7 @@ class SensorDistancia(object):
 		distancia2 = self.calcularDistancia()
 		time.sleep(0.1)
 		distancia3 = self.calcularDistancia()
+		time.sleep(0.1)
 		distancia = distancia1 + distancia2 + distancia3
 		distancia = distancia / 3
 		globales.distancia = distancia

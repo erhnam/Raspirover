@@ -3,7 +3,21 @@
 
 	{% block content %}	
 	
-	<div align="center">{% include 'grafica.html' %} </div>	
-	
+	<div><h1>Exploraciones</h1>
+
+	{% if explo %}
+
+	{% for explo in explo %}
+	<p>Detalles de la exploracion: {{explo.nombre}} </p>
+	<p>Explorado por: {{explo.usuariofk.username}} </p>
+	<p>Descripción: {{explo.descripcion}} </p>
+		<ul>
+		<h3>Sensores utilizados</h3>
+		<p>{{explo.sensores}}</p>	
+		</ul>
+	{% endfor %}
+
+	{% endif %}
+	</div>
 	{% endblock content %}
 
