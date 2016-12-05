@@ -9,7 +9,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser, UserManager
 
 # Create your models here.
-
+#Usuario
 class Usuario(AbstractUser):
 	id_usuario = models.AutoField(db_column='ID_Usuario', primary_key=True)
 	photo = models.ImageField(upload_to='profiles', blank=True, null=True)
@@ -19,14 +19,7 @@ class Usuario(AbstractUser):
 	class Meta:
 		db_table = 'Usuario'
 
-
-#class UserProfile(models.Model):
-#	user = models.OneToOneField(settings.AUTH_USER_MODEL,primary_key=True)
-#	photo = models.ImageField(upload_to='profiles', blank=True, null=True)
-	
-#	def __unicode__(self):
-#		return self.user.username
-
+#Sensor
 class Sensor(models.Model):
 	id_sensor = models.AutoField(db_column='ID_Sensor', primary_key=True)
 	tipo = models.CharField(max_length=20, null=True)
@@ -40,7 +33,7 @@ class Sensor(models.Model):
 	class Meta:
 		db_table = 'Sensor'
 
-#La solucion es añadir este constraint para que no haya dos parejas iguales
+#Exploración
 class Exploracion(models.Model):
 	id_exploracion = models.AutoField(db_column='ID_Exploracion', primary_key=True)
 	sensores = models.ManyToManyField(Sensor)
@@ -56,28 +49,75 @@ class Exploracion(models.Model):
 	class Meta:
 		db_table = 'Exploracion'	
 		#La solucion es añadir este constraint para que no haya dos parejas iguales
-		#unique_together = (("usuariofk", "id_exploracion"),)	
+		unique_together = (("usuariofk", "id_exploracion"),)	
 	
-		
-class sensorTemperatura(Sensor):
+#Medida de temperatura	
+class temperatura(models.Model):
+	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	temperatura = models.DecimalField(max_digits=3, decimal_places=1, null=True,
 		validators=[
 			MinValueValidator(-10),
 			MaxValueValidator(50)
 		])	
 
-class sensorHumedad(Sensor):
+	class Meta:
+		db_table = 'Temperatura'
+		
+#Sensor de Temperatura		
+class sensorTemperatura(Sensor):
+	temperaturafk = models.ForeignKey(Temperatura, db_column='TemperaturaFK')
+
+	class Meta:
+		db_table = 'SensorTemperatura'
+	
+#Medida de humedad	
+class Humedad(models.Model):
+	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	humedad = models.DecimalField(max_digits=3, decimal_places=1, null=True,
 		validators=[
 			MinValueValidator(-10),
 			MaxValueValidator(50)
-		])	
+		])
+
+	class Meta:
+		db_table = 'Humedad'	
+
+#Sensor de Humedad
+class sensorHumedad(Sensor):
+	humedadfk = models.ForeignKey(Humedad, db_column='HumedadFK')
+
+	class Meta:
+		db_table = 'SensorHumedad'
+
+#Medidas de luz
+class Luminosidad(models.Model):
+	fecha = models.DateTimeField(auto_now_add=True, null=True)
+	luminosidad = models.BooleanField(default=False)
 	
+	class Meta:
+		db_table = 'Luminosidad'
+
+#Sensor de Luz
 class sensorLuz(Sensor):
-	luz = models.BooleanField(default=False)
+	luminosidad = models.ForeignKey(Luminosidad, db_column='LuminosidadFK')
+
+	class Meta:
+		db_table = 'SensorLuz'
+
+#medida de gas
+class Gas(models.Model):
+	fecha = models.DateTimeField(auto_now_add=True, null=True)
+	gas = models.BooleanField(default=False)
 	
+	class Meta:
+		db_table = 'Gas'
+#Sensor de Gas
 class sensorGas(Sensor):
-	gas = models.IntegerField(default=False)
+	gas = models.ForeignKey(Gas, db_column='GasFK')
+
+	class Meta:
+		db_table = 'SensorGas'
+
 	
 class Sensores(models.Model):
 	nombre = models.CharField(max_length=12, blank=False)
