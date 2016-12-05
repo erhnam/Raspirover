@@ -13,6 +13,11 @@ from .models import *
 
 #admin.site.register(UserProfile)
 admin.site.register(Sensores)
+admin.site.register(temperatura)
+admin.site.register(humedad)
+admin.site.register(luz)
+admin.site.register(gas)
+
 
 class exploracionAdmin(admin.ModelAdmin):
     list_display = ( 'id_exploracion', 'nombre', 'usuariofk', 'fecha', 'descripcion', 'tiempo')
