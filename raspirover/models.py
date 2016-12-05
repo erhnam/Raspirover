@@ -65,7 +65,7 @@ class temperatura(models.Model):
 		
 #Sensor de Temperatura		
 class sensorTemperatura(Sensor):
-	temperaturafk = models.ForeignKey(temperatura, db_column='TemperaturaFK')
+	temperaturafk = models.ForeignKey(temperatura, db_column='TemperaturaFK', null=True)
 
 	class Meta:
 		db_table = 'SensorTemperatura'
@@ -84,7 +84,7 @@ class humedad(models.Model):
 
 #Sensor de Humedad
 class sensorHumedad(Sensor):
-	humedadfk = models.ForeignKey(humedad, db_column='HumedadFK')
+	humedadfk = models.ForeignKey(humedad, db_column='HumedadFK', null=True)
 
 	class Meta:
 		db_table = 'SensorHumedad'
@@ -99,7 +99,7 @@ class luminosidad(models.Model):
 
 #Sensor de Luz
 class sensorLuz(Sensor):
-	luminosidad = models.ForeignKey(luminosidad, db_column='LuminosidadFK')
+	luminosidad = models.ForeignKey(luminosidad, db_column='LuminosidadFK', null=True)
 
 	class Meta:
 		db_table = 'SensorLuz'
@@ -113,7 +113,7 @@ class gas(models.Model):
 		db_table = 'Gas'
 #Sensor de Gas
 class sensorGas(Sensor):
-	gas = models.ForeignKey(gas, db_column='GasFK')
+	gas = models.ForeignKey(gas, db_column='GasFK', null=True)
 
 	class Meta:
 		db_table = 'SensorGas'
