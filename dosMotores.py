@@ -35,9 +35,7 @@ class DriverDosMotores(object):
 
 		self.motorIzq.Parar()
 		self.motorDer.Parar()
-		
-		yield from asyncio.sleep(1)
-		
+				
 	@asyncio.coroutine
 	def GirarIzqAsync(self):
 		self.motorIzq.Adelante()

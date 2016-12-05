@@ -1,34 +1,31 @@
 #!/usr/bin/env python3.4
 # -*- encoding: utf-8 -*- 
-from django.shortcuts import render
-from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect, render_to_response
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required   #para loguin
-from django.contrib import auth                             #para arreglar error de login() takes exactly 1 argument (2 given)
+from django.contrib import auth, messages                   #para arreglar error de login() takes exactly 1 argument (2 given)
 from django.contrib.auth import authenticate, login, logout #para logout y login                                                    
 from django.contrib.auth.hashers import make_password       #para password                                                            
 from operator import attrgetter                             #Ordena la lista por un campo del Objeto.
-from django.contrib import messages                         #para mostrar mensajes
-from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.template import Context, RequestContext
-from django.shortcuts import render
-from django.http import HttpResponse, Http404
-
-from .models import *
-from .forms import *
-
 from multiprocessing import Process 
-from servo import *
+from subprocess import call
 import asyncio
 import time, sys, os
 import RPi.GPIO as GPIO
 import picamera
 import datetime
 import threading
+import datetime
+
+#Importaciones de ficheros creados para
+#sensores, camara, motores y globales.
+from .models import *
+from .forms import *
+from servo import *
 from motor import *
 from camara import *
 from dosMotores import *
@@ -37,8 +34,6 @@ from sensorLuz import *
 from sensorTemperatura import *
 from sensorGas import *
 from timerRecurrente import *
-from subprocess import call
-import datetime
 import globales 
 
 sensorDistancia=SensorDistancia(23,24)
@@ -64,6 +59,7 @@ def index(request):
 	dbhumedad=sensorHumedad()
 	dbgas=sensorGas()
 	dbluz=sensorLuz()
+
 	#Creacion de los motores por parejas
 	motorIzq = Motor (27,22,4,100)
 	motorDer = Motor (5,6,17,100)
@@ -85,7 +81,7 @@ def explorar(request):
 	if request.method == "POST":
 		form = ExploracionForm(request.POST)
 		if form.is_valid():
-			print('Es valido')
+			#Se extraen los valores del formulario
 			cleaned_data = form.cleaned_data
 			globales.stemperatura = cleaned_data.get('temperatura')
 			globales.shumedad = cleaned_data.get('humedad')
@@ -96,11 +92,11 @@ def explorar(request):
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
-			#usuario=Usuario.objects.get(usuario=request.user)
-
+			#Se crea una exploracion con parte de los valores del formulario	
 			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
 			dbexplo.save()
 			
+			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
 				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
 				sensordth = SensorTemperatura(14)
@@ -125,7 +121,8 @@ def explorar(request):
 				else:
 					timerdth = TimerRecurrente(float(tiempo)-0.2, sensordth.read)
 					timerdth.start_timer()
-					
+			
+			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
 				#Se crea sensor de Luz para manejar con Raspberry
 				sensorluz = SensorLuz(21,20,16)
@@ -142,6 +139,7 @@ def explorar(request):
 					timerluz = TimerRecurrente(1.0, sensorluz.comprobarLuz)
 					timerluz.start_timer()
 
+			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
 				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
 				sensorgas = SensorGas(26)
@@ -158,16 +156,21 @@ def explorar(request):
 					timergas = TimerRecurrente(1.0, sensorgas.comprobarGas)
 					timergas.start_timer()
 
+			#si se ha elegido cámara para streaming
 			if globales.camara == True:
 				camara_start()
 
+			#Si se ha metido valor en el tiempo
 			if tiempo is not None:
+				#se crea un triguer para lanzar la base de datos
 				trigger = TimerRecurrente(float(tiempo) , BBDD)
 				trigger.start_timer()
 
+			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:
 				return redirect(reverse('manual'))
 
+			#si se ha elegido automatico
 			if request.method=='POST' and 'automatico' in request.POST:
 				globales.auto=True
 				return redirect(reverse('auto'))		
@@ -226,22 +229,40 @@ def salir(request):
 	global timergas
 
 	GPIO.cleanup()
+
+	#Se procede a eliminar timers
+
+	#si el sensor de temperatura o humedad estaba elegido
 	if globales.stemperatura == True or globales.shumedad == True:
 		timerdth.destroy_timer()
+	
+	#si el sensor de gas estaba elegido
 	if globales.sgas == True:
 		timergas.destroy_timer()
+
+	#si el sensor de luz estaba elegido
 	if globales.sluz == True:
 		timerluz.destroy_timer()
 
+	#se elimina el trigger de base de datos
 	trigger.destroy_timer()
+
+	#se para la cámara
 	camara_stop()
 
+	#se elimina el driver
 	del globales.driver
 
+	#si estaba en automático
 	if globales.auto == True:
+		#borra hilo de automático
 		del globales.automatic
+		#reinicia la variable
 		globales.auto = False
+
+	#reinicia todas las variables	
 	globales.inicializar()
+
 	return redirect(reverse('index'))
 
 @login_required(login_url='/')

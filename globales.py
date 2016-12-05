@@ -42,6 +42,7 @@ def inicializar():
 	dbhumedad=''
 	dbgas=''
 	dbluz=''
+	driver=0
 	sensordth=0
 	sensorgas=0
 	sensorluz=0
