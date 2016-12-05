@@ -32,23 +32,23 @@ admin.site.register(Sensor, SensorAdmin)
 
 
 class sensorTemperaturaAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable', 'temperatura' )
+    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
 
 admin.site.register(sensorTemperatura, sensorTemperaturaAdmin)
 
 
 class sensorHumedadAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable', 'humedad' )
+    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
 
 admin.site.register(sensorHumedad, sensorHumedadAdmin)
 
 class sensorLuzAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable', 'luz' )
+    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
 
 admin.site.register(sensorLuz, sensorLuzAdmin)
 
 class sensorGasAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable', 'gas' )
+    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
 
 admin.site.register(sensorGas, sensorGasAdmin)
 
