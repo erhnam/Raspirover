@@ -99,6 +99,7 @@ def explorar(request):
 			#usuario=Usuario.objects.get(usuario=request.user)
 
 			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
+			dbexplo.save()
 			
 			if globales.stemperatura == True or globales.shumedad == True:
 				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
@@ -159,7 +160,6 @@ def explorar(request):
 			if globales.camara == True:
 				camara_start()
 
-			dbexplo.save()
 
 			if tiempo is not None:
 				trigger = TimerRecurrente(float(tiempo) , BBDD)
