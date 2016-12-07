@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.4
 # -*- encoding: utf-8 -*- 
+import django_extensions
 from django.shortcuts import render, redirect, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.models import User
@@ -39,26 +40,26 @@ import globales
 sensorDistancia=SensorDistancia(23,24)
 
 #variables para bases de datos
-dbtemperatura=sensorTemperatura()
-dbhumedad=sensorHumedad()
-dbgas=sensorGas()
-dbluz=sensorLuz()
-dbexplo=Exploracion()
-trigger = ' '
+#dbtemperatura=sensorTemperatura()
+#dbhumedad=sensorHumedad()
+#dbgas=sensorGas()
+#dbluz=sensorLuz()
+#dbexplo=Exploracion()
+#trigger = ' '
 
 def demo():
 	pass
 
-timerdth = TimerRecurrente(0, demo )
-timergas = TimerRecurrente(0, demo )
-timerluz = TimerRecurrente(0, demo )
-trigger = TimerRecurrente(0, demo )
+#timerdth = TimerRecurrente(0, demo )
+#timergas = TimerRecurrente(0, demo )
+#timerluz = TimerRecurrente(0, demo )
+#trigger = TimerRecurrente(0, demo )
 
 def index(request):
-	dbtemperatura=sensorTemperatura()
-	dbhumedad=sensorHumedad()
-	dbgas=sensorGas()
-	dbluz=sensorLuz()
+#	dbtemperatura=sensorTemperatura()
+#	dbhumedad=sensorHumedad()
+#	dbgas=sensorGas()
+#	dbluz=sensorLuz()
 
 	#Creacion de los motores por parejas
 	motorIzq = Motor (27,22,4,100)
@@ -143,7 +144,7 @@ def explorar(request):
 			if globales.sgas == True:
 				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
 				sensorgas = SensorGas(26)
-				#Se crea una tabla sensor de gas asociada a la exploracion	
+			#Se crea una tabla sensor de gas asociada a la exploracion	
 				dbgas = sensorGas(tipo="Gas", enable=True)
 				dbgas.save()
 				dbexplo.sensores.add(dbgas)
@@ -162,7 +163,7 @@ def explorar(request):
 
 			#Si se ha metido valor en el tiempo
 			if tiempo is not None:
-				#se crea un triguer para lanzar la base de datos
+			#se crea un triguer para lanzar la base de datos
 				trigger = TimerRecurrente(float(tiempo) , BBDD)
 				trigger.start_timer()
 
@@ -182,23 +183,35 @@ def explorar(request):
 #funcion para insertar valor de sensores en base de datos
 def BBDD():
 	global dbexplo
+	print(globales.stemperatura)
 
 	if globales.stemperatura == True:
+		print("almaceno temperatura")
 		#se crea un nuevo registro de temperatura
 		dbtemperatura = temperatura(temperatura=globales.temperatura)
 		#se agrega a la base de datos
 		dbtemperatura.save()
-		sensores=dbexplo.sensores
-		st=sensores.objects.filter(tipo="Temperatura")
-		st.add(dbtemperatura)
+		st = dbexplo.sensores.get(tipo="Temperatura")
+		print(st)
+		print(st.tipo)	
+		st.temperaturafk=dbtemperatura
 		st.save()
 		#se agrega al sensore temperatura
 		#dbexplo.sensores.temperaturafk.add(dbtemperatura)
+
+	print(globales.shumedad)
 				
 	if globales.shumedad == True:
+		print("almaceno temperatura")
+		#se crea un nuevo registro de temperatura
 		dbhumedad = humedad(humedad=globales.humedad)
+		#se agrega a la base de datos
 		dbhumedad.save()
-		dbexplo.sensores.humedadfk.add(dbhumedad)
+		sh = dbexplo.sensores.get(tipo="Humedad")
+		print(sh)
+		print(sh.tipo)	
+		sh.humedadfk=dbhumedad
+		sh.save()
 
 	if globales.sgas == True:
 		dbgas = gas(gas=globales.gas)
@@ -214,10 +227,9 @@ def BBDD():
 #funcion Analizar
 @login_required(login_url='/')
 def analizar(request):
-#	explo=Exploracion.objects.filter(usuariofk=request.user)
-	explo=Exploracion.objects.all()
+	explo=Exploracion.objects.filter(usuariofk=request.user)
 
-	context= sensorTemperatura.objects.all()
+#	context= sensorTemperatura.objects.all()
 	return render(request, 'analizar.html', {'explo': explo})
 
 #funcion para salir del modo de control

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+	{% extends 'base.html' %}
 
 
 	{% block content %}	
@@ -6,16 +6,22 @@
 	<div><h1>Exploraciones</h1>
 
 	{% if explo %}
-
-	{% for explo in explo %}
-	<p>Detalles de la exploracion: {{explo.nombre}} </p>
-	<p>Explorado por: {{explo.usuariofk.username}} </p>
-	<p>Descripción: {{explo.descripcion}} </p>
-		<ul>
-		<h3>Sensores utilizados</h3>
-		<p>{{explo.sensores}}</p>	
-		</ul>
+	
+	<form>		
+	<select>
+	{% for e in explo %}
+		<option>{{e.nombre}}</option>
 	{% endfor %}
+	</select>
+		<ul>
+		<p>Sensores utilizados</p>
+			<select>		
+			{% for a in e.sensores.all %}			
+				<option>{{a.tipo}}</option>
+			{% endfor %}
+			</select>
+		</ul>
+	</form>
 
 	{% endif %}
 	</div>
