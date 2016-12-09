@@ -13,13 +13,7 @@ from .models import *
 
 #admin.site.register(UserProfile)
 admin.site.register(Sensores)
-admin.site.register(humedad)
-admin.site.register(luminosidad)
-admin.site.register(gas)
 
-#class temperaturaAdmin(admin.ModelAdmin):
-#    list_display = ( 'id' ,'temperatura', 'fecha')
-	
 
 #admin.site.register(temperatura, temperaturaAdmin)
 
@@ -33,7 +27,6 @@ class SensorAdmin(admin.ModelAdmin):
     list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
 
 admin.site.register(Sensor, SensorAdmin)
-
 
 class sensorTemperaturaAdmin(admin.ModelAdmin):
     list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )

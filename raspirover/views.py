@@ -146,7 +146,7 @@ def explorar(request):
 			#Si no se ha insertado tiempo no hay insercion en base de datos
 			if tiempo is not None:
 			#se crea un triguer para lanzar la base de datos
-				trigger = TimerRecurrente(float(tiempo) , BBDD, args=(dbexplo.id_exploracion))
+				trigger = TimerRecurrente(float(tiempo) , BBDD, args=[dbexplo.id_exploracion])
 				trigger.start_timer()
 
 			#Si se ha elegido manual
@@ -164,7 +164,8 @@ def explorar(request):
 
 #funcion para insertar valor de sensores en base de datos
 def BBDD(id_exploracion):
-	#se busca la exploracion
+
+	#se busca la exploracion actual
 	dbexplo = Exploracion.objects.get(pk=id_exploracion)
 	print(dbexplo.nombre)
 
