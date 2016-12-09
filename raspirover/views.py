@@ -39,27 +39,9 @@ import globales
 
 sensorDistancia=SensorDistancia(23,24)
 
-#variables para bases de datos
-#dbtemperatura=sensorTemperatura()
-#dbhumedad=sensorHumedad()
-#dbgas=sensorGas()
-#dbluz=sensorLuz()
-#dbexplo=Exploracion()
-#trigger = ' '
 
-def demo():
-	pass
-
-#timerdth = TimerRecurrente(0, demo )
-#timergas = TimerRecurrente(0, demo )
-#timerluz = TimerRecurrente(0, demo )
-#trigger = TimerRecurrente(0, demo )
 
 def index(request):
-#	dbtemperatura=sensorTemperatura()
-#	dbhumedad=sensorHumedad()
-#	dbgas=sensorGas()
-#	dbluz=sensorLuz()
 
 	#Creacion de los motores por parejas
 	motorIzq = Motor (27,22,4,100)
@@ -73,11 +55,6 @@ def index(request):
 #Funcion explorar
 @login_required(login_url='/')
 def explorar(request):
-	global dbexplo
-	global trigger
-	global timerdth
-	global timergas
-	global timerluz
 	
 	if request.method == "POST":
 		form = ExploracionForm(request.POST)
@@ -235,35 +212,11 @@ def analizar(request):
 #funcion para salir del modo de control
 @login_required(login_url='/')
 def salir(request):
-	global trigger
-	global timerdth
-	global timerluz
-	global timergas
 
 	GPIO.cleanup()
 
-	#Se procede a eliminar timers
-
-	#si el sensor de temperatura o humedad estaba elegido
-	if globales.stemperatura == True or globales.shumedad == True:
-		timerdth.destroy_timer()
-	
-	#si el sensor de gas estaba elegido
-	if globales.sgas == True:
-		timergas.destroy_timer()
-
-	#si el sensor de luz estaba elegido
-	if globales.sluz == True:
-		timerluz.destroy_timer()
-
-	#se elimina el trigger de base de datos
-	trigger.destroy_timer()
-
 	#se para la cámara
 	camara_stop()
-
-	#se elimina el driver
-	del globales.driver
 
 	#si estaba en automático
 	if globales.auto == True:
