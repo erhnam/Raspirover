@@ -20,5 +20,6 @@ urlpatterns = [
 	url(r'auto/$', views.auto, name='auto'), 
 	url(r'salir/$', views.salir, name='salir'), 	
 	url(r'mostrardatos/$', views.mostrardatos, name='mostrardatos'),
-	
+	url (r'^detallesExploracion/(?P<id_exploracion>\d+)', views.detallesExploracion, name='detallesExploracion'),
+	url (r'^mostrarGrafica/(?P<id_sensor>\d+)', views.mostrarGrafica, name='mostrarGrafica'),	
 ]

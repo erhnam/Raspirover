@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}	
+
+		<h3>Detalle de Exploración</h3>
+		<ul>
+			<li> Nombre: {{explo.nombre}} </li>
+			<li> Usuario: {{explo.usuariofk}} </li>
+			<li> Fecha: {{explo.fecha}} </li>
+			<li> Descripción: {{explo.descripcion}} </li>
+			<li> Sensores Utilizados: </li>
+			<ul>
+				{% for x in explo.sensores.all %}
+					<li> Tipo de sensor: <a href =/mostrarGrafica/{{x.id_sensor}}> {{x.tipo}}</a> </li>
+				{% endfor %}
+			</ul>
+		</ul>
+
+{% endblock content %}
+

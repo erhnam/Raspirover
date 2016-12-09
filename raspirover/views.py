@@ -1,5 +1,7 @@
 #!/usr/bin/env python3.4
 # -*- encoding: utf-8 -*- 
+from graphos.sources.simple import SimpleDataSource
+from graphos.renderers.gchart import LineChart
 import django_extensions
 from django.shortcuts import render, redirect, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -39,8 +41,6 @@ import globales
 
 sensorDistancia=SensorDistancia(23,24)
 
-
-
 def index(request):
 
 	#Creacion de los motores por parejas
@@ -71,9 +71,9 @@ def explorar(request):
 			descripcion = cleaned_data.get('descripcion')
 	
 			#Se crea una exploracion con parte de los valores del formulario	
-			dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
-			dbexplo.save()
-			
+			if tiempo is not None:
+				dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
+				dbexplo.save()			
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
 				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
@@ -84,7 +84,6 @@ def explorar(request):
 					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True )
 					dbtemperatura.save()
 					dbexplo.sensores.add(dbtemperatura)
-
 				#Se crea una tabla sensor de humedad asociada a la exploracion	
 				if globales.shumedad == True:
 					dbhumedad = sensorHumedad(tipo="Humedad", enable=True)
@@ -138,14 +137,14 @@ def explorar(request):
 			if globales.camara == True:
 				camara_start()
 
-			#Si se ha metido valor en el tiempo
+			#Si no se ha insertado tiempo no hay insercion en base de datos
 			if tiempo is not None:
 			#se crea un triguer para lanzar la base de datos
-				trigger = TimerRecurrente(float(tiempo) , BBDD)
+				trigger = TimerRecurrente(float(tiempo) , BBDD, args=(dbexplo.id_exploracion,dbtemperatura.id_sensor))
 				trigger.start_timer()
 
 			#Si se ha elegido manual
-			if request.method=='POST' and 'manual' in request.POST:
+			if request.method=='POST' and 'manual' in request.POST:				
 				return redirect(reverse('manual'))
 
 			#si se ha elegido automatico
@@ -158,9 +157,10 @@ def explorar(request):
 	return render(request, 'explorar.html', context)
 
 #funcion para insertar valor de sensores en base de datos
-def BBDD():
-	global dbexplo
-	print(globales.stemperatura)
+def BBDD(id_exploracion, id_sensortemp):
+
+	dbexplo = Exploracion.objects.get(pk=id_exploracion)
+	print(dbexplo.nombre)
 
 	if globales.stemperatura == True:
 		print("almaceno temperatura")
@@ -168,15 +168,9 @@ def BBDD():
 		dbtemperatura = temperatura(temperatura=globales.temperatura)
 		#se agrega a la base de datos
 		dbtemperatura.save()
-		st = dbexplo.sensores.get(tipo="Temperatura")
-		print(st)
-		print(st.tipo)	
-		st.temperaturafk=dbtemperatura
-		st.save()
-		#se agrega al sensore temperatura
-		#dbexplo.sensores.temperaturafk.add(dbtemperatura)
-
-	print(globales.shumedad)
+		dbexplo.sensores.temperatura.temperaturafk.add(dbgas)
+	
+		
 				
 	if globales.shumedad == True:
 		print("almaceno temperatura")
@@ -204,10 +198,43 @@ def BBDD():
 #funcion Analizar
 @login_required(login_url='/')
 def analizar(request):
+	#extraer todas las exploraciones del usuario
 	explo=Exploracion.objects.filter(usuariofk=request.user)
-
-#	context= sensorTemperatura.objects.all()
 	return render(request, 'analizar.html', {'explo': explo})
+
+#Funcion que muestra detalles de una exploracion
+def detallesExploracion (request, id_exploracion):
+	#extraer solo la exploracion seleccionada
+	explo = Exploracion.objects.get(pk=id_exploracion)
+	context = {'explo':explo}
+	return render(request, 'detalleExploracion.html', context)
+
+#Funcion que muestra detalles de una exploracion
+def mostrarGrafica (request, id_sensor):
+	#extraer el sensor seleccionado
+	
+	sensor = Sensor.objects.get(pk=id_sensor)
+	print(sensor.temperaturafk)
+
+	print(sensor.tipo)
+
+	if sensor.tipo == 'Temperatura':
+		queryset = sensorTemperatura.objects.get(pk=id_sensor)
+
+	print(queryset.id_sensor)
+	print(queryset.enable)
+	print(queryset.fecha)
+	print(queryset.temperaturafk)
+
+	#queryset = sensor.temperaturafk.all()
+	#print(queryset)
+
+	#data_source = ModelDataSource(queryset,fields=['temperaturafk', 'fecha'])
+	#chart = LineChart(SimpleDataSource(data=data_source))
+	#context = {'sensor':sensor, 'chart': chart}
+	context = {'sensor':sensor}
+	return render(request, 'mostrarGrafica.html', context)
+
 
 #funcion para salir del modo de control
 @login_required(login_url='/')

@@ -3,27 +3,18 @@
 
 	{% block content %}	
 	
-	<div><h1>Exploraciones</h1>
+	<div><h3>Exploraciones</h3>
 
 	{% if explo %}
-	
-	<form>		
-	<select>
-	{% for e in explo %}
-		<option>{{e.nombre}}</option>
-	{% endfor %}
-	</select>
 		<ul>
-		<p>Sensores utilizados</p>
-			<select>		
-			{% for a in e.sensores.all %}			
-				<option>{{a.tipo}}</option>
-			{% endfor %}
-			</select>
+		{% for x in explo %}
+			 <li> Nombre: <a href =/detallesExploracion/{{x.id_exploracion}}>{{x.nombre}}</a> </li>
+		{% endfor %}
 		</ul>
-	</form>
-
-	{% endif %}
+		{% else %}
+			<h3> Este usuario no tiene exploraciones </h3>
+		{% endif %}
 	</div>
 	{% endblock content %}
+
 
