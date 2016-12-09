@@ -2,6 +2,8 @@
 # -*- encoding: utf-8 -*- 
 from graphos.sources.simple import SimpleDataSource
 from graphos.renderers.gchart import LineChart
+from graphos.sources.model import ModelDataSource
+from graphos.renderers import flot
 import django_extensions
 from django.shortcuts import render, redirect, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -79,16 +81,18 @@ def explorar(request):
 				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
 				sensordth = SensorTemperatura(14)
 
-				#Se crea una tabla sensor de temperatura asociada a la exploracion
+				#Se crea una tabla sensor de temperatura asociado a la exploracion
 				if globales.stemperatura == True:
-					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True )
+					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True)
 					dbtemperatura.save()
 					dbexplo.sensores.add(dbtemperatura)
+
 				#Se crea una tabla sensor de humedad asociada a la exploracion	
 				if globales.shumedad == True:
 					dbhumedad = sensorHumedad(tipo="Humedad", enable=True)
 					dbhumedad.save()
 					dbexplo.sensores.add(dbhumedad)
+					dbexplo.save()					
 
 				#Si el tiempo es null se ejecuta el sensor cada segundo			
 				if tiempo is None:	
@@ -107,6 +111,7 @@ def explorar(request):
 				dbluz = sensorLuz(tipo="Luz", enable=True)
 				dbluz.save()
 				dbexplo.sensores.add(dbluz)
+				dbexplo.save()
 				#Si el tiempo es null se ejecuta el sensor cada segundo			
 				if tiempo is None:	
 					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
@@ -124,6 +129,7 @@ def explorar(request):
 				dbgas = sensorGas(tipo="Gas", enable=True)
 				dbgas.save()
 				dbexplo.sensores.add(dbgas)
+				dbexplo.save()
 				#Si el tiempo es null se ejecuta el sensor cada segundo			
 				if tiempo is not None:	
 					timergas = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
@@ -140,7 +146,7 @@ def explorar(request):
 			#Si no se ha insertado tiempo no hay insercion en base de datos
 			if tiempo is not None:
 			#se crea un triguer para lanzar la base de datos
-				trigger = TimerRecurrente(float(tiempo) , BBDD, args=(dbexplo.id_exploracion,dbtemperatura.id_sensor))
+				trigger = TimerRecurrente(float(tiempo) , BBDD, args=(dbexplo.id_exploracion))
 				trigger.start_timer()
 
 			#Si se ha elegido manual
@@ -157,42 +163,38 @@ def explorar(request):
 	return render(request, 'explorar.html', context)
 
 #funcion para insertar valor de sensores en base de datos
-def BBDD(id_exploracion, id_sensortemp):
-
+def BBDD(id_exploracion):
+	#se busca la exploracion
 	dbexplo = Exploracion.objects.get(pk=id_exploracion)
 	print(dbexplo.nombre)
 
+	#Si está activado el sensor de temperatura
 	if globales.stemperatura == True:
-		print("almaceno temperatura")
-		#se crea un nuevo registro de temperatura
-		dbtemperatura = temperatura(temperatura=globales.temperatura)
-		#se agrega a la base de datos
+		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True)
 		dbtemperatura.save()
-		dbexplo.sensores.temperatura.temperaturafk.add(dbgas)
-	
-		
-				
+		dbexplo.sensores.add(dbtemperatura)
+		dbexplo.save()
+
+	#Si está activado el sensor de humedad
 	if globales.shumedad == True:
-		print("almaceno temperatura")
-		#se crea un nuevo registro de temperatura
-		dbhumedad = humedad(humedad=globales.humedad)
-		#se agrega a la base de datos
+		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
 		dbhumedad.save()
-		sh = dbexplo.sensores.get(tipo="Humedad")
-		print(sh)
-		print(sh.tipo)	
-		sh.humedadfk=dbhumedad
-		sh.save()
+		dbexplo.sensores.add(dbhumedad)
+		dbexplo.save()
 
+	#Si está activado el sensor de gas
 	if globales.sgas == True:
-		dbgas = gas(gas=globales.gas)
+		dbgas = sensorGas(gas=globales.gas, tipo="Gas")
 		dbgas.save()
-		dbexplo.sensores.gas.add(dbgas)
+		dbexplo.sensores.add(dbgas)
+		dbexplo.save()
 
+	#Si está activado el sensor de luz
 	if globales.sluz == True:
-		dbluz = luminosidad(luz=globales.luz)
+		dbluz = sensorLuz(luz=globales.luz, tipo="Luz")
 		dbluz.save()
-		dbexplo.sensores.luminosidad.add(dbluz)
+		dbexplo.sensores.add(dbluz)
+		dbexplo.save()
 
 
 #funcion Analizar
@@ -206,34 +208,58 @@ def analizar(request):
 def detallesExploracion (request, id_exploracion):
 	#extraer solo la exploracion seleccionada
 	explo = Exploracion.objects.get(pk=id_exploracion)
-	context = {'explo':explo}
+	t = "Temperatura"
+	h = "Humedad"
+	l = "Luz"
+	g = "Gas"
+	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g}
 	return render(request, 'detalleExploracion.html', context)
 
 #Funcion que muestra detalles de una exploracion
-def mostrarGrafica (request, id_sensor):
+def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	#extraer el sensor seleccionado
 	
-	sensor = Sensor.objects.get(pk=id_sensor)
-	print(sensor.temperaturafk)
+	explo = Exploracion.objects.get(pk=id_exploracion)
+	print(explo.nombre)
 
-	print(sensor.tipo)
+	if sensor_tipo == "Temperatura":
+		titulo = "Grafica de la exploracion " + explo.nombre + " de Temperatura" 
+		sensor =  sensorTemperatura.objects.filter(exploracion=explo )
+		data_source = ModelDataSource(sensor, fields= ['fecha', 'temperatura'])
+		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
+		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo ,'explo' : explo}
+		return render(request, 'mostrarGrafica.html', context)
+	
+	if sensor_tipo == "Humedad":
+		titulo = "Grafica de la exploracion " + explo.nombre + " de Humedad" 
+		sensor =  sensorHumedad.objects.filter(exploracion=explo )
+		data_source = ModelDataSource(sensor, fields= ['fecha', 'humedad'])
+		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
+		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo, 'explo' : explo}
+		return render(request, 'mostrarGrafica.html', context)
 
-	if sensor.tipo == 'Temperatura':
-		queryset = sensorTemperatura.objects.get(pk=id_sensor)
+	if sensor_tipo == "Gas":
+		titulo = "Grafica de la exploracion " + explo.nombre + " de Gas" 
+		sensor =  sensorGas.objects.filter(exploracion=explo)
+		data_source = ModelDataSource(sensor, fields= ['fecha', 'gas'])
+		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
+		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo, 'explo' : explo}
+		return render(request, 'mostrarGrafica.html', context)
 
-	print(queryset.id_sensor)
-	print(queryset.enable)
-	print(queryset.fecha)
-	print(queryset.temperaturafk)
+	if sensor_tipo == "Luz":
+		titulo = "Grafica de la exploracion " + explo.nombre + " de Luz" 
+		sensor =  sensorLuz.objects.filter(exploracion=explo )
+		data_source = ModelDataSource(sensor, fields= ['fecha', 'luz'])
+		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
+		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo, 'explo' : explo}
+		return render(request, 'mostrarGrafica.html', context)
 
-	#queryset = sensor.temperaturafk.all()
-	#print(queryset)
+	#for x in sensor:
+	#	print(x.temperatura)
+	#	print(x.fecha)
 
-	#data_source = ModelDataSource(queryset,fields=['temperaturafk', 'fecha'])
-	#chart = LineChart(SimpleDataSource(data=data_source))
-	#context = {'sensor':sensor, 'chart': chart}
-	context = {'sensor':sensor}
-	return render(request, 'mostrarGrafica.html', context)
+	
+
 
 
 #funcion para salir del modo de control

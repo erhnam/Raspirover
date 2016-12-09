@@ -17,11 +17,11 @@ admin.site.register(humedad)
 admin.site.register(luminosidad)
 admin.site.register(gas)
 
-class temperaturaAdmin(admin.ModelAdmin):
-    list_display = ( 'id' ,'temperatura', 'fecha')
+#class temperaturaAdmin(admin.ModelAdmin):
+#    list_display = ( 'id' ,'temperatura', 'fecha')
 	
 
-admin.site.register(temperatura, temperaturaAdmin)
+#admin.site.register(temperatura, temperaturaAdmin)
 
 class exploracionAdmin(admin.ModelAdmin):
     list_display = ( 'id_exploracion', 'nombre', 'usuariofk', 'fecha', 'descripcion', 'tiempo')

@@ -23,8 +23,7 @@ class Usuario(AbstractUser):
 #Sensor
 class Sensor(models.Model):
 	id_sensor = models.AutoField(db_column='ID_Sensor', primary_key=True)
-	tipo = models.CharField(max_length=20, null=True)
-	descripcion = models.CharField(max_length=140)
+	tipo = models.CharField(max_length=20)
 	fecha = models.DateTimeField(auto_now_add=True, null=True)
 	enable = models.BooleanField(default=False)
 
@@ -33,6 +32,7 @@ class Sensor(models.Model):
 
 	class Meta:
 		db_table = 'Sensor'
+
 
 #Exploración
 class Exploracion(models.Model):
@@ -52,73 +52,42 @@ class Exploracion(models.Model):
 		#La solucion es añadir este constraint para que no haya dos parejas iguales
 		unique_together = (("usuariofk", "id_exploracion"),)	
 	
-#Medida de temperatura	
-class temperatura(models.Model):
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
-	temperatura = models.DecimalField(max_digits=3, decimal_places=1, null=True,
-		validators=[
-			MinValueValidator(-10),
-			MaxValueValidator(50)
-		])	
 
-	class Meta:
-		db_table = 'Temperatura'
-		
-#Sensor de Temperatura		
+#Sensor de temperatura	
 class sensorTemperatura(Sensor):
-	temperaturafk = models.ManyToManyField(temperatura)
-
-	class Meta:
-		db_table = 'SensorTemperatura'
+        temperatura = models.DecimalField(max_digits=3, decimal_places=1, null=True,
+                validators=[
+                        MinValueValidator(-10),
+                        MaxValueValidator(100)
+                ])
 	
-#Medida de humedad	
-class humedad(models.Model):
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
-	humedad = models.DecimalField(max_digits=3, decimal_places=1, null=True,
-		validators=[
-			MinValueValidator(-10),
-			MaxValueValidator(50)
-		])
-
 	class Meta:
-		db_table = 'Humedad'	
+		db_table = 'SensorTemperatura'	
 
-#Sensor de Humedad
+#Sensor de humedad	
 class sensorHumedad(Sensor):
-	humedadfk = models.ManyToManyField(humedad)
+        humedad = models.DecimalField(max_digits=3, decimal_places=1, null=True,
+                validators=[
+                        MinValueValidator(-10),
+                        MaxValueValidator(100)
+                ])
 
 	class Meta:
-		db_table = 'SensorHumedad'
+		db_table = 'SensorHumedad'	
 
 #Medidas de luz
-class luminosidad(models.Model):
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
-	luminosidad = models.BooleanField(default=False)
-	
-	class Meta:
-		db_table = 'Luminosidad'
-
-#Sensor de Luz
 class sensorLuz(Sensor):
-	luminosidad = models.ManyToManyField(luminosidad)
-
+	luz = models.BooleanField(default=False)
+	
 	class Meta:
 		db_table = 'SensorLuz'
 
 #medida de gas
-class gas(models.Model):
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
+class sensorGas(Sensor):
 	gas = models.BooleanField(default=False)
 	
 	class Meta:
-		db_table = 'Gas'
-#Sensor de Gas
-class sensorGas(Sensor):
-	gas = models.ManyToManyField(gas)
-
-	class Meta:
 		db_table = 'SensorGas'
-
 	
 class Sensores(models.Model):
 	nombre = models.CharField(max_length=12, blank=False)

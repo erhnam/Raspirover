@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_extensions',
     'raspirover',
+    'graphos',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -66,7 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-				'django.template.context_processors.media', #para ver fotos
+		'django.template.context_processors.media', #para ver fotos
             ],
         },
     },
@@ -81,8 +82,8 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'NAME': '/home/pi/proyecto/db/db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#        'NAME': '/home/pi/proyecto/db/db.sqlite3',
     }
 }
 

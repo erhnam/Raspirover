@@ -6,7 +6,10 @@
 <script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});
 </script>
 
-{{ chart.as_html }}
+	<h4><center>Exploración: {{explo.nombre}}</h4>
+        <h4><center>Gráfica de {{tipo}} </h4>
+
+	<div align="center"> {{ chart.as_html }} </div>
 
 {% endblock content %}
 
