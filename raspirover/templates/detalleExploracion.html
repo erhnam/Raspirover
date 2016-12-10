@@ -11,7 +11,7 @@
 			<li> Sensores Utilizados: </li>
 			<ul>
 				{% if temperatura %}
-				<li> Sensor de temperatura: <a id="temp" href ='#'/>Mostrar gráfica</a> </li>
+				<li> Sensor de temperatura: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{t}}>Mostrar gráfica</a> </li>
 				{% endif %}
 
 				{% if humedad %}
@@ -26,8 +26,6 @@
 				<li> Sensor de luz: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{l}}>Mostrar gráfica</a> </li>
 				{% endif %}
 				
-			{% include 'mostrarGrafica.html' %} 
-
 			</ul>
 		</ul>
 
