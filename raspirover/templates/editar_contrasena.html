@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Editar email{% endblock title %}
+{% block title %}Editar contraseña{% endblock title %}
 
 {% block content %}
 
-<div><h2><img src="{% if seguido.photo %}{{ MEDIA_URL }}{{ user.user_profile.photo }}{% else %}{{ MEDIA_URL }}default.png{% endif %}" width="60" height="" ="60"/> Perfil de usuario </h2></div>
+<div><h2><img src="{% if usuario.photo %}{{ MEDIA_URL }}{{ usuario.photo }}{% else %}{{ MEDIA_URL }}default.png{% endif %}" width="60" height="" ="60"/> Perfil de usuario </h2></div>
 
 	<div class="col-sm-4">
 	    <h3 class="page-header">Cambiar contraseña</h3>
@@ -12,7 +12,7 @@
 	        {% csrf_token %}
 	        {{ form.as_p }}
 	        <button class="btn btn-primary" type="submit">Actualizar contraseña</button>
-	        <a href="{% url 'home' %}" class="btn btn-warning" type="submit">Cancelar</a>
+	        <a href="{% url 'index' %}" class="btn btn-warning" type="submit">Cancelar</a>
 	    </form>
 	</div>
 	

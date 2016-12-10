@@ -119,17 +119,17 @@ class EditarContrasenaForm(forms.Form):
  
 	actual_password = forms.CharField(
 		label='Contraseña actual',
-		min_length=5,
+		min_length=4,
 		widget=forms.PasswordInput(attrs={'class': 'form-control'}))
  
 	password = forms.CharField(
 		label='Nueva contraseña',
-		min_length=5,
+		min_length=4,
 		widget=forms.PasswordInput(attrs={'class': 'form-control'}))
  
 	repetirpassword = forms.CharField(
 		label='Repetir contraseña',
-		min_length=5,
+		min_length=4,
 		widget=forms.PasswordInput(attrs={'class': 'form-control'}))
  
 	def clean_password2(self):

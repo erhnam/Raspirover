@@ -6,7 +6,7 @@
 
     {% if user.is_authenticated %}
         <div class="content" align="center">
-	        <img width="640" height="480" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
+	        <img class="img-responsive" width="640" height="480" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
         </div>
         <div class="servo" align="center">
 	        <a href="{% url 'explorar' %}"><button type="button">Explorar</button></a>

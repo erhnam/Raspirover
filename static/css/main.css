@@ -2,6 +2,68 @@
 
 body { background-color: grey; }
 
+/************************************************************************************
+MEDIA QUERIES
+*************************************************************************************/
+/* para 980px o menos */
+@media screen and (max-width: 980px) {
+	
+	#pagewrap {
+		width: 94%;
+	}
+	#content {
+		width: 65%;
+	}
+	#sidebar {
+		width: 30%;
+	}
+	img{
+                width: 65%;
+                height: 30%;
+	}
+}
+
+/* para 700px o menos */
+@media screen and (max-width: 700px) {
+
+	#content {
+		width: auto;
+		height: auto;
+		float: none;
+	}
+	#sidebar {
+		width: auto;
+		float: top;
+		height: auto;
+	}
+        img{
+                width: 70%;
+                float: center
+                height: 40%;
+        }
+}
+
+/* para 480px o menos */
+@media screen and (max-width: 480px) {
+
+	#header {
+		height: auto;
+	}
+	h1 {
+		font-size: 24px;
+	}
+	#sidebar {
+		float: top;
+		height: auto;
+	}
+        img{
+                width: 70%;
+                float: center;
+                height: 40%;
+        }
+}
+
+
 .btn-primary-raspirover {
   margin-top: 7px;
 }
@@ -13,6 +75,15 @@ body { background-color: grey; }
 	margin-bottom: 25px;
 	width: 72px;
 	height: 72px;
+}
+
+#grafica {
+ 	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 36px;
+	height: 36px;    
 }
 
 #decimales{

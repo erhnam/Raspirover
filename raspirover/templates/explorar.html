@@ -14,22 +14,22 @@
 			
 			<h3> <center>¿Qué sensores deseas utilizar para la exploración?</h3>
 			
-			<label for="id_temperatura"><img id="checkbox_f1" src="{{MEDIA_URL}}temperaturagris.png" onclick="cambiar1()"></label>
+			<label for="id_temperatura"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}temperaturagris.png" onclick="cambiar1()"></label>
 			
-			<label for="id_humedad"><img id="checkbox_f2" src="{{MEDIA_URL}}humedadgris.png" onclick="cambiar2()"></label>
+			<label for="id_humedad"><img class="img-responsive" id="checkbox_f2" src="{{MEDIA_URL}}humedadgris.png" onclick="cambiar2()"></label>
 
-			<label for="id_gas"><img id="checkbox_f3" src="{{MEDIA_URL}}gasgris.png" onclick="cambiar3()"></label>
+			<label for="id_gas"><img class="img-responsive" id="checkbox_f3" src="{{MEDIA_URL}}gasgris.png" onclick="cambiar3()"></label>
 
-			<label for="id_luz"><img id="checkbox_f4" src="{{MEDIA_URL}}luzgris.png" onclick="cambiar4()"></label>
+			<label for="id_luz"><img class="img-responsive" id="checkbox_f4" src="{{MEDIA_URL}}luzgris.png" onclick="cambiar4()"></label>
 
-			<label for="id_camara"><img id="checkbox_f5" src="{{MEDIA_URL}}camaragris.png" onclick="cambiar5()"></label>
+			<label for="id_camara"><img class="img-responsive" id="checkbox_f5" src="{{MEDIA_URL}}camaragris.png" onclick="cambiar5()"></label>
 		
 			<h3> <center>¿Qué  modo de exploración desea utilizar?</h3>
 
-			<label for="sbm"><img id="checkbox_f6" src="{{MEDIA_URL}}manualgris.png" onmouseover="cambiar6()" onmouseout="cambiar6alt()"></label>
+			<label for="sbm"><img class="img-responsive" id="checkbox_f6" src="{{MEDIA_URL}}manualgris.png" onmouseover="cambiar6()" onmouseout="cambiar6alt()"></label>
 			<input type="submit" class="hide-checkbox" name="manual" id="sbm" value="Iniciar exploración manual" />
 
-			<label for="sba"><img id="checkbox_f7" src="{{MEDIA_URL}}automaticogris.png" onmouseover="cambiar7()" onmouseout="cambiar7alt()"></label>
+			<label for="sba"><img class="img-responsive" id="checkbox_f7" src="{{MEDIA_URL}}automaticogris.png" onmouseover="cambiar7()" onmouseout="cambiar7alt()"></label>
 			<input type="submit" class="hide-checkbox" name="automatico" id="sba"value="Iniciar exploración automática" />
 			{{ form.as_p }}
 		</div>

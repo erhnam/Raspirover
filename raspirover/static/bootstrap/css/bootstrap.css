@@ -9,6 +9,28 @@ html {
   -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
 }
+
+/* para 480px o menos */
+@media screen and (max-width: 480px) {
+
+        #header {
+                height: auto;
+        }
+        h1 {
+                font-size: 24px;
+        }
+        #sidebar {
+                float: top;
+                height: auto;
+        }
+        img{
+                width: 70%;
+                float: center;
+                height: 40%;
+        }
+}
+
+
 body {
   margin: 0;
 }
@@ -1588,6 +1610,20 @@ pre code {
   padding-left: 15px;
   margin-right: auto;
   margin-left: auto;
+}
+
+
+@media (min-width: 480px) {
+  .container {
+    width: auto;
+    height:auto;
+  }
+  #img {
+    width: auto;
+    height:auto;
+
+  }	
+
 }
 @media (min-width: 768px) {
   .container {

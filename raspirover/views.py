@@ -234,6 +234,7 @@ def detallesExploracion (request, id_exploracion):
 	return render(request, 'detalleExploracion.html', context)
 
 #Funcion que muestra detalles de una exploracion
+@login_required(login_url='/')
 def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	#extraer el sensor seleccionado
 	
@@ -622,7 +623,7 @@ def logout(request):
 #editar contraseña
 @login_required(login_url='/')
 def editar_contrasena(request):
-	q=UserProfile.objects.get(user=request.user)    
+	usuario=request.user    
 	if request.method == 'POST':
 		form = EditarContrasenaForm(request.POST)
 		if form.is_valid():
@@ -630,10 +631,10 @@ def editar_contrasena(request):
 			request.user.save()
 			messages.success(request, 'La contraseña ha sido cambiado con exito!.')
 			messages.success(request, 'Es necesario introducir los datos para entrar.')
-			return render(request, 'editar_contrasena.html', {'form': form, 'seguido': q}) 
+			return render(request, 'editar_contrasena.html', {'form': form, 'usuario': usuario}) 
 	else:
 		form = EditarContrasenaForm()
-	return render(request, 'editar_contrasena.html', {'form': form, 'seguido': q})    
+	return render(request, 'editar_contrasena.html', {'form': form, 'usuario': usuario})    
  
 #editar foto
 @login_required(login_url='/')
@@ -641,18 +642,17 @@ def editar_foto(request):
 	if request.method == 'POST':
 		form = EditarFotoForm(request.POST, request.FILES)
 		if form.is_valid():
-			request.user.user_profile.photo = form.cleaned_data['imagen']
-			request.user.user_profile.save()
-			return render(request, 'editar_foto.html', {'form': form, 'seguido': request.user.user_profile})
+			request.user.photo = form.cleaned_data['imagen']
+			request.user.save()
+			return render(request, 'editar_foto.html', {'form': form, 'usuario': request.user})
 	else:
 		form = EditarFotoForm()
-	return render(request, 'editar_foto.html', {'form': form, 'seguido': request.user.user_profile}) 
+	return render(request, 'editar_foto.html', {'form': form, 'usuario': request.user}) 
  
 #dar de baja a un usuario
 @login_required(login_url='/')
 def eliminar_usuario(request):
-	usuario=Usuario.objects.get(username=request.user.username)
-	username=usuario.username
+	usuario=request.user
 	usuario.delete()
 	login='0'
 	return redirect(reverse('gracias', kwargs={'username': username, 'login':login}))

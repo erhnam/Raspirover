@@ -17,4 +17,3 @@ $(document).ready(function(){
 });
 
 setInterval(auto_load,1000);
-	
