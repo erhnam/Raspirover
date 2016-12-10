@@ -204,13 +204,34 @@ def analizar(request):
 
 #Funcion que muestra detalles de una exploracion
 def detallesExploracion (request, id_exploracion):
-	#extraer solo la exploracion seleccionada
-	explo = Exploracion.objects.get(pk=id_exploracion)
+	#variables para la página
 	t = "Temperatura"
 	h = "Humedad"
 	l = "Luz"
 	g = "Gas"
-	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g}
+	temperatura=False
+	humedad=False
+	gas=False
+	luz=False
+
+	#extraer solo la exploracion seleccionada
+	explo = Exploracion.objects.get(pk=id_exploracion)
+	#extraer los sensores utilizados en la exploracion
+	sensores = Sensor.objects.filter(exploracion=explo)
+	#recorrer los sensores para saber cuales estan detectados
+	#y pasarlos a la pagina
+	for x in sensores:
+		if x.tipo == "Temperatura"
+			temperatura=True
+		if x.tipo == "Humedad"
+			humedad=True
+		if x.tipo == "Gas"
+			gas=True
+		if x.tipo == "Luz"
+			luz=True
+	
+	
+	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz}
 	return render(request, 'detalleExploracion.html', context)
 
 #Funcion que muestra detalles de una exploracion

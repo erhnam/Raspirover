@@ -10,13 +10,22 @@
 			<li> Descripción: {{explo.descripcion}} </li>
 			<li> Sensores Utilizados: </li>
 			<ul>
+				{% if temperatura %}
 				<li> Sensor de temperatura: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{t}}/>Mostrar gráfica</a> </li>
+				{% endif %}
 
+				{% if humedad %}
 				<li> Sensor de humedad:: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{h}}>Mostrar gráfica</a> </li>
+				{% endif %}
 			
+				{% if gas %}
 				<li> Sensor de gas: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{g}}>Mostrar gráfica</a> </li>
+				{% endif %}
 			
+				{% if luz %}
 				<li> Sensor de luz: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{l}}>Mostrar gráfica</a> </li>
+				{% endif %}
+
 			</ul>
 		</ul>
 
