@@ -221,15 +221,14 @@ def detallesExploracion (request, id_exploracion):
 	#recorrer los sensores para saber cuales estan detectados
 	#y pasarlos a la pagina
 	for x in sensores:
-		if x.tipo == "Temperatura"
+		if x.tipo == "Temperatura":
 			temperatura=True
-		if x.tipo == "Humedad"
+		if x.tipo == "Humedad":
 			humedad=True
-		if x.tipo == "Gas"
+		if x.tipo == "Gas":
 			gas=True
-		if x.tipo == "Luz"
+		if x.tipo == "Luz":
 			luz=True
-	
 	
 	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz}
 	return render(request, 'detalleExploracion.html', context)
