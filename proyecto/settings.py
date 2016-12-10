@@ -39,7 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_extensions',
     'raspirover',
-    'graphos',
+    'chartit',
 )
 
 MIDDLEWARE_CLASSES = (

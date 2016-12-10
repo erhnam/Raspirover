@@ -1,9 +1,6 @@
 #!/usr/bin/env python3.4
 # -*- encoding: utf-8 -*- 
-from graphos.sources.simple import SimpleDataSource
-from graphos.renderers.gchart import LineChart
-from graphos.sources.model import ModelDataSource
-from graphos.renderers import flot
+from chartit import DataPool, Chart			#para graficas
 import django_extensions
 from django.shortcuts import render, redirect, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -221,47 +218,187 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	#extraer el sensor seleccionado
 	
 	explo = Exploracion.objects.get(pk=id_exploracion)
-	print(explo.nombre)
 
 	if sensor_tipo == "Temperatura":
-		titulo = "Grafica de la exploracion " + explo.nombre + " de Temperatura" 
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Temperatura" 
 		sensor =  sensorTemperatura.objects.filter(exploracion=explo )
-		data_source = ModelDataSource(sensor, fields= ['fecha', 'temperatura'])
-		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
-		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo ,'explo' : explo}
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': sensorTemperatura.objects.filter(exploracion=explo)},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					'temperatura']}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'temperatura']
+					  }}],
+				chart_options={
+		            'title': {
+		                'text': titulo},
+		            'xAxis': {
+		                'title': {
+		                    'text': 'Tiempo'}},
+		            'yAxis': {
+		                'title': {
+		                    'text': 'Temperatura'}},
+		            'legend': {
+		                'enabled': False},
+		            'credits': {
+		                'enabled': False}})		
+        #paso 3: Enviar la gráfica a la página.
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+
 		return render(request, 'mostrarGrafica.html', context)
-	
+
+	#Se ha elegido mostrar humedad
 	if sensor_tipo == "Humedad":
 		titulo = "Grafica de la exploracion " + explo.nombre + " de Humedad" 
 		sensor =  sensorHumedad.objects.filter(exploracion=explo )
-		data_source = ModelDataSource(sensor, fields= ['fecha', 'humedad'])
-		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
-		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo, 'explo' : explo}
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': sensorHumedad.objects.filter(exploracion=explo)},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					'humedad']}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'humedad']
+					  }}],
+				chart_options={
+		            'title': {
+		                'text': titulo},
+		            'xAxis': {
+		                'title': {
+		                    'text': 'Tiempo'}},
+		            'yAxis': {
+		                'title': {
+		                    'text': 'Humedad'}},
+		            'legend': {
+		                'enabled': False},
+		            'credits': {
+		                'enabled': False}})		
+        #paso 3: Enviar la gráfica a la página.
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+
 		return render(request, 'mostrarGrafica.html', context)
 
+	#Se ha elegido mostrar gas
 	if sensor_tipo == "Gas":
 		titulo = "Grafica de la exploracion " + explo.nombre + " de Gas" 
 		sensor =  sensorGas.objects.filter(exploracion=explo)
-		data_source = ModelDataSource(sensor, fields= ['fecha', 'gas'])
-		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
-		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo, 'explo' : explo}
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': sensorGas.objects.filter(exploracion=explo)},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					'gas']}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'gas']
+					  }}],
+				chart_options={
+		            'title': {
+		                'text': titulo},
+		            'xAxis': {
+		                'title': {
+		                    'text': 'Tiempo'}},
+		            'yAxis': {
+		                'title': {
+		                    'text': 'Gas'}},
+		            'legend': {
+		                'enabled': False},
+		            'credits': {
+		                'enabled': False}})
+
+        #paso 3: Enviar la gráfica a la página.
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+
 		return render(request, 'mostrarGrafica.html', context)
 
+	#Se ha elegido mostrar luz
 	if sensor_tipo == "Luz":
 		titulo = "Grafica de la exploracion " + explo.nombre + " de Luz" 
-		sensor =  sensorLuz.objects.filter(exploracion=explo )
-		data_source = ModelDataSource(sensor, fields= ['fecha', 'luz'])
-		chart = LineChart(data_source, options={'title': titulo, 'xaxis': {'mode': "categories"}})
-		context = {'sensor':sensor, 'chart': chart, 'tipo': sensor_tipo, 'explo' : explo}
+		sensor =  sensorLuz.objects.filter(exploracion=explo)
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': sensorLuz.objects.filter(exploracion=explo)},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					'luz']}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'luz']
+					  }}],
+				chart_options={
+		            'title': {
+		                'text': titulo},
+		            'xAxis': {
+		                'title': {
+		                    'text': 'Tiempo'}},
+		            'yAxis': {
+		                'title': {
+		                    'text': 'Luz'}},
+		            'legend': {
+		                'enabled': False},
+		            'credits': {
+		                'enabled': False}})
+		                		
+        #paso 3: Enviar la gráfica a la página.
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+
 		return render(request, 'mostrarGrafica.html', context)
-
-	#for x in sensor:
-	#	print(x.temperatura)
-	#	print(x.fecha)
-
-	
-
-
 
 #funcion para salir del modo de control
 @login_required(login_url='/')

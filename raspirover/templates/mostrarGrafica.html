@@ -1,15 +1,23 @@
-{% extends 'base.html' %}
-{% block content %}	
+{% extends "base.html" %}
+
+{% load chartit %}
+{% block title %}Gráfica{% endblock %}
+
+{% block content %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <script src="http://code.highcharts.com/highcharts.js"></script>
+    
+        <div id="grafica">{{ chart|load_charts:"grafica" }}</div>
+{% endblock %}
 
 
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});
-</script>
-
-	<h4><center>Exploración: {{explo.nombre}}</h4>
-        <h4><center>Gráfica de {{tipo}} </h4>
-
-	<div align="center"> {{ chart.as_html }} </div>
-
-{% endblock content %}
-
+<style>
+#grafica {
+    height: auto;
+    width: auto;
+    background: #4c5462;
+    margin: 0 auto; 
+    border: 0px solid #000000;
+    text-align: left;       
+}
+</style>
