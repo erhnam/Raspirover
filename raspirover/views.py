@@ -246,19 +246,19 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'temperatura']
 					  }}],
 				chart_options={
-		            'title': {
-		                'text': titulo},
-		            'xAxis': {
-		                'title': {
-		                    'text': 'Tiempo'}},
-		            'yAxis': {
-		                'title': {
-		                    'text': 'Temperatura'}},
-		            'legend': {
-		                'enabled': False},
-		            'credits': {
-		                'enabled': False}})		
-        #paso 3: Enviar la gráfica a la página.
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'Temperatura'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})		
+		#paso 3: Enviar la gráfica a la página.
 		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
@@ -291,19 +291,19 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'humedad']
 					  }}],
 				chart_options={
-		            'title': {
-		                'text': titulo},
-		            'xAxis': {
-		                'title': {
-		                    'text': 'Tiempo'}},
-		            'yAxis': {
-		                'title': {
-		                    'text': 'Humedad'}},
-		            'legend': {
-		                'enabled': False},
-		            'credits': {
-		                'enabled': False}})		
-        #paso 3: Enviar la gráfica a la página.
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'Humedad'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})		
+		#paso 3: Enviar la gráfica a la página.
 		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
@@ -336,20 +336,20 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'gas']
 					  }}],
 				chart_options={
-		            'title': {
-		                'text': titulo},
-		            'xAxis': {
-		                'title': {
-		                    'text': 'Tiempo'}},
-		            'yAxis': {
-		                'title': {
-		                    'text': 'Gas'}},
-		            'legend': {
-		                'enabled': False},
-		            'credits': {
-		                'enabled': False}})
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'Gas'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})
 
-        #paso 3: Enviar la gráfica a la página.
+		#paso 3: Enviar la gráfica a la página.
 		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
@@ -382,20 +382,20 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'luz']
 					  }}],
 				chart_options={
-		            'title': {
-		                'text': titulo},
-		            'xAxis': {
-		                'title': {
-		                    'text': 'Tiempo'}},
-		            'yAxis': {
-		                'title': {
-		                    'text': 'Luz'}},
-		            'legend': {
-		                'enabled': False},
-		            'credits': {
-		                'enabled': False}})
-		                		
-        #paso 3: Enviar la gráfica a la página.
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'Luz'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})
+								
+		#paso 3: Enviar la gráfica a la página.
 		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
