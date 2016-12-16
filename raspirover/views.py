@@ -38,7 +38,7 @@ from sensorGas import *
 from timerRecurrente import *
 import globales 
 
-
+sensorDistancia=SensorDistancia(23,24)
 globales.salir = 0
 
 def index(request):
@@ -519,9 +519,42 @@ def manual(request):
 	#Devuelve el contexto a la página manul
 	return render_to_response(template, context, context_instance=RequestContext(request))
 
+
+#Funcion que se ejecuta cuando la distancia es menor de la requerida
+	def BuscarDistanciaMasLarga():
+		driver=globales.driver
+		global sensorDistancia
+		
+		driver.Parar()
+		time.sleep(1)
+		#girar a la izquiera y toma medida
+		Izquierda()
+		distancia1 = sensorDistancia.precisionDistancia()
+		driver.Parar()
+		time.sleep(1)
+		#vuelve a posicion original
+		Derecha()
+		driver.Parar()
+		time.sleep(1)
+		#gira a la derecha y toma medida
+		Derecha()
+		driver.Parar()
+		time.sleep(1)
+		distancia2 = sensorDistancia.precisionDistancia()
+		time.sleep(1)
+
+		#si la distancia de la izq es mayor q la derecha gira dos veces a izq para volver a su posicion
+		if distancia1 > distancia2:
+			Izquierda()
+			time.sleep(1)	
+			Izquierda()
+			time.sleep(1)
+			driver.Parar()
+
+
 def automatico():
 	#Se crea el sensor de distancia
-	sensorDistancia=SensorDistancia(23,24)
+	global sensorDistancia
 	
 	print("entro en modo auto")
 	print("He creado el sensor y entro a bucle")
@@ -544,26 +577,13 @@ def auto(request):
 
 	sensorDistancia=SensorDistancia(23,24)
 	
-	print("entro en modo auto")
-	print("He creado el sensor y entro a bucle")
-	#Comienzo de la automatización
-	while True:
-		print("estoy en bucle")
-		#Se obtiene una primera medida de distancia
-		globales.distancia = float(sensorDistancia.precisionDistancia() - 20)	
-		print ("Distancia: %.2f" % globales.distancia)
-		#Si la distancia es menor de 30 busca la distancia mas larga
-		if globales.distancia < 30.0:
-			BuscarDistanciaMasLarga()
-		#Si es mayor de 30 prosigue su camino
-		else:
-			globales.driver.Adelante()
-
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
 	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
 
-	#automatic=threading.Thread(target=automatico)
-	#automatic.start()
+	#Creamos un hilo para ejecutar el automatico
+	#así no bloquea a los demas hilos
+	automatic=threading.Thread(target=automatico)
+	automatic.start()
 	
 	template = "auto.html"
 	return render_to_response(template, context, context_instance=RequestContext(request))
