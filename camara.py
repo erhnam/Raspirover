@@ -4,13 +4,13 @@ from subprocess import call
 
 #Funcion para empezar streaming
 def camara_start():
-	return_code = call("/home/pi/raspirover/script/camara_start.sh", shell=True)
+	return_code = call("/home/pi/proyecto/script/camara_start.sh", shell=True)
 
 #Funcion para acabar streaming
 def camara_stop():
-	return_code = call("/home/pi/raspirover/script/camara_stop.sh", shell=True)
+	return_code = call("/home/pi/proyecto/script/camara_stop.sh", shell=True)
 
 #Funcion para hacer foto
 def make_photo():
-	return_code = call("/home/pi/raspirover/script/photo.sh", shell=True)
+	return_code = call("/home/pi/proyecto/script/photo.sh", shell=True)
 
