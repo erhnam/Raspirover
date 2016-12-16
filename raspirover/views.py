@@ -505,39 +505,52 @@ def BuscarDistanciaMasLarga():
 @login_required(login_url='/')
 def manual(request):
 
-	t = get_template('manual.html')
 	#Control manual del robot
+	#Se recoge la peticion de movimiento
 	if 'cmd' in request.GET and request.GET['cmd']:
 		control = request.GET['cmd']
 
 		#Control del robot
+		#Mover hacia adelante
 		if (control == "fwd"):
 			globales.driver.Adelante()
+		#Mover hacia atras
 		if (control == "bwd"):
 			globales.driver.Atras()
+		#Mover a la izquierda
 		if (control == "left"):
 			globales.driver.Izquierda()
+		#Mover a la derecha
 		if (control == "right"):
-			globales.driver.Derecha()		
+			globales.driver.Derecha()
+		#Parar los motors		
 		if (control == "stop"):
 			globales.driver.Parar()  	
 
 		#Control de la cámara
+		#Mover a la izquierda
 		if (control == "camleft"):
 			servo_l()
+		#Mover al centro
 		if (control == "camcenter"):
-			servo_c()  
+			servo_c()
+		#Mover a la derecha  
 		if (control == "camright"):
 			servo_r()	
 
+	#Se crea un contexto con las variables para devolver a la plantilla
+	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
+			'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
+			'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
+			'camara':globales.camara }
 
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
-
+	#Variable que guarda la página a cargar
 	template = "manual.html"
-	return HttpResponseRedirect(reverse(template, kwargs=context))
 
-	#return render_to_response(template, context, context_instance=RequestContext(request))
+	#Devuelve el contexto a la página manul
+	return render_to_response(template, context, context_instance=RequestContext(request))
+
+
 
 def automatico():
 	global sensorDistancia	
