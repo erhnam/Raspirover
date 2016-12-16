@@ -38,6 +38,8 @@ from sensorGas import *
 from timerRecurrente import *
 import globales 
 
+
+globales.salir = 0
 sensorDistancia=SensorDistancia(23,24)
 
 def index(request):
@@ -425,9 +427,12 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 @login_required(login_url='/')
 def salir(request):
 
+	#Destruye los timers
+	globales.salir=1
+	#Inicializa los GPIO
 	GPIO.cleanup()
 
-	#se para la cámara
+	#Para la cámara
 	camara_stop()
 
 	#si estaba en automático
@@ -442,6 +447,8 @@ def salir(request):
 
 	return redirect(reverse('index'))
 
+#Función que muestra los datos de los sensores
+#En la pantalla de control del sistema
 @login_required(login_url='/')
 def mostrardatos(request):
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
@@ -528,7 +535,9 @@ def manual(request):
 	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
 
 	template = "manual.html"
-	return render_to_response(template, context, context_instance=RequestContext(request))
+	return HttpResponseRedirect(reverse(template, kwargs=context))
+
+	#return render_to_response(template, context, context_instance=RequestContext(request))
 
 def automatico():
 	global sensorDistancia	

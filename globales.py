@@ -5,6 +5,7 @@ from sensorTemperatura import *
 from sensorGas import *
 
 #Variables globales
+salir=0
 driver=0
 dbtemperatura=''
 dbhumedad=''
