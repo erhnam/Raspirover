@@ -521,36 +521,35 @@ def manual(request):
 
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
-	def BuscarDistanciaMasLarga():
-		driver=globales.driver
-		global sensorDistancia
-		
-		driver.Parar()
-		time.sleep(1)
-		#girar a la izquiera y toma medida
+def BuscarDistanciaMasLarga():
+	driver=globales.driver
+	global sensorDistancia
+	
+	driver.Parar()
+	time.sleep(1)
+	#girar a la izquiera y toma medida
+	Izquierda()
+	distancia1 = sensorDistancia.precisionDistancia()
+	driver.Parar()
+	time.sleep(1)
+	#vuelve a posicion original
+	Derecha()
+	driver.Parar()
+	time.sleep(1)
+	#gira a la derecha y toma medida
+	Derecha()
+	driver.Parar()
+	time.sleep(1)
+	distancia2 = sensorDistancia.precisionDistancia()
+	time.sleep(1)
+
+	#si la distancia de la izq es mayor q la derecha gira dos veces a izq para volver a su posicion
+	if distancia1 > distancia2:
 		Izquierda()
-		distancia1 = sensorDistancia.precisionDistancia()
+		time.sleep(1)	
+		Izquierda()
+		time.sleep(1)
 		driver.Parar()
-		time.sleep(1)
-		#vuelve a posicion original
-		Derecha()
-		driver.Parar()
-		time.sleep(1)
-		#gira a la derecha y toma medida
-		Derecha()
-		driver.Parar()
-		time.sleep(1)
-		distancia2 = sensorDistancia.precisionDistancia()
-		time.sleep(1)
-
-		#si la distancia de la izq es mayor q la derecha gira dos veces a izq para volver a su posicion
-		if distancia1 > distancia2:
-			Izquierda()
-			time.sleep(1)	
-			Izquierda()
-			time.sleep(1)
-			driver.Parar()
-
 
 def automatico():
 	#Se crea el sensor de distancia
@@ -570,7 +569,6 @@ def automatico():
 		#Si es mayor de 30 prosigue su camino
 		else:
 			globales.driver.Adelante()
-
 
 @login_required(login_url='/')
 def auto(request):
