@@ -16,6 +16,7 @@ class SensorDistancia(object):
 		time.sleep(0.00001)
 		GPIO.output(self.trigger, False)
 		inicio = time.time()
+		fin = 0
 
 		while GPIO.input(self.echo)==0:
 			inicio = time.time()
