@@ -1,6 +1,6 @@
 import time
 import RPi.GPIO as GPIO
-
+import dosMotores
 
 class SensorDistancia(object):
 	def __init__(self, pinTrigger, pinEcho):
@@ -39,6 +39,37 @@ class SensorDistancia(object):
 		distancia = distancia / 3
 		globales.distancia = distancia
 		return distancia
+
+	#Funcion que se ejecuta cuando la distancia es menor de la requerida
+	def BuscarDistanciaMasLarga():
+		driver=globales.driver
+		global sensorDistancia
 		
+		driver.Parar()
+		time.sleep(1)
+		#girar a la izquiera y toma medida
+		Izquierda()
+		distancia1 = precisionDistancia()
+		driver.Parar()
+		time.sleep(1)
+		#vuelve a posicion original
+		Derecha()
+		driver.Parar()
+		time.sleep(1)
+		#gira a la derecha y toma medida
+		Derecha()
+		driver.Parar()
+		time.sleep(1)
+		distancia2 = precisionDistancia()
+		time.sleep(1)
+
+		#si la distancia de la izq es mayor q la derecha gira dos veces a izq para volver a su posicion
+		if distancia1 > distancia2:
+			Izquierda()
+			time.sleep(1)	
+			Izquierda()
+			time.sleep(1)
+			driver.Parar()
+
 	def __del__(self):
 		print ("Sensor de Distancia destruido")
