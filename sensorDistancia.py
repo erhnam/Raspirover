@@ -1,6 +1,6 @@
 import time
 import RPi.GPIO as GPIO
-import dosMotores
+import globales
 
 class SensorDistancia(object):
 	def __init__(self, pinTrigger, pinEcho):
