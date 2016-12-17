@@ -1,8 +1,5 @@
 import RPi.GPIO as GPIO
-from sensorDistancia import *
-from sensorLuz import *
-from sensorTemperatura import *
-from sensorGas import *
+from sensores import *
 
 #Variables globales
 salir=0

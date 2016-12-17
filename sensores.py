@@ -96,6 +96,7 @@ class SensorLuz(object):
 			GPIO.output(self.led1,GPIO.HIGH)
 			GPIO.output(self.led2,GPIO.HIGH)
 			globales.luz = False
+
 	#Funcion que destruye el sensor
 	def __del__(self):
 		print ("Sensor de Luz destruido")

@@ -21,7 +21,6 @@ import RPi.GPIO as GPIO
 import picamera
 import datetime
 import threading
-import datetime
 
 #Importaciones de ficheros creados para
 #sensores, camara, motores y globales.
@@ -31,9 +30,6 @@ from servo import *
 from motor import *
 from camara import *
 from dosMotores import *
-#from sensorDistancia import *
-#from sensorLuz import *
-#from sensorGas import *
 from sensores import *
 from timerRecurrente import *
 import globales 
