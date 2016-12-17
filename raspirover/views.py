@@ -33,13 +33,23 @@ from camara import *
 from dosMotores import *
 from sensorDistancia import *
 from sensorLuz import *
-from sensorTemperatura import *
 from sensorGas import *
 from timerRecurrente import *
 import globales 
+import Adafruit_DHT
 
 sensorDistancia=SensorDistancia(23,24)
 globales.salir = 0
+
+#Funcion para la temperatura y la humedad
+def comprobarth():
+	#Sensor Adafruit
+	sensor = Adafruit_DHT.AM2302
+	#Obtiene los valores del sensor de temepratura y la humedad
+	globales.humedad, globales.temperatura = Adafruit_DHT.read_retry(sensor, 14)
+	#Redondea a 1 dígito decimal
+	globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0	
+	globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0	
 
 def index(request):
 
@@ -70,80 +80,82 @@ def explorar(request):
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
-			#Se crea una exploracion con parte de los valores del formulario	
+			#Se crea una exploracion con parte de los valores del formulario
+			#Si tiempo no está vacío se crea una exploracion	
 			if tiempo is not None:
 				dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
-				dbexplo.save()			
+				dbexplo.save()
+			
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
 				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
-				sensordth = SensorTemperatura(14)
+				#sensordth = SensorTemperatura(14)
 
 				#Se crea una tabla sensor de temperatura asociado a la exploracion
-				if globales.stemperatura == True:
+				if globales.stemperatura == True and tiempo is not None:
 					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True)
 					dbtemperatura.save()
 					dbexplo.sensores.add(dbtemperatura)
 
 				#Se crea una tabla sensor de humedad asociada a la exploracion	
-				if globales.shumedad == True:
+				if globales.shumedad == True and tiempo is not None:
 					dbhumedad = sensorHumedad(tipo="Humedad", enable=True)
 					dbhumedad.save()
 					dbexplo.sensores.add(dbhumedad)
-					dbexplo.save()					
 
-				#Si el tiempo es null se ejecuta el sensor cada segundo			
+				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				if tiempo is None:	
-					timerdth = TimerRecurrente(1.0, sensordth.read)
+					timerdth = TimerRecurrente(5.0, comprobarth)
 					timerdth.start_timer()
-				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
+				#Si el tiempo no es null se crea un timer de x segundos definidos por la variable tiempo
 				else:
-					timerdth = TimerRecurrente(float(tiempo)-0.2, sensordth.read)
+					timerdth = TimerRecurrente(float(tiempo)-0.2, comprobarth)
 					timerdth.start_timer()
 			
 			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
 				#Se crea sensor de Luz para manejar con Raspberry
 				sensorluz = SensorLuz(21,20,16)
-				#Se crea una tabla sensor de luz asociada a la exploracion	
-				dbluz = sensorLuz(tipo="Luz", enable=True)
-				dbluz.save()
-				dbexplo.sensores.add(dbluz)
-				dbexplo.save()
-				#Si el tiempo es null se ejecuta el sensor cada segundo			
-				if tiempo is None:	
+				#Se crea un timer de x segundos definidos por la variable tiempo
+				if tiempo is not None:	
 					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
 					timerluz.start_timer()
-				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
+				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
-					timerluz = TimerRecurrente(1.0, sensorluz.comprobarLuz)
+					#Se crea una tabla sensor de luz asociada a la exploracion	
+					dbluz = sensorLuz(tipo="Luz", enable=True)
+					dbluz.save()
+					dbexplo.sensores.add(dbluz)
+					#Se crea un timer de 5 segundos
+					timerluz = TimerRecurrente(5.0, sensorluz.comprobarLuz)
 					timerluz.start_timer()
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
 				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
 				sensorgas = SensorGas(26)
-			#Se crea una tabla sensor de gas asociada a la exploracion	
-				dbgas = sensorGas(tipo="Gas", enable=True)
-				dbgas.save()
-				dbexplo.sensores.add(dbgas)
-				dbexplo.save()
-				#Si el tiempo es null se ejecuta el sensor cada segundo			
-				if tiempo is not None:	
+				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
+				if tiempo is not None:
+					#Se crea un timer de x segundos definidos por la variable tiempo
 					timergas = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
 					timergas.start_timer()
-				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
+				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
-					timergas = TimerRecurrente(1.0, sensorgas.comprobarGas)
+					#Se crea una tabla sensor de gas asociada a la exploracion	
+					dbgas = sensorGas(tipo="Gas", enable=True)
+					dbgas.save()
+					dbexplo.sensores.add(dbgas)
+					#Se crea un timer de 5 segundos
+					timergas = TimerRecurrente(5.0, sensorgas.comprobarGas)
 					timergas.start_timer()
 
-			#si se ha elegido cámara para streaming
+			#Si se ha elegido cámara para streaming
 			if globales.camara == True:
 				camara_start()
-
-			#Si no se ha insertado tiempo no hay insercion en base de datos
+			
+			#Si se ha insertado tiempo se lanza un trigger para la bbdd
+			#definida por la variable tiempo
 			if tiempo is not None:
-			#se crea un triguer para lanzar la base de datos
 				trigger = TimerRecurrente(float(tiempo) , BBDD, args=[dbexplo.id_exploracion])
 				trigger.start_timer()
 
@@ -153,6 +165,7 @@ def explorar(request):
 
 			#si se ha elegido automatico
 			if request.method=='POST' and 'automatico' in request.POST:
+				#Sirve para cancelar el modo automatico
 				globales.auto=True
 				return redirect(reverse('auto'))		
 	else:
@@ -172,29 +185,24 @@ def BBDD(id_exploracion):
 		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True)
 		dbtemperatura.save()
 		dbexplo.sensores.add(dbtemperatura)
-		dbexplo.save()
 
 	#Si está activado el sensor de humedad
 	if globales.shumedad == True:
 		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
 		dbhumedad.save()
 		dbexplo.sensores.add(dbhumedad)
-		dbexplo.save()
 
 	#Si está activado el sensor de gas
 	if globales.sgas == True:
 		dbgas = sensorGas(gas=globales.gas, tipo="Gas")
 		dbgas.save()
 		dbexplo.sensores.add(dbgas)
-		dbexplo.save()
 
 	#Si está activado el sensor de luz
 	if globales.sluz == True:
 		dbluz = sensorLuz(luz=globales.luz, tipo="Luz")
 		dbluz.save()
 		dbexplo.sensores.add(dbluz)
-		dbexplo.save()
-
 
 #funcion Analizar
 @login_required(login_url='/')
