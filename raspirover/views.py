@@ -35,17 +35,15 @@ from timerRecurrente import *
 import globales 
 
 sensorDistancia=SensorDistancia(23,24)
-globales.salir = 0
+#Creacion de los motores por parejas
+motorIzq = Motor (27,22,4,100)
+motorDer = Motor (5,6,17,100)
+
+#Creacion del driver L298N
+globales.driver = DriverDosMotores (motorIzq, motorDer)	
 
 def index(request):
 
-	#Creacion de los motores por parejas
-	motorIzq = Motor (27,22,4,100)
-	motorDer = Motor (5,6,17,100)
-
-	#Creacion del driver L298N
-	globales.driver = DriverDosMotores (motorIzq, motorDer)
-	
 	return render(request, 'index.html')
 
 #Funcion explorar
@@ -104,14 +102,15 @@ def explorar(request):
 				sensorluz = SensorLuz(21,20,16)
 				#Se crea un timer de x segundos definidos por la variable tiempo
 				if tiempo is not None:	
-					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
-					timerluz.start_timer()
-				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
-				else:
 					#Se crea una tabla sensor de luz asociada a la exploracion	
 					dbluz = sensorLuz(tipo="Luz", enable=True)
 					dbluz.save()
 					dbexplo.sensores.add(dbluz)
+
+					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
+					timerluz.start_timer()
+				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
+				else:
 					#Se crea un timer de 5 segundos
 					timerluz = TimerRecurrente(5.0, sensorluz.comprobarLuz)
 					timerluz.start_timer()
@@ -122,15 +121,15 @@ def explorar(request):
 				sensorgas = SensorGas(26)
 				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				if tiempo is not None:
+					#Se crea una tabla sensor de gas asociada a la exploracion	
+					dbgas = sensorGas(tipo="Gas", enable=True)
+					dbgas.save()
+					dbexplo.sensores.add(dbgas)
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					timergas = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
 					timergas.start_timer()
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
-					#Se crea una tabla sensor de gas asociada a la exploracion	
-					dbgas = sensorGas(tipo="Gas", enable=True)
-					dbgas.save()
-					dbexplo.sensores.add(dbgas)
 					#Se crea un timer de 5 segundos
 					timergas = TimerRecurrente(5.0, sensorgas.comprobarGas)
 					timergas.start_timer()
@@ -164,7 +163,6 @@ def BBDD(id_exploracion):
 
 	#se busca la exploracion actual
 	dbexplo = Exploracion.objects.get(pk=id_exploracion)
-	print(dbexplo.nombre)
 
 	#Si está activado el sensor de temperatura
 	if globales.stemperatura == True:
@@ -422,8 +420,6 @@ def salir(request):
 
 	#Destruye los timers
 	globales.salir=1
-	#Inicializa los GPIO
-	GPIO.cleanup()
 
 	#Para la cámara
 	camara_stop()

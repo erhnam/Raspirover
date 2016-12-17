@@ -67,6 +67,5 @@ def inicializar():
 	tiempo=False
 	nombre=False
 	
-	GPIO.cleanup()
 	print ("Todo inizializado")
 	
