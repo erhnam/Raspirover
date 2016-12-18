@@ -22,11 +22,7 @@
 	<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-theme.min.css' %}">
 
 	<!-- Custom styles for this template -->
-	<link href="theme.css" rel="stylesheet">
-
 	<link rel="stylesheet" href="{% static 'css/main.css' %}">
-
-	<script src="../../assets/js/ie-emulation-modes-warning.js"></script>
 
   </head>
 
@@ -54,7 +50,7 @@
 			<ul class="nav navbar-nav navbar-right">
 			  {% if user.is_authenticated %}
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img src="{% if user.photo %}{{ MEDIA_URL }}{{ user.photo }}{% else %}{{ MEDIA_URL }}default.png{% endif %}" width="20" height="20" >Ajustes<span class="caret"></span></a>
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img class="img-responsive src="{% if user.photo %}{{ MEDIA_URL }}{{ user.photo }}{% else %}{{ MEDIA_URL }}default.png{% endif %}" width="20" height="20" >Ajustes<span class="caret"></span></a>
 					<ul class="dropdown-menu">
 						<li><a href="{% url 'editar_contrasena' %}">Cambiar contraseña</a></li>
 						<li><a href="{% url 'editar_foto' %}">Cambiar Foto</a></li>
@@ -106,10 +102,8 @@
 
     <script src="{% static 'js/custom.js' %}"></script>
     <script src="{% static 'jquery/jquery.js' %}"></script>
-    <script src="{% static 'js/highcharts.js' %}"></script>
     <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
-    <script src="{% static 'js/chartloader.js' %}"></script>
 
   </body>
 </html>
