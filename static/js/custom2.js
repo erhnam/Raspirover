@@ -1,5 +1,3 @@
-	
-
 function auto_load(){
 	$.ajax({
 	  url: "manual",

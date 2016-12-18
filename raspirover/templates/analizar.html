@@ -7,7 +7,7 @@
 	{% if explo %}
 		<ul>
 		{% for x in explo %}
-			 <li> Nombre: <a href =/detallesExploracion/{{x.id_exploracion}}><font color="#F5F5DC">{{x.nombre}}</font></a> </li>
+			 <li><a href =/eliminarExploracion/{{x.id_exploracion}}><font color="#FF0000">X</font></a>  Nombre: <a href =/detallesExploracion/{{x.id_exploracion}}><font color="#F5F5DC">{{x.nombre}}</font></a> </li>
 		{% endfor %}
 		</ul>
 		{% else %}

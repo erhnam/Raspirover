@@ -21,5 +21,6 @@ urlpatterns = [
 	url(r'salir/$', views.salir, name='salir'), 	
 	url(r'mostrardatos/$', views.mostrardatos, name='mostrardatos'),
 	url (r'^detallesExploracion/(?P<id_exploracion>\d+)', views.detallesExploracion, name='detallesExploracion'),
+	url (r'^eliminarExploracion/(?P<id_exploracion>\d+)', views.eliminarExploracion, name='eliminarExploracion'),
 	url (r'^mostrarGrafica/(?P<id_exploracion>\d+)/(?P<sensor_tipo>[\w]+)', views.mostrarGrafica, name='mostrarGrafica'),	
 ]

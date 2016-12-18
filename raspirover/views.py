@@ -42,6 +42,7 @@ motorDer = Motor (5,6,17,100)
 #Creacion del driver L298N
 globales.driver = DriverDosMotores (motorIzq, motorDer)	
 
+
 def index(request):
 
 	return render(request, 'index.html')
@@ -194,6 +195,16 @@ def analizar(request):
 	#extraer todas las exploraciones del usuario
 	explo=Exploracion.objects.filter(usuariofk=request.user)
 	return render(request, 'analizar.html', {'explo': explo})
+
+#Elimina una exploración
+@login_required(login_url='/')
+def eliminarExploracion(request, id_exploracion):
+	#Busca la exploracion
+	explo = Exploracion.objects.get(pk=id_exploracion)
+	#elimina la exploracion de la base de datos
+	explo.delete()
+	#vuelve a la pagina de analisis
+	return redirect('analizar')
 
 #Funcion que muestra detalles de una exploracion
 def detallesExploracion (request, id_exploracion):
@@ -428,12 +439,11 @@ def salir(request):
 	if globales.auto == True:
 		#borra hilo de automático
 		del globales.automatic
-		#reinicia la variable
-		globales.auto = False
 
 	#reinicia todas las variables	
 	globales.inicializar()
 
+	#redirige al index
 	return redirect(reverse('index'))
 
 #Función que muestra los datos de los sensores
@@ -446,14 +456,14 @@ def mostrardatos(request):
 	template = "datos.html"
 	return render(request, template, context)
 
-#Funcion para girar a la derecha
+#Funcion para girar a la derecha en asincrono
 def Derecha():
 	eventloop = asyncio.new_event_loop()
 	asyncio.set_event_loop(eventloop)
 	eventloop.run_until_complete(globales.driver.GirarDerAsync()) 
 	eventloop.close()
 
-#Funcion para girar a la izquierda
+#Funcion para girar a la izquierda en asincrono
 def Izquierda():
 	eventloop = asyncio.new_event_loop()
 	asyncio.set_event_loop(eventloop)
@@ -520,6 +530,8 @@ def BuscarDistanciaMasLarga():
 	#girar a la izquiera y toma medida
 	Izquierda()
 	distancia1 = sensorDistancia.precisionDistancia()
+	print("2:")
+	print(distancia1)
 	driver.Parar()
 	time.sleep(1)
 	#vuelve a posicion original
@@ -531,28 +543,32 @@ def BuscarDistanciaMasLarga():
 	driver.Parar()
 	time.sleep(1)
 	distancia2 = sensorDistancia.precisionDistancia()
+	print("3:")
+	print(distancia2)
 	time.sleep(1)
 
 	#si la distancia de la izq es mayor q la derecha gira dos veces a izq para volver a su posicion
 	if distancia1 > distancia2:
+		globales.distancia=distancia1
 		Izquierda()
 		time.sleep(1)	
 		Izquierda()
 		time.sleep(1)
-		driver.Parar()
+		return
+	else:
+		globales.distancia=distancia2
+		return
 
+#Funcion que controla el modo automatico
 def automatico():
 	#Se crea el sensor de distancia
 	global sensorDistancia
-	
-	print("entro en modo auto")
-	print("He creado el sensor y entro a bucle")
 	#Comienzo de la automatización
 	while True:
-		print("estoy en bucle")
 		#Se obtiene una primera medida de distancia
-		globales.distancia = float(sensorDistancia.precisionDistancia() - 20)	
-		print ("Distancia: %.2f" % globales.distancia)
+		globales.distancia = float(sensorDistancia.precisionDistancia())	
+		print("1:")
+		print(globales.distancia)
 		#Si la distancia es menor de 30 busca la distancia mas larga
 		if globales.distancia < 30.0:
 			BuscarDistanciaMasLarga()
@@ -560,22 +576,24 @@ def automatico():
 		else:
 			globales.driver.Adelante()
 
+#FUncion que llama al control automatico
 @login_required(login_url='/')
 def auto(request):
-
-	sensorDistancia=SensorDistancia(23,24)
-	
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
-
+	#Indica que está el modo automatico activado
+	globales.auto=True	
 	#Creamos un hilo para ejecutar el automatico
 	#así no bloquea a los demas hilos
-	automatic=threading.Thread(target=automatico)
-	automatic.start()
+	globales.automatic=threading.Thread(target=automatico)
+	globales.automatic.start()
+
+	#creamos el contexto
+	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
 	
 	template = "auto.html"
 	return render_to_response(template, context, context_instance=RequestContext(request))
 	
+#Funcion que registra a un usuario en el sitema
 def registro(request):
 		
 	#Si el formulario ha sido enviado
@@ -601,14 +619,6 @@ def registro(request):
 			login='1'
 			return redirect(reverse('gracias', kwargs={'username': username , 'login' : login } ))
 			
-			#Cuando se registra un usuario nuevo se logea automaticamente
-			#acceso=authenticate(username=nuevo_usuario.username,password=form.cleaned_data['password'])
-			#if acceso is not None:	# Usuario válido
-			#	if acceso.is_active:
-			#		login(request,acceso)
-			#		return HttpResponseRedirect('index/')
-			#
-			#return HttpResponseRedirect('/')
 	else:
 		form=UsuarioForm()	#Formulario vacio
 	return render_to_response('registro.html',{'form':form}, context_instance=RequestContext(request))
@@ -635,7 +645,6 @@ def login(request):
 #desloguear usuario
 @login_required(login_url='/')
 def logout(request):
-#	logout(request)
 	auth.logout(request)
 	return HttpResponseRedirect('/')
 
@@ -676,7 +685,8 @@ def eliminar_usuario(request):
 	login='0'
 	return redirect(reverse('gracias', kwargs={'username': username, 'login':login}))
  
-
+#funcion que da las gracias cuando
+#incias, cierras o borras usuario
 def gracias(request, username, login):
 	return render(request, 'gracias.html', {'username': username, 'login': login})
 

@@ -1,5 +1,3 @@
-	
-
 function auto_load(){
 	$.ajax({
 	  url: "manual",
@@ -16,4 +14,4 @@ $(document).ready(function(){
  
 });
 
-setInterval(auto_load,1000);
+setInterval(auto_load,2000);
