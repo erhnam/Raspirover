@@ -69,14 +69,14 @@ class sensorHumedad(Sensor):
 
 #Medidas de luz
 class sensorLuz(Sensor):
-	luz = models.BooleanField(default=False)
+	luz = models.IntegerField(null=True)
 	
 	class Meta:
 		db_table = 'SensorLuz'
 
 #medida de gas
 class sensorGas(Sensor):
-	gas = models.BooleanField(default=False)
+	gas = models.IntegerField(null=True)
 	
 	class Meta:
 		db_table = 'SensorGas'

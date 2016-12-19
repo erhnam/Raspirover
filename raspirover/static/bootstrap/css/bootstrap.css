@@ -65,7 +65,7 @@ template {
   display: none;
 }
 a {
-  background-color: transparent;
+  background-color: transparent; 
 }
 a:active,
 a:hover {

@@ -3,6 +3,15 @@ import time
 import globales
 import Adafruit_DHT
 
+#resetea los pins
+def setup(*pins):
+    GPIO.cleanup()
+    GPIO.setmode(GPIO.BCM)
+    for pin in pins:
+        GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(pin, GPIO.LOW)
+
+
 #Funcion para la temperatura y la humedad 
 #proporcionada por Adafruit
 def comprobarth():
@@ -70,8 +79,8 @@ class SensorDistancia(object):
 		return distancia
 
 	#Funcion que destruye el sensor
-	def __del__(self):
-		print ("Sensor de Distancia destruido")
+#	def __del__(self):
+#		print ("Sensor de Distancia destruido")
 
 #Sensor de Luz
 class SensorLuz(object):
@@ -90,16 +99,16 @@ class SensorLuz(object):
 		if (GPIO.input(self.sensor) == 0):
 			GPIO.output(self.led1,GPIO.LOW)
 			GPIO.output(self.led2,GPIO.LOW)
-			globales.luz = True
+			globales.luz = 1
 		#Detecta que no hay luz y enciende los leds
 		else:
 			GPIO.output(self.led1,GPIO.HIGH)
 			GPIO.output(self.led2,GPIO.HIGH)
-			globales.luz = False
+			globales.luz = 0
 
 	#Funcion que destruye el sensor
-	def __del__(self):
-		print ("Sensor de Luz destruido")
+#	def __del__(self):
+#		print ("Sensor de Luz destruido")
 
 #Sensor de gas MQ2
 class SensorGas(object):
@@ -113,13 +122,14 @@ class SensorGas(object):
 	def comprobarGas(self):
 		#Se detectan gases
 		if GPIO.input(self.pinGas) == 0:
-			globales.gas=True
+			globales.gas=1
+
 		#No se detectan gases
 		else:
-			globales.gas=False
+			globales.gas=0
 
 	#Funcion que destruye el sensor
-	def __del__(self):
-		print ("Sensor de Gas destruido")
+#	def __del__(self):
+#		print ("Sensor de Gas destruido")
 
 

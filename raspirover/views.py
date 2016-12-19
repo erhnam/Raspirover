@@ -44,7 +44,7 @@ globales.driver = DriverDosMotores (motorIzq, motorDer)
 
 
 def index(request):
-
+	setup(14,23,21,20,16,26,27,22,4,5,6,17)
 	return render(request, 'index.html')
 
 #Funcion explorar
@@ -431,6 +431,7 @@ def salir(request):
 
 	#Destruye los timers
 	globales.salir=1
+	GPIO.cleanup()
 
 	#Para la cámara
 	camara_stop()

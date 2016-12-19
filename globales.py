@@ -67,5 +67,5 @@ def inicializar():
 	tiempo=False
 	nombre=False
 	
-	print ("Todo inizializado")
+#	print ("Todo inizializado")
 	

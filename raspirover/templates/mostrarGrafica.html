@@ -1,4 +1,4 @@
-{% extends "detalleExploracion.html" %}
+{% extends "base.html" %}
 
 {% load chartit %}
 {% block title %}Gráfica{% endblock %}
@@ -8,5 +8,8 @@
         <script src="http://code.highcharts.com/highcharts.js"></script>
     
         <div id="grafica">{{ chart|load_charts:"grafica" }}</div>
-{% endblock %}
+	<br>
+	<div><center> <br><button type="button" class="btn btn-warning"><a href =/detallesExploracion/{{explo.id_exploracion}}><font color="#000000">Volver</font></a></button></div>
 
+
+{% endblock %}
