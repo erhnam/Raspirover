@@ -9,9 +9,9 @@
 	        <img class="img-responsive" width="640" height="480" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
         </div>
         <div class="servo" align="center">
-	        <a href="{% url 'explorar' %}"><button type="button" class="btn btn-success">Explorar</button></a>
-	    <label for="id_analizar"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}estadisticas.png"></label>
-            <a href="{% url 'analizar' %}"><button type="button" id=id_analizar class="btn btn-warning">Analizar</button></a>
+	   <a href="{% url 'explorar' %}"><label for="id_analizar"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}explorar.png"></label></a>
+	   <a href="{% url 'analizar' %}"><label for="id_analizar"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}estadisticas.png"></label></a>
+
         </div>
     {% else %}
 		<div class="content" align="center">
@@ -22,3 +22,5 @@
 	{% endif %}
 
 {% endblock content %}
+            <a href="{% url 'analizar' %}"><button type="button" id=id_analizar class="btn btn-primary2">Analizar</button></a>
+

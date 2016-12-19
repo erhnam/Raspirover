@@ -11,6 +11,7 @@
 		<div align="center" >
 
 			{% csrf_token %}
+			{{ form.as_p }}
 			
 			<h3> <center>¿Qué sensores deseas utilizar para la exploración?</h3>
 			
@@ -31,7 +32,7 @@
 
 			<label for="sba"><img class="img-responsive" id="checkbox_f7" src="{{MEDIA_URL}}automaticogris.png" onmouseover="cambiar7()" onmouseout="cambiar7alt()"></label>
 			<input type="submit" class="hide-checkbox" name="automatico" id="sba" value="Iniciar exploración automática" />
-			{{ form.as_p }}
+
 		</div>
 	</form>
 

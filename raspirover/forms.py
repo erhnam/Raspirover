@@ -174,12 +174,10 @@ class ExploracionForm(forms.Form):
 		for field in self.fields:
 			self.fields[field].error_messages = {'required': 'Nombre de la exploración es obligatorio'}
 
-		fields = ['username', 'email', 'telefono']
 		
 		#Se personalizan los mensajes de error
 		error_messages = {
 			'nombre': {
 				'required': ("El nombre de la exploración es obligatorio"),
-				'invalid': ("Nick inválido"),
 			},
 		}
