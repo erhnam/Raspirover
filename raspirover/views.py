@@ -42,9 +42,8 @@ motorDer = Motor (5,6,17,100)
 #Creacion del driver L298N
 globales.driver = DriverDosMotores (motorIzq, motorDer)	
 
-
 def index(request):
-	setup(14,23,21,20,16,26,27,22,4,5,6,17)
+#	setup(14,23,21,20,16,26,27,22,4,5,6,17)
 	return render(request, 'index.html')
 
 #Funcion explorar
