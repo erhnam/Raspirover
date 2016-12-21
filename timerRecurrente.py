@@ -20,17 +20,19 @@ class TimerRecurrente(threading.Timer):
 				self.destroy = 1
 				globales.salir = 0
 			self.finished.wait (self.interval)
+			
 			#Se destruye el timer
 			if self.destroy:
 				return;
+
 			#Sigue ejecutándose
 			if self.running:
 				self.function (*self.args, **self.kwargs)
 
-		#Reiniciar el valor de salir y hace return para cortar el Timer
-		#if globales.salir == 1:
-		#	globales.salir=0
-		#	return;
+			#Reiniciar el valor de salir y hace return para cortar el Timer
+			if globales.salir == 1:
+				globales.salir=0
+				return;
 
 	#Función que inicia el timer
 	def start_timer (self):

@@ -36,15 +36,15 @@ class SensorDistancia(object):
 
 	#funcion que calcula la distancia		
 	def calcularDistancia(self):
+		#Se crean las variables para controlar tiempo
+		inicio = 0
+		fin = 0
 		#Manda señal
 		GPIO.output(self.trigger, True)
 		#Espera respuesta
 		time.sleep(0.00001)
 		#Recoge la señal
 		GPIO.output(self.trigger, False)
-		#Se crean las variables para controlar tiempo
-		inicio = time.time()
-		fin = 0
 
 		#Manda señal de inicio
 		while GPIO.input(self.echo)==0:
@@ -79,8 +79,8 @@ class SensorDistancia(object):
 		return distancia
 
 	#Funcion que destruye el sensor
-#	def __del__(self):
-#		print ("Sensor de Distancia destruido")
+	def __del__(self):
+		print ("Sensor de Distancia destruido")
 
 #Sensor de Luz
 class SensorLuz(object):
@@ -107,8 +107,8 @@ class SensorLuz(object):
 			globales.luz = 0
 
 	#Funcion que destruye el sensor
-#	def __del__(self):
-#		print ("Sensor de Luz destruido")
+	def __del__(self):
+		print ("Sensor de Luz destruido")
 
 #Sensor de gas MQ2
 class SensorGas(object):
@@ -129,7 +129,7 @@ class SensorGas(object):
 			globales.gas=0
 
 	#Funcion que destruye el sensor
-#	def __del__(self):
-#		print ("Sensor de Gas destruido")
+	def __del__(self):
+		print ("Sensor de Gas destruido")
 
 

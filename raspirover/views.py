@@ -1,25 +1,36 @@
-#!/usr/bin/env python3.4
-# -*- encoding: utf-8 -*- 
-from chartit import DataPool, Chart			#para graficas
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
+########################## LIBRERÍAS ###############################
+
+#para graficas Chartit2
+from chartit import DataPool, Chart
+#Para django_extensions
 import django_extensions
+#Renders de Django
 from django.shortcuts import render, redirect, render_to_response
-from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required   #para loguin
-from django.contrib import auth, messages                   #para arreglar error de login() takes exactly 1 argument (2 given)
-from django.contrib.auth import authenticate, login, logout #para logout y login                                                    
-from django.contrib.auth.hashers import make_password       #para password                                                            
-from operator import attrgetter                             #Ordena la lista por un campo del Objeto.
-from django.template.loader import get_template
+from django.http import HttpResponseRedirect
+#Clase User de Django
+from django.contrib.auth.models import User
+#Para obligar a estar logueado en sistema
+from django.contrib.auth.decorators import login_required  
+from django.contrib import auth, messages
+#Para autintificar, el login y el logout
+from django.contrib.auth import authenticate, login, logout
+#para password                                                     
+from django.contrib.auth.hashers import make_password
+#Para crear contextos       
 from django.template import Context, RequestContext
-from multiprocessing import Process 
-from subprocess import call
+#Librería asyncio para operaciones asincronas
 import asyncio
-import time, sys, os
+#Librería time
+import time
+#Librería para controlar GPIO
 import RPi.GPIO as GPIO
+#Librería para usar PiCamera
 import picamera
-import datetime
+#Libreria para hilos
 import threading
 
 #Importaciones de ficheros creados para
@@ -34,7 +45,9 @@ from sensores import *
 from timerRecurrente import *
 import globales 
 
-sensorDistancia=SensorDistancia(23,24)
+########################## CONTROLADOR ###############################
+
+
 #Creacion de los motores por parejas
 motorIzq = Motor (27,22,4,100)
 motorDer = Motor (5,6,17,100)
@@ -42,16 +55,22 @@ motorDer = Motor (5,6,17,100)
 #Creacion del driver L298N
 globales.driver = DriverDosMotores (motorIzq, motorDer)	
 
+########################## INICIO  ###############################
+
+#Función de la página principal del programa
 def index(request):
-#	setup(14,23,21,20,16,26,27,22,4,5,6,17)
+	#Se inicializa los puertos GPIO
+	setup(14,23,21,20,16,26,27,22,4,5,6,17)
 	return render(request, 'index.html')
 
-#Funcion explorar
+#Funcion que ofrece las opciones para iniciar una exploración
 @login_required(login_url='/')
 def explorar(request):
-	
+	#Si es método post
 	if request.method == "POST":
+		#se crea un formulaio
 		form = ExploracionForm(request.POST)
+		#Si el formulario es válido
 		if form.is_valid():
 			#Se extraen los valores del formulario
 			cleaned_data = form.cleaned_data
@@ -72,9 +91,6 @@ def explorar(request):
 			
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
-				#Se crea sensor de Temperatura y humedad (dth22) para manejar con Raspberry
-				#sensordth = SensorTemperatura(14)
-
 				#Se crea una tabla sensor de temperatura asociado a la exploracion
 				if globales.stemperatura == True and tiempo is not None:
 					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True)
@@ -106,7 +122,7 @@ def explorar(request):
 					dbluz = sensorLuz(tipo="Luz", enable=True)
 					dbluz.save()
 					dbexplo.sensores.add(dbluz)
-
+					#Se crea un timer de x segundos definidos por la variable tiempo
 					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
 					timerluz.start_timer()
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
@@ -152,7 +168,8 @@ def explorar(request):
 			if request.method=='POST' and 'automatico' in request.POST:
 				#Sirve para cancelar el modo automatico
 				globales.auto=True
-				return redirect(reverse('auto'))		
+				return redirect(reverse('auto'))
+
 	else:
 		form = ExploracionForm()
 	context = {'form': form}
@@ -161,41 +178,46 @@ def explorar(request):
 #funcion para insertar valor de sensores en base de datos
 def BBDD(id_exploracion):
 
-	#se busca la exploracion actual
+	#Se busca la exploracion actual
 	dbexplo = Exploracion.objects.get(pk=id_exploracion)
 
 	#Si está activado el sensor de temperatura
 	if globales.stemperatura == True:
+		#Se añade un nuevo valor de temperatura a la base de datos
 		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True)
 		dbtemperatura.save()
 		dbexplo.sensores.add(dbtemperatura)
 
 	#Si está activado el sensor de humedad
 	if globales.shumedad == True:
+		#Se añade un nuevo valor de humedad a la base de datos
 		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
 		dbhumedad.save()
 		dbexplo.sensores.add(dbhumedad)
 
 	#Si está activado el sensor de gas
 	if globales.sgas == True:
+		#Se añade un nuevo valor de gas a la base de datos
 		dbgas = sensorGas(gas=globales.gas, tipo="Gas")
 		dbgas.save()
 		dbexplo.sensores.add(dbgas)
 
 	#Si está activado el sensor de luz
 	if globales.sluz == True:
+		#Se añade un nuevo valor de luz a la base de datos
 		dbluz = sensorLuz(luz=globales.luz, tipo="Luz")
 		dbluz.save()
 		dbexplo.sensores.add(dbluz)
 
-#funcion Analizar
+#Funcion que accede a la página Analizar
 @login_required(login_url='/')
 def analizar(request):
 	#extraer todas las exploraciones del usuario
 	explo=Exploracion.objects.filter(usuariofk=request.user)
+
 	return render(request, 'analizar.html', {'explo': explo})
 
-#Elimina una exploración
+#Elimina una exploración elegida por el usuario
 @login_required(login_url='/')
 def eliminarExploracion(request, id_exploracion):
 	#Busca la exploracion
@@ -205,7 +227,7 @@ def eliminarExploracion(request, id_exploracion):
 	#vuelve a la pagina de analisis
 	return redirect('analizar')
 
-#Funcion que muestra detalles de una exploracion
+#Funcion que muestra detalles de una exploracion elegida por usuario
 def detallesExploracion (request, id_exploracion):
 	#variables para la página
 	t = "Temperatura"
@@ -236,13 +258,12 @@ def detallesExploracion (request, id_exploracion):
 	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz}
 	return render(request, 'detalleExploracion.html', context)
 
-#Funcion que muestra detalles de una exploracion
+#Funcion que muestra una gráfica seleccionada
 @login_required(login_url='/')
 def mostrarGrafica (request, id_exploracion, sensor_tipo):
-	#extraer el sensor seleccionado
-	
+	#con sensor_tipo se sabe la gráfica que se ha seleccionado
 	explo = Exploracion.objects.get(pk=id_exploracion)
-
+	#Se ha seleccionado gráfica de temperatura
 	if sensor_tipo == "Temperatura":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Temperatura" 
 		sensor =  sensorTemperatura.objects.filter(exploracion=explo )
@@ -287,7 +308,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 		return render(request, 'mostrarGrafica.html', context)
 
-	#Se ha elegido mostrar humedad
+	#Se ha seleccionado gráfica de humedad
 	if sensor_tipo == "Humedad":
 		titulo = "Grafica de la exploracion " + explo.nombre + " de Humedad" 
 		sensor =  sensorHumedad.objects.filter(exploracion=explo )
@@ -332,7 +353,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 		return render(request, 'mostrarGrafica.html', context)
 
-	#Se ha elegido mostrar gas
+	#Se ha seleccionado gráfica de Gas
 	if sensor_tipo == "Gas":
 		titulo = "Grafica de la exploracion " + explo.nombre + " de Gas" 
 		sensor =  sensorGas.objects.filter(exploracion=explo)
@@ -378,7 +399,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 		return render(request, 'mostrarGrafica.html', context)
 
-	#Se ha elegido mostrar luz
+	#Se ha seleccionado gráfica de Luz
 	if sensor_tipo == "Luz":
 		titulo = "Grafica de la exploracion " + explo.nombre + " de Luz" 
 		sensor =  sensorLuz.objects.filter(exploracion=explo)
@@ -424,13 +445,12 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 		return render(request, 'mostrarGrafica.html', context)
 
-#funcion para salir del modo de control
+#Funcion para salir del modo de control
 @login_required(login_url='/')
 def salir(request):
 
 	#Destruye los timers
 	globales.salir=1
-	GPIO.cleanup()
 
 	#Para la cámara
 	camara_stop()
@@ -446,7 +466,7 @@ def salir(request):
 	#redirige al index
 	return redirect(reverse('index'))
 
-#Función que muestra los datos de los sensores
+#Función que muestra los datos de los sensores en pantalla modo de control
 #En la pantalla de control del sistema
 @login_required(login_url='/')
 def mostrardatos(request):
@@ -470,11 +490,10 @@ def Izquierda():
 	eventloop.run_until_complete(globales.driver.GirarIzqAsync()) 
 	eventloop.close()
 
-#funcion Manual
+#Función de control manual del sistema
 @login_required(login_url='/')
 def manual(request):
 
-	#Control manual del robot
 	#Se recoge la peticion de movimiento
 	if 'cmd' in request.GET and request.GET['cmd']:
 		control = request.GET['cmd']
@@ -521,37 +540,41 @@ def manual(request):
 
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
-def BuscarDistanciaMasLarga():
+def BuscarDistanciaMasLarga(sensorDistancia):
 	driver=globales.driver
-	global sensorDistancia
 	
+	#Se para el robot 1 segundo
 	driver.Parar()
 	time.sleep(1)
-	#girar a la izquiera y toma medida
+	#Funcion asincrona de girar a la izquierda
 	Izquierda()
+	#Realiza una medida
 	distancia1 = sensorDistancia.precisionDistancia()
-	print("2:")
-	print(distancia1)
+	#Se para el robot 1 segundo
 	driver.Parar()
 	time.sleep(1)
 	#vuelve a posicion original
 	Derecha()
+	#Se para el robot 1 segundo
 	driver.Parar()
 	time.sleep(1)
-	#gira a la derecha y toma medida
-	Derecha()
+	#Funcion asincrona de girar a la derecha
+	Derecha() 
+	#Se para el robot 1 segundo
 	driver.Parar()
 	time.sleep(1)
+	#Realiza otra medida
 	distancia2 = sensorDistancia.precisionDistancia()
-	print("3:")
-	print(distancia2)
-	time.sleep(1)
-
-	#si la distancia de la izq es mayor q la derecha gira dos veces a izq para volver a su posicion
+	
+	#si la distancia de la izquierda es mayor q la derecha,
+	#gira dos veces a izq para volver a su posicion
 	if distancia1 > distancia2:
+		#Actualiza el valor
 		globales.distancia=distancia1
+		#Funcion asincrona de girar a la izquierda
 		Izquierda()
-		time.sleep(1)	
+		time.sleep(1)
+		#Funcion asincrona de girar a la izquierda
 		Izquierda()
 		time.sleep(1)
 		return
@@ -561,20 +584,30 @@ def BuscarDistanciaMasLarga():
 
 #Funcion que controla el modo automatico
 def automatico():
+	salir=0	#Variable para salir del bucle while
 	#Se crea el sensor de distancia
-	global sensorDistancia
+	sensorDistancia=SensorDistancia(23,24)
+	
 	#Comienzo de la automatización
-	while True:
-		#Se obtiene una primera medida de distancia
-		globales.distancia = float(sensorDistancia.precisionDistancia())	
-		print("1:")
-		print(globales.distancia)
-		#Si la distancia es menor de 30 busca la distancia mas larga
-		if globales.distancia < 30.0:
-			BuscarDistanciaMasLarga()
-		#Si es mayor de 30 prosigue su camino
-		else:
-			globales.driver.Adelante()
+	
+	#Se toma una primera medida
+	globales.distancia = float(sensorDistancia.precisionDistancia())
+
+	while salir == 0:
+			#Se obtiene una primera medida de distancia
+			globales.distancia = float(sensorDistancia.precisionDistancia())
+			#Si la distancia es menor de 30 busca la distancia mas larga
+			if globales.distancia < 30.0:
+				BuscarDistanciaMasLarga(sensorDistancia)
+			#Si es mayor de 30 prosigue su camino
+			else:
+				globales.driver.Adelante()
+			#Comprueba la salida
+			if globales.salir == 1:
+				salir = 1
+
+	#Corta el hilo			
+	return
 
 #FUncion que llama al control automatico
 @login_required(login_url='/')
@@ -620,19 +653,25 @@ def registro(request):
 			return redirect(reverse('gracias', kwargs={'username': username , 'login' : login } ))
 			
 	else:
-		form=UsuarioForm()	#Formulario vacio
+		#Formulario vacio
+		form=UsuarioForm()	
+	
 	return render_to_response('registro.html',{'form':form}, context_instance=RequestContext(request))
 
 
-# para loguear al usuario
+#Función para loguear al usuario
 def login(request):
+	#Comprueba autentificación del usuario
 	if request.user.is_authenticated():
 		return redirect(reverse('index'))
 	mensaje = ''
 	if request.method == 'POST':
+		#Recoge los datos metidos por usuario
 		username = request.POST.get('username')
 		password = request.POST.get('password')
+		#Comprueba los datos
 		user = authenticate(username=username, password=password)
+		#Si el usuario está logueado pasa a estar activo
 		if user is not None:
 			if user.is_active:
 				auth.login(request, user)
@@ -642,19 +681,23 @@ def login(request):
 		mensaje = 'Nombre de usuario o contraseña no valido'
 	return render(request, 'login.html', {'mensaje': mensaje})
  
-#desloguear usuario
+#Función para desloguear usuario
 @login_required(login_url='/')
 def logout(request):
 	auth.logout(request)
 	return HttpResponseRedirect('/')
 
-#editar contraseña
+#Función para editar contraseña
 @login_required(login_url='/')
 def editar_contrasena(request):
+	#Se obtiene el usuario
 	usuario=request.user    
 	if request.method == 'POST':
+		#Llama al formulario
 		form = EditarContrasenaForm(request.POST)
+		#Comprueba formulario
 		if form.is_valid():
+			#Realiza los cambios
 			request.user.password = make_password(form.cleaned_data['password'])
 			request.user.save()
 			messages.success(request, 'La contraseña ha sido cambiado con exito!.')
@@ -668,8 +711,11 @@ def editar_contrasena(request):
 @login_required(login_url='/')
 def editar_foto(request):
 	if request.method == 'POST':
+		#Crea formulario
 		form = EditarFotoForm(request.POST, request.FILES)
+		#Comprueba formulario
 		if form.is_valid():
+			#Realiza cambios
 			request.user.photo = form.cleaned_data['imagen']
 			request.user.save()
 			return render(request, 'editar_foto.html', {'form': form, 'usuario': request.user})
@@ -677,20 +723,21 @@ def editar_foto(request):
 		form = EditarFotoForm()
 	return render(request, 'editar_foto.html', {'form': form, 'usuario': request.user}) 
  
-#dar de baja a un usuario
+#Función para  dar de baja a un usuario
 @login_required(login_url='/')
 def eliminar_usuario(request):
+	#Se busca usuario
 	usuario=request.user
+	#Se borra usuario de la base de datos
 	usuario.delete()
 	login='0'
 	return redirect(reverse('gracias', kwargs={'username': username, 'login':login}))
  
-#funcion que da las gracias cuando
-#incias, cierras o borras usuario
+#Función para dar las gracias cuando incías, cierras o borras usuario
 def gracias(request, username, login):
 	return render(request, 'gracias.html', {'username': username, 'login': login})
 
-#sobre mi
+#Función para sobre mi
 def sobre_mi(request):
 	return render(request, 'sobre_mi.html')
 

@@ -11,11 +11,7 @@ from raspirover.models import Usuario
 
 from .models import *
 
-#admin.site.register(UserProfile)
 admin.site.register(Sensores)
-
-
-#admin.site.register(temperatura, temperaturaAdmin)
 
 class exploracionAdmin(admin.ModelAdmin):
     list_display = ( 'id_exploracion', 'nombre', 'usuariofk', 'fecha', 'descripcion', 'tiempo')
@@ -48,7 +44,6 @@ class sensorGasAdmin(admin.ModelAdmin):
     list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
 
 admin.site.register(sensorGas, sensorGasAdmin)
-
 
 admin.site.register(Usuario)
 
