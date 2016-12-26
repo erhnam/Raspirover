@@ -5,10 +5,9 @@
 
 {% block content %}
 
-	<form name="formulario"  method="POST">
 
-		
-		<div align="center" >
+	<div align="center" >
+		<form name="formulario"  method="POST">
 
 			{% csrf_token %}
 			{{ form.as_p }}
@@ -33,8 +32,10 @@
 			<label for="sba"><img class="img-responsive" id="checkbox_f7" src="{{MEDIA_URL}}automaticogris.png" onmouseover="cambiar7()" onmouseout="cambiar7alt()"></label>
 			<input type="submit" class="hide-checkbox" name="automatico" id="sba" value="Iniciar exploración automática" />
 
-		</div>
-	</form>
+		</form>
+	<div><a href="{% url 'index' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
+	</div>
 
 {% endblock %}
+
 

@@ -9,7 +9,9 @@
     
         <div id="grafica">{{ chart|load_charts:"grafica" }}</div>
 	<br>
-	<div><center> <br><button type="button" class="btn btn-warning"><a href =/detallesExploracion/{{explo.id_exploracion}}><font color="#000000">Volver</font></a></button></div>
+
+<div align="center"><a href =/detallesExploracion/{{explo.id_exploracion}}><label for="id_analizar"><img class="img-responsive" src="{{MEDIA_URL}}volver.png"></label></a></div>
 
 
 {% endblock %}
+

@@ -7,10 +7,10 @@ import Adafruit_DHT
 def setup(*pins):
     GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
     for pin in pins:
         GPIO.setup(pin, GPIO.OUT)
         GPIO.output(pin, GPIO.LOW)
-
 
 #Funcion para la temperatura y la humedad 
 #proporcionada por Adafruit
@@ -79,8 +79,8 @@ class SensorDistancia(object):
 		return distancia
 
 	#Funcion que destruye el sensor
-	def __del__(self):
-		print ("Sensor de Distancia destruido")
+#	def __del__(self):
+#		print ("Sensor de Distancia destruido")
 
 #Sensor de Luz
 class SensorLuz(object):
@@ -107,8 +107,8 @@ class SensorLuz(object):
 			globales.luz = 0
 
 	#Funcion que destruye el sensor
-	def __del__(self):
-		print ("Sensor de Luz destruido")
+#	def __del__(self):
+#		print ("Sensor de Luz destruido")
 
 #Sensor de gas MQ2
 class SensorGas(object):
@@ -129,7 +129,7 @@ class SensorGas(object):
 			globales.gas=0
 
 	#Funcion que destruye el sensor
-	def __del__(self):
-		print ("Sensor de Gas destruido")
+#	def __del__(self):
+#		print ("Sensor de Gas destruido")
 
 

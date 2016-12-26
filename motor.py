@@ -36,4 +36,3 @@ class Motor(object):
 		GPIO.output(self.motorGpioPinA, GPIO.LOW)
 		GPIO.output(self.motorGpioPinB, GPIO.LOW)
 		self.pwm.ChangeDutyCycle(0)
-		

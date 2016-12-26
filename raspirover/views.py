@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
@@ -47,7 +48,6 @@ import globales
 
 ########################## CONTROLADOR ###############################
 
-
 #Creacion de los motores por parejas
 motorIzq = Motor (27,22,4,100)
 motorDer = Motor (5,6,17,100)
@@ -59,8 +59,13 @@ globales.driver = DriverDosMotores (motorIzq, motorDer)
 
 #Función de la página principal del programa
 def index(request):
+	#reinicia todas las variables	
+	inicializar()
+	
 	#Se inicializa los puertos GPIO
-	setup(14,23,21,20,16,26,27,22,4,5,6,17)
+	print("index:")
+	print(globales.salir)
+	setup(14,23,21,20,16,26)
 	return render(request, 'index.html')
 
 #Funcion que ofrece las opciones para iniciar una exploración
@@ -310,7 +315,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 	#Se ha seleccionado gráfica de humedad
 	if sensor_tipo == "Humedad":
-		titulo = "Grafica de la exploracion " + explo.nombre + " de Humedad" 
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Humedad" 
 		sensor =  sensorHumedad.objects.filter(exploracion=explo )
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
@@ -355,7 +360,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 	#Se ha seleccionado gráfica de Gas
 	if sensor_tipo == "Gas":
-		titulo = "Grafica de la exploracion " + explo.nombre + " de Gas" 
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Gas" 
 		sensor =  sensorGas.objects.filter(exploracion=explo)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
@@ -401,7 +406,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 	#Se ha seleccionado gráfica de Luz
 	if sensor_tipo == "Luz":
-		titulo = "Grafica de la exploracion " + explo.nombre + " de Luz" 
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Luz" 
 		sensor =  sensorLuz.objects.filter(exploracion=explo)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
@@ -451,7 +456,7 @@ def salir(request):
 
 	#Destruye los timers
 	globales.salir=1
-
+	
 	#Para la cámara
 	camara_stop()
 
@@ -460,11 +465,8 @@ def salir(request):
 		#borra hilo de automático
 		del globales.automatic
 
-	#reinicia todas las variables	
-	globales.inicializar()
-
 	#redirige al index
-	return redirect(reverse('index'))
+	return redirect('index')
 
 #Función que muestra los datos de los sensores en pantalla modo de control
 #En la pantalla de control del sistema
@@ -728,6 +730,7 @@ def editar_foto(request):
 def eliminar_usuario(request):
 	#Se busca usuario
 	usuario=request.user
+	username = usuario.username
 	#Se borra usuario de la base de datos
 	usuario.delete()
 	login='0'

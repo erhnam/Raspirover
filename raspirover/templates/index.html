@@ -6,7 +6,7 @@
 
     {% if user.is_authenticated %}
         <div class="content" align="center">
-	        <img class="img-responsive" width="640" height="480" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
+	        <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
         </div>
         <div class="servo" align="center">
 	   <a href="{% url 'explorar' %}"><label for="id_analizar"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}explorar.png"></label></a>
@@ -15,12 +15,16 @@
         </div>
     {% else %}
 		<div class="content" align="center">
-		    <h2>No estás registrado</h2>
-		    <h2>Inicia sesión </h2>
+			<div class="content" align="center">
+	       		  <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
+        	</div>
+		    <h3><font color="#1a66a4">Regístrate</font></h3>
+		    <h3><font color="#1a66a4">o</font></h3>
+		    <h3><font color="#1a66a4">Inicia Sesión</font></h3>
 	    </div>
 
 	{% endif %}
 
 {% endblock content %}
-            <a href="{% url 'analizar' %}"><button type="button" id=id_analizar class="btn btn-primary2">Analizar</button></a>
+
 

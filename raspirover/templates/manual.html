@@ -8,7 +8,7 @@
 {% block centro %}
 	
     <div id="content" align="center">
-	    <img class="img-responsive" width="640" height="480" src="http://192.168.1.99:8080/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.jpg">			
+	    <img class="img-responsive" width="320" height="240" src="http://192.168.1.99:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.jpg">			
     </div>  
  
         <div class="servo" align="center">
@@ -63,9 +63,10 @@
         </div>
 
 	
-			<a href="{% url 'salir' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>	
+			<br><a href="{% url 'salir' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>	
 
 {% endblock centro %}
+
 
 
 

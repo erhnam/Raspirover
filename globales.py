@@ -38,7 +38,6 @@ def inicializar():
 	dbhumedad=''
 	dbgas=''
 	dbluz=''
-	driver=0
 	sensordth=0
 	sensorgas=0
 	sensorluz=0
@@ -62,3 +61,4 @@ def inicializar():
 	camara=False
 	tiempo=False
 	nombre=False	
+	salir=0

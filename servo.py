@@ -37,4 +37,3 @@ def servo_c():
 #Para el servo
 def servo_s():
         os.system('echo P1-12=+0 > /dev/servoblaster')
-
