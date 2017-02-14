@@ -19,4 +19,6 @@
 1. Python 3.41
 2. Django Framework 1.8
 3. Nginx Server   
-
+4. MJPEG-Streamer
+5. ServoBlaster
+6. Adafruit DHT22
