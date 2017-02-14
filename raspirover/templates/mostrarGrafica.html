@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% load chartit %}
+
 {% block title %}Gráfica{% endblock %}
 
 {% block content %}
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-        <script src="http://code.highcharts.com/highcharts.js"></script>
+
+        <script src="{% static 'js/highcharts.js' %}"></script>
+        <script src="{% static 'jquery/jquery.min.js' %}"></script>
     
         <div id="grafica">{{ chart|load_charts:"grafica" }}</div>
 	<br>

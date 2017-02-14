@@ -6,17 +6,18 @@
 
     {% if user.is_authenticated %}
         <div class="content" align="center">
-	        <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
+	        <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.png">
         </div>
-        <div class="servo" align="center">
+        <div class="content" align="center">
 	   <a href="{% url 'explorar' %}"><label for="id_analizar"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}explorar.png"></label></a>
 	   <a href="{% url 'analizar' %}"><label for="id_analizar"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}estadisticas.png"></label></a>
+           <br><a href="{% url 'apagar' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>
 
-        </div>
+	</div>
     {% else %}
 		<div class="content" align="center">
 			<div class="content" align="center">
-	       		  <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
+	       		<img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.jpg">
         	</div>
 		    <h3><font color="#1a66a4">Regístrate</font></h3>
 		    <h3><font color="#1a66a4">o</font></h3>

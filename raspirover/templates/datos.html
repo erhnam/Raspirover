@@ -1,3 +1,6 @@
+{% load static %}
+
+	
 <div id="auto">
 	{% if stemp == True %}
 	<label for="id_temperatura"><img id="checkbox_f1b" src="{{MEDIA_URL}}temperatura.png" onclick="cambiar1()"> {{ temperatura }}º</label>
@@ -18,9 +21,13 @@
 	{% if camara == True %}
 	<label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" onclick="cambiar5()"></label>
 	{% endif %}
+
+	{% if spir == True %}
+	<label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" onclick="cambiar5()">Videos Grabados:{{numVideos}}</label>
+	{% endif %}
 </div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="{% static 'jquery/jquery.min1.js' %}"></script>
 
 <script type="text/javascript">
 
@@ -28,6 +35,6 @@
         $('#auto').load('{% url 'mostrardatos' %} #auto');
     }
 
-    setInterval( "actualizar()", 5000 );
+    setInterval( "actualizar()", 2000 );
 
 </script>

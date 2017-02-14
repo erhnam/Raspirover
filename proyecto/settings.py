@@ -23,9 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'cv5+it_13@#(3*9p-p#3zbb7hff(3(iy7l74@_&673-a#8jd8v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+#DEBUG = True
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com']
 
 
 # Application definition
@@ -76,14 +77,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'proyecto.wsgi.application'
 
 
+MEDIA_BUNDLES = (
+    ('main.js',
+        'jquery.js',
+        'canvas_main.py',
+    ),
+)
+
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'NAME': '/home/pi/proyecto/db/db.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#        'NAME': '/home/pi/proyecto/db/db.sqlite3',
+#        'NAME': '/dev/shm/db.sqlite3',
+#        'NAME': '/run/shm/db.sqlite3',
+#        'TEST_CHARSET': 'UTF8',
+#        'TEST_NAME': None  # in-memory sqlite db
     }
 }
 
@@ -119,7 +131,6 @@ ADMIN_MEDIA_PREFIX = '/static/'
 #AUTH_PROFILE_MODULE = 'raspirover.Usuario'
 AUTH_USER_MODEL = 'raspirover.Usuario'
 
- 
 LOGIN_URL = '/'
  
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

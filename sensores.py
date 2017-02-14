@@ -23,6 +23,28 @@ def comprobarth():
 	globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0	
 	globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0	
 
+
+#Sensor ultrasónico HC-SR04
+class SensorMovimiento(object):
+	#Constructor recibe el pin trigger y echo del sensor
+	def __init__(self, pirPin):
+		GPIO.setwarnings(False)
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(pirPin,GPIO.IN)
+		self.detectar = pirPin
+
+	#Detectar movimiento
+	def detectarMovimiento(self):
+		if GPIO.input(self.detectar) == 0: # No hay movimiento
+			globales.detectar = False
+			time.sleep(1)
+#			print("No se detecta movimiento")
+		else: # Hay movimiento
+			globales.detectar = True
+			time.sleep(1)
+#			print("Se detecta movimiento")
+
+
 #Sensor ultrasónico HC-SR04
 class SensorDistancia(object):
 	#Constructor recibe el pin trigger y echo del sensor

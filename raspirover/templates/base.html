@@ -42,10 +42,11 @@
 			<span class="icon-bar"></span>
 		  </button>
 		  <a class="navbar-brand" href="{% url 'index' %}"><img class="img-responsive" weight="30px" height="30px" src="{{MEDIA_URL}}rr.png"></a>
+		  <a class="navbar-brand" href="#"><img class="img-responsive" src="{{MEDIA_URL}}battery.png" align="left" ><font size=2 color="white">{{voltaje}}%</font></a>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
 		  <ul class="nav navbar-nav">
-			<li><a href="{% url 'sobre_mi' %}">Sobre Raspirover</a></li>
+			<li><a href="{% url 'sobre_mi' %}">Información</a></li>
 		  </ul>
 			<ul class="nav navbar-nav navbar-right">
 			  {% if user.is_authenticated %}
@@ -94,12 +95,12 @@
 		</div>
 
 
-	 <footer>
+<!--	 <footer>
 		<div class=" navbar-fixed-bottom" style="color:black; text-align:center;">
-				Copyright © Francisco Arcos, 2016
+				Copyright © Francisco Arcos, 2017
 		</div>
 	</footer>
-
+-->
     <script src="{% static 'js/custom.js' %}"></script>
     <script src="{% static 'jquery/jquery.js' %}"></script>
     <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>

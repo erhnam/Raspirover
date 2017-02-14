@@ -1,13 +1,48 @@
 function fwd() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=fwd", true);
-	xhttp.send();
+
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+	if (isiDevice == false){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=fwd", true);
+		xhttp.send();
+	}
 }
 
+function fwdi() {
+
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+	if (isiDevice == true){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=fwd", true);
+		xhttp.send();
+	}
+
+}
+
+
 function left() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=left", true);
-	xhttp.send();
+
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+	if (isiDevice == false){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=left", true);
+		xhttp.send();
+	}
+}
+
+function lefti() {
+
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+        if (isiDevice == true){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=left", true);
+		xhttp.send();
+	}
+
 }
 
 function stop() {
@@ -17,16 +52,49 @@ function stop() {
 }
 
 function right() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=right", true);
-	xhttp.send();
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+	if (isiDevice == false){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=right", true);
+		xhttp.send();
+	}
 }
 
-function bwd() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=bwd", true);
-	xhttp.send();
+function righti() {
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+        if (isiDevice == true){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=right", true);
+		xhttp.send();
+	}
+
 }
+
+
+function bwd() {
+	
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+	if (isiDevice != true){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=bwd", true);
+		xhttp.send();
+	}
+}
+
+function bwdi() {
+	
+	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+
+        if (isiDevice == true){
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("GET", "?cmd=bwd", true);
+		xhttp.send();
+	}
+}
+
 
 function camleft() {
 	var xhttp = new XMLHttpRequest();
@@ -37,6 +105,18 @@ function camleft() {
 function camcenter() {
 	var xhttp = new XMLHttpRequest();
 	xhttp.open("GET", "?cmd=camcenter", true);
+	xhttp.send();
+}
+
+function camup() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", "?cmd=camup", true);
+	xhttp.send();
+}
+
+function camdown() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", "?cmd=camdown", true);
 	xhttp.send();
 }
 
@@ -87,6 +167,11 @@ image7 = new Image();
 image7.src = "/media/automaticogris.png";
 image7alt = new Image();
 image7alt.src = "/media/automatico.png";
+
+image8 = new Image();
+image8.src = "/media/vigilanciagris.png";
+image8alt = new Image();
+image8alt.src = "/media/vigilancia.png";
 
 function cambiar1() {
 	if (document.getElementById('checkbox_f1').src != image1.src ) {
@@ -154,12 +239,23 @@ function cambiar5() {
 function cambiar6() {
  		document.getElementById('checkbox_f6').src = image6alt.src;
 }
+
 function cambiar6alt() {
  		document.getElementById('checkbox_f6').src = image6.src;
 }
+
 function cambiar7() {
  		document.getElementById('checkbox_f7').src = image7alt.src;
 }
+
 function cambiar7alt() {
  		document.getElementById('checkbox_f7').src = image7.src;
+}
+
+function cambiar8() {
+ 		document.getElementById('checkbox_f8').src = image8alt.src;
+}
+
+function cambiar8alt() {
+ 		document.getElementById('checkbox_f8').src = image8.src;
 }

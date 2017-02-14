@@ -26,13 +26,13 @@ class DriverDosMotores(object):
 
 	#Giro a la derecha
 	def Derecha(self):
-		self.motorIzq.Atras()
+#		self.motorIzq.Atras()
 		self.motorDer.Adelante()
 
 	#Giro a la izquierda	
 	def Izquierda(self):
 		self.motorIzq.Adelante()
-		self.motorDer.Atras()
+#		self.motorDer.Atras()
 	
 	#Giro a la derecha asincrono	
 	@asyncio.coroutine

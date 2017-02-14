@@ -52,6 +52,12 @@ class Exploracion(models.Model):
 		#La solucion es añadir este constraint para que no haya dos parejas iguales
 		unique_together = (("usuariofk", "id_exploracion"),)	
 	
+#Sensor de Camara
+class sensorCamara(Sensor):
+	video = models.CharField(max_length=250, blank=False, null=True)
+	
+	class Meta:
+		db_table = 'SensorCamara'	
 
 #Sensor de temperatura	
 class sensorTemperatura(Sensor):

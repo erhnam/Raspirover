@@ -1,9 +1,8 @@
-
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
 ########################## LIBRERÍAS ###############################
-
+from django.db import transaction
 #para graficas Chartit2
 from chartit import DataPool, Chart
 #Para django_extensions
@@ -33,6 +32,8 @@ import RPi.GPIO as GPIO
 import picamera
 #Libreria para hilos
 import threading
+#Libreria telegram
+from telegrambot import *
 
 #Importaciones de ficheros creados para
 #sensores, camara, motores y globales.
@@ -44,29 +45,46 @@ from camara import *
 from dosMotores import *
 from sensores import *
 from timerRecurrente import *
-import globales 
+from globales import * 
+from voltaje import *
 
 ########################## CONTROLADOR ###############################
 
 #Creacion de los motores por parejas
-motorIzq = Motor (27,22,4,100)
-motorDer = Motor (5,6,17,100)
+motorIzq = Motor (27,22)
+motorDer = Motor (5,6)
 
 #Creacion del driver L298N
 globales.driver = DriverDosMotores (motorIzq, motorDer)	
 
+#Calculo del voltaje
+#Canal mpc, Resitencia1, Resistencia2
+valorVoltaje = CalcularVoltaje(1, 98500.0, 9500.0)
+voltaje = TimerRecurrente(30, valorVoltaje.calcularVoltaje())
+voltaje.start_timer()
+
 ########################## INICIO  ###############################
+
+#funcion para apagar el sistema
+def apagar(request):
+	os.system("sudo shutdown -h now")	
 
 #Función de la página principal del programa
 def index(request):
-	#reinicia todas las variables	
-	inicializar()
-	
+	#reinicia todas las variables
+	globales.salir=1
+	globales.auto=False
+	globales.manu=False
+	salir(request)
+	globales.inicializar()
+	globales.salir=0
+	servo_c()
+
 	#Se inicializa los puertos GPIO
-	print("index:")
-	print(globales.salir)
-	setup(14,23,21,20,16,26)
-	return render(request, 'index.html')
+	setup(14,21,20,16,26,22,27,5,6)
+	#devuelve los valores a la pagina
+	context = {'voltaje': globales.porcentaje}
+	return render(request, 'index.html', context)
 
 #Funcion que ofrece las opciones para iniciar una exploración
 @login_required(login_url='/')
@@ -84,37 +102,46 @@ def explorar(request):
 			globales.sgas =  cleaned_data.get('gas')
 			globales.sluz =  cleaned_data.get('luz')
 			globales.camara = cleaned_data.get('camara')
-			tiempo = cleaned_data.get('tiempo')
+			globales.tiempo = cleaned_data.get('tiempo')
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
 			#Se crea una exploracion con parte de los valores del formulario
 			#Si tiempo no está vacío se crea una exploracion	
-			if tiempo is not None:
-				dbexplo=Exploracion(nombre=nombre, tiempo=tiempo, usuariofk=request.user, descripcion=descripcion)
-				dbexplo.save()
-			
+			if globales.tiempo is not None:
+				globales.dbexplo=Exploracion(nombre=nombre, tiempo=globales.tiempo, usuariofk=request.user, descripcion=descripcion)
+				globales.dbexplo.save()
+				#Si la camara está activada
+				if globales.camara == True:
+					dbcamara = sensorCamara(video=nombre+str(globales.dbexplo.id_exploracion)+".mp4", tipo="Camara", enable=True)
+					dbcamara.save()
+					globales.dbexplo.sensores.add(dbcamara)
+					globales.dbexplo.save()
+					camara_start()
+
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
 				#Se crea una tabla sensor de temperatura asociado a la exploracion
-				if globales.stemperatura == True and tiempo is not None:
+				if globales.stemperatura == True and globales.tiempo is not None:
 					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True)
 					dbtemperatura.save()
-					dbexplo.sensores.add(dbtemperatura)
+					globales.dbexplo.sensores.add(dbtemperatura)
+					globales.dbexplo.save()
 
 				#Se crea una tabla sensor de humedad asociada a la exploracion	
-				if globales.shumedad == True and tiempo is not None:
+				if globales.shumedad == True and globales.tiempo is not None:
 					dbhumedad = sensorHumedad(tipo="Humedad", enable=True)
 					dbhumedad.save()
-					dbexplo.sensores.add(dbhumedad)
+					globales.dbexplo.sensores.add(dbhumedad)
+					globales.dbexplo.save()
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
-				if tiempo is None:	
+				if globales.tiempo is None:	
 					timerdth = TimerRecurrente(5.0, comprobarth)
 					timerdth.start_timer()
 				#Si el tiempo no es null se crea un timer de x segundos definidos por la variable tiempo
 				else:
-					timerdth = TimerRecurrente(float(tiempo)-0.2, comprobarth)
+					timerdth = TimerRecurrente(float(globales.tiempo), comprobarth)
 					timerdth.start_timer()
 			
 			#Se ha elegido en el formulario el sensor de luz		
@@ -122,13 +149,14 @@ def explorar(request):
 				#Se crea sensor de Luz para manejar con Raspberry
 				sensorluz = SensorLuz(21,20,16)
 				#Se crea un timer de x segundos definidos por la variable tiempo
-				if tiempo is not None:	
+				if globales.tiempo is not None:	
 					#Se crea una tabla sensor de luz asociada a la exploracion	
 					dbluz = sensorLuz(tipo="Luz", enable=True)
 					dbluz.save()
-					dbexplo.sensores.add(dbluz)
+					globales.dbexplo.sensores.add(dbluz)
+					globales.dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
-					timerluz = TimerRecurrente(float(tiempo)-0.2, sensorluz.comprobarLuz)
+					timerluz = TimerRecurrente(float(globales.tiempo),  sensorluz.comprobarLuz)
 					timerluz.start_timer()
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
@@ -141,13 +169,14 @@ def explorar(request):
 				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
 				sensorgas = SensorGas(26)
 				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
-				if tiempo is not None:
+				if globales.tiempo is not None:
 					#Se crea una tabla sensor de gas asociada a la exploracion	
 					dbgas = sensorGas(tipo="Gas", enable=True)
 					dbgas.save()
-					dbexplo.sensores.add(dbgas)
-					#Se crea un timer de x segundos definidos por la variable tiempo
-					timergas = TimerRecurrente(float(tiempo)-0.2, sensorgas.comprobarGas)
+					globales.dbexplo.sensores.add(dbgas)
+					globales.dbexplo.save()
+				#Se crea un timer de x segundos definidos por la variable tiempo
+					timergas = TimerRecurrente(float(globales.tiempo), sensorgas.comprobarGas)
 					timergas.start_timer()
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
@@ -161,8 +190,8 @@ def explorar(request):
 			
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
-			if tiempo is not None:
-				trigger = TimerRecurrente(float(tiempo) , BBDD, args=[dbexplo.id_exploracion])
+			if globales.tiempo is not None:
+				trigger = TimerRecurrente(float(globales.tiempo) , BBDD, args=[globales.dbexplo.id_exploracion])
 				trigger.start_timer()
 
 			#Si se ha elegido manual
@@ -171,62 +200,75 @@ def explorar(request):
 
 			#si se ha elegido automatico
 			if request.method=='POST' and 'automatico' in request.POST:
-				#Sirve para cancelar el modo automatico
-				globales.auto=True
 				return redirect(reverse('auto'))
+
+			#si se ha elegido vigilancia
+			if request.method=='POST' and 'vigilancia' in request.POST:
+				return redirect(reverse('vigilancia'))
 
 	else:
 		form = ExploracionForm()
-	context = {'form': form}
+	context = {'form': form, 'voltaje': globales.porcentaje}
 	return render(request, 'explorar.html', context)
 
-#funcion para insertar valor de sensores en base de datos
+#Funcion que guarda valores de sensores en la base de datos
+@transaction.atomic
 def BBDD(id_exploracion):
 
 	#Se busca la exploracion actual
-	dbexplo = Exploracion.objects.get(pk=id_exploracion)
+	globales.dbexplo = Exploracion.objects.get(pk=id_exploracion)
 
 	#Si está activado el sensor de temperatura
 	if globales.stemperatura == True:
 		#Se añade un nuevo valor de temperatura a la base de datos
 		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True)
 		dbtemperatura.save()
-		dbexplo.sensores.add(dbtemperatura)
+		globales.dbexplo.sensores.add(dbtemperatura)
+		globales.dbexplo.save()
 
 	#Si está activado el sensor de humedad
 	if globales.shumedad == True:
 		#Se añade un nuevo valor de humedad a la base de datos
 		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
 		dbhumedad.save()
-		dbexplo.sensores.add(dbhumedad)
+		globales.dbexplo.sensores.add(dbhumedad)
+		globales.dbexplo.save()
 
 	#Si está activado el sensor de gas
 	if globales.sgas == True:
 		#Se añade un nuevo valor de gas a la base de datos
 		dbgas = sensorGas(gas=globales.gas, tipo="Gas")
 		dbgas.save()
-		dbexplo.sensores.add(dbgas)
+		globales.dbexplo.sensores.add(dbgas)
+		globales.dbexplo.save()
 
 	#Si está activado el sensor de luz
 	if globales.sluz == True:
 		#Se añade un nuevo valor de luz a la base de datos
 		dbluz = sensorLuz(luz=globales.luz, tipo="Luz")
 		dbluz.save()
-		dbexplo.sensores.add(dbluz)
+		globales.dbexplo.sensores.add(dbluz)
+		globales.dbexplo.save()
+
 
 #Funcion que accede a la página Analizar
 @login_required(login_url='/')
 def analizar(request):
+	globales.salir=1
+	salir(request)
+	globales.inicializar()
 	#extraer todas las exploraciones del usuario
 	explo=Exploracion.objects.filter(usuariofk=request.user)
 
-	return render(request, 'analizar.html', {'explo': explo})
+	return render(request, 'analizar.html', {'explo': explo, 'voltaje': globales.porcentaje})
 
 #Elimina una exploración elegida por el usuario
 @login_required(login_url='/')
 def eliminarExploracion(request, id_exploracion):
 	#Busca la exploracion
 	explo = Exploracion.objects.get(pk=id_exploracion)
+	#elimina el video
+	os.system("sudo rm -rf /home/pi/proyecto/media/videos/"+explo.nombre+str(explo.id_exploracion)+".mp4")
 	#elimina la exploracion de la base de datos
 	explo.delete()
 	#vuelve a la pagina de analisis
@@ -239,10 +281,12 @@ def detallesExploracion (request, id_exploracion):
 	h = "Humedad"
 	l = "Luz"
 	g = "Gas"
+	c = "Camara"
 	temperatura=False
 	humedad=False
 	gas=False
 	luz=False
+	camara=False
 
 	#extraer solo la exploracion seleccionada
 	explo = Exploracion.objects.get(pk=id_exploracion)
@@ -259,8 +303,11 @@ def detallesExploracion (request, id_exploracion):
 			gas=True
 		if x.tipo == "Luz":
 			luz=True
+		if x.tipo == "Camara":
+			video = sensorCamara.objects.filter(exploracion=explo)
+			camara=True
 	
-	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz}
+	context = {'explo':explo, 'c':c, 't':t, 'h':h, 'l':l, 'g':g, 'camara':camara, 'voltaje': globales.porcentaje, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz, 'video':video}
 	return render(request, 'detalleExploracion.html', context)
 
 #Funcion que muestra una gráfica seleccionada
@@ -309,7 +356,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 					'credits': {
 						'enabled': False}})		
 		#paso 3: Enviar la gráfica a la página.
-		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
 
@@ -354,7 +401,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 					'credits': {
 						'enabled': False}})		
 		#paso 3: Enviar la gráfica a la página.
-		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
 
@@ -400,7 +447,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'enabled': False}})
 
 		#paso 3: Enviar la gráfica a la página.
-		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
 
 		return render(request, 'mostrarGrafica.html', context)
 
@@ -446,7 +493,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'enabled': False}})
 								
 		#paso 3: Enviar la gráfica a la página.
-		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'voltaje': globales.porcentaje}
 
 		return render(request, 'mostrarGrafica.html', context)
 
@@ -458,12 +505,36 @@ def salir(request):
 	globales.salir=1
 	
 	#Para la cámara
-	camara_stop()
+	if globales.camara == True:
+		if globales.tiempo is not None:
+			globales.nombreFichero=globales.dbexplo.nombre + str(globales.dbexplo.id_exploracion)			
+			camara_stop(globales.nombreFichero)
+		camara_parar()
+
 
 	#si estaba en automático
 	if globales.auto == True:
 		#borra hilo de automático
+		globales.auto=False
 		del globales.automatic
+
+	#si estaba en manual
+	if globales.manu == True:
+		#borra hilo de automático
+		globales.manu=False
+		del globales.manual
+
+	#si estaba el modo bot
+	#if globales.bot == True:
+		#borra hilo de automático
+		#globales.bot=False
+		#del globales.tg
+
+	#si estaba en manual
+	if globales.vigilancia == True:
+		#borra hilo de automático
+		globales.vigilancia=False
+		del globales.movimiento
 
 	#redirige al index
 	return redirect('index')
@@ -472,8 +543,14 @@ def salir(request):
 #En la pantalla de control del sistema
 @login_required(login_url='/')
 def mostrardatos(request):
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
+
+	if vigilancia == True:
+		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
+		'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje, 'numVideos': globales.grabacion}
+
+	else:
+		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
+		'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'spir': globales.vigilancia, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje, 'numVideos': globales.grabacion}
 
 	template = "datos.html"
 	return render(request, template, context)
@@ -492,11 +569,8 @@ def Izquierda():
 	eventloop.run_until_complete(globales.driver.GirarIzqAsync()) 
 	eventloop.close()
 
-#Función de control manual del sistema
-@login_required(login_url='/')
-def manual(request):
-
-	#Se recoge la peticion de movimiento
+def manu(request):
+	#Se recoge la peticion de wmovimiento
 	if 'cmd' in request.GET and request.GET['cmd']:
 		control = request.GET['cmd']
 
@@ -527,18 +601,118 @@ def manual(request):
 		#Mover a la derecha  
 		if (control == "camright"):
 			servo_r()	
+		#Mover arriba  
+		if (control == "camup"):
+			servo_u()	
+		#Mover abajao  
+		if (control == "camdown"):
+			servo_d()	
+
+
+
+#Función de control manual del sistema
+@login_required(login_url='/')
+def manual(request):
+
+	#Activar modo manual	
+	globales.manu=True
+
+	#Crear hilo de modo manual
+	globales.manual=threading.Thread(target=manu(request))
+	globales.manual.start()
 
 	#Se crea un contexto con las variables para devolver a la plantilla
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
 			'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
 			'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
-			'camara':globales.camara }
+			'camara':globales.camara, 'voltaje': globales.porcentaje}
 
 	#Variable que guarda la página a cargar
 	template = "manual.html"
 
 	#Devuelve el contexto a la página manul
 	return render_to_response(template, context, context_instance=RequestContext(request))
+
+#Función de control detectar movimiento
+@login_required(login_url='/')
+def vigilancia(request):
+
+	#Activar modo manual	
+	globales.vigilancia=True
+	#Activar el bot
+	#globales.bot=True
+	#Crear hilo de modo manual
+	globales.movimiento=threading.Thread(target=modoVigilancia)
+	globales.movimiento.start()
+
+	#Crear hilo para el telegram
+	#globales.tg=threading.Thread(target=arrancar)
+	#globales.tg.start()
+
+	#Se crea un contexto con las variables para devolver a la plantilla
+	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
+			'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
+			'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
+			'camara':globales.camara, 'voltaje': globales.porcentaje}
+
+	#Variable que guarda la página a cargar
+	template = "vigilancia.html"
+
+	#Devuelve el contexto a la página manul
+	return render_to_response(template, context, context_instance=RequestContext(request))
+
+def modoVigilancia():
+	salir=0	#Variable para salir del bucle while
+
+	#Se crea el sensor de distancia
+	sensorMovimiento=SensorMovimiento(19)
+	previous_state = False
+	current_state = False
+	#opciones de la camara
+	cam = picamera.PiCamera(resolution=(320, 240) )
+	cam.hflip = True
+	cam.vflip = True
+	cam.video_stabilization = True
+	cam.exposure_mode = 'auto'
+	cam.meter_mode = 'average'
+	cam.awb_mode = 'auto'
+	cam.image_effect = 'none'
+	cam.color_effects = None
+	#Comienzo de la vigilancia
+	while salir == 0:
+		time.sleep(0.1)
+		sensorMovimiento.detectarMovimiento()
+		previous_state = current_state
+		current_state = globales.detectar
+		if current_state != previous_state:
+			if current_state:
+				dbcamara = sensorCamara(video=globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".mp4", tipo="Camara", enable=True)
+				dbcamara.save()
+				globales.dbexplo.sensores.add(dbcamara)
+				globales.dbexplo.save()
+				filename = "/home/pi/proyecto/media/videos/"+globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".h264"	
+				cam.start_preview()
+				cam.start_recording(filename)
+				servo_lcr()
+			else:
+				cam.stop_preview()
+				cam.stop_recording()
+				os.system("sudo ffmpeg -i " + filename + " /home/pi/proyecto/media/videos/"+globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".mp4")
+				os.system("sudo rm -rf " + filename)
+				globales.direccion = "/home/pi/proyecto/media/videos/"+globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".mp4"
+				#cambiarDireccion()
+				#mandarVideo()
+				globales.grabacion = globales.grabacion + 1
+				current_state = False
+  
+		#Comprueba la salida
+		if globales.salir == 1:
+			salir = 1
+			globales.vigilancia = False		
+	#Corta el hilo
+	salir=0
+	globales.salir=0	
+	return
 
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
@@ -596,19 +770,22 @@ def automatico():
 	globales.distancia = float(sensorDistancia.precisionDistancia())
 
 	while salir == 0:
-			#Se obtiene una primera medida de distancia
-			globales.distancia = float(sensorDistancia.precisionDistancia())
-			#Si la distancia es menor de 30 busca la distancia mas larga
-			if globales.distancia < 30.0:
-				BuscarDistanciaMasLarga(sensorDistancia)
-			#Si es mayor de 30 prosigue su camino
-			else:
-				globales.driver.Adelante()
-			#Comprueba la salida
-			if globales.salir == 1:
-				salir = 1
+		#Se obtiene una primera medida de distancia
+		globales.distancia = float(sensorDistancia.precisionDistancia())
+		#Si la distancia es menor de 30 busca la distancia mas larga
+		if globales.distancia < 60.0:
+			BuscarDistanciaMasLarga(sensorDistancia)
+		#Si es mayor de 30 prosigue su camino
+		else:
+			globales.driver.Adelante()
+		#Comprueba la salida
+		if globales.salir == 1:
+			salir = 1
+			globales.auto = False		
 
-	#Corta el hilo			
+	#Corta el hilo
+	salir=0
+	globales.salir=0	
 	return
 
 #FUncion que llama al control automatico
@@ -623,7 +800,7 @@ def auto(request):
 
 	#creamos el contexto
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara }
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje }
 	
 	template = "auto.html"
 	return render_to_response(template, context, context_instance=RequestContext(request))
@@ -707,7 +884,7 @@ def editar_contrasena(request):
 			return render(request, 'editar_contrasena.html', {'form': form, 'usuario': usuario}) 
 	else:
 		form = EditarContrasenaForm()
-	return render(request, 'editar_contrasena.html', {'form': form, 'usuario': usuario})    
+	return render(request, 'editar_contrasena.html', {'form': form, 'voltaje': globales.porcentaje, 'usuario': usuario})    
  
 #editar foto
 @login_required(login_url='/')
@@ -723,7 +900,7 @@ def editar_foto(request):
 			return render(request, 'editar_foto.html', {'form': form, 'usuario': request.user})
 	else:
 		form = EditarFotoForm()
-	return render(request, 'editar_foto.html', {'form': form, 'usuario': request.user}) 
+	return render(request, 'editar_foto.html', {'form': form, 'voltaje': globales.porcentaje, 'usuario': request.user}) 
  
 #Función para  dar de baja a un usuario
 @login_required(login_url='/')
@@ -734,11 +911,11 @@ def eliminar_usuario(request):
 	#Se borra usuario de la base de datos
 	usuario.delete()
 	login='0'
-	return redirect(reverse('gracias', kwargs={'username': username, 'login':login}))
+	return redirect(reverse('gracias', kwargs={'username': username, 'login':login, 'voltaje': globales.porcentaje}))
  
 #Función para dar las gracias cuando incías, cierras o borras usuario
 def gracias(request, username, login):
-	return render(request, 'gracias.html', {'username': username, 'login': login})
+	return render(request, 'gracias.html', {'username': username, 'login': login, 'voltaje': globales.porcentaje})
 
 #Función para sobre mi
 def sobre_mi(request):

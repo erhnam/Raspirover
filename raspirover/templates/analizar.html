@@ -7,15 +7,15 @@
 	{% if explo %}
 		<ul>
 		{% for x in explo %}
-			 <li><a href =/eliminarExploracion/{{x.id_exploracion}}><font color="#FF0000">X</font></a>  Nombre: <a href =/detallesExploracion/{{x.id_exploracion}}><font color="#F5F5DC">{{x.nombre}}</font></a> </li>
+			 <li><a href =/eliminarExploracion/{{x.id_exploracion}}><font color="#FF0000">X</font></a>  Nombre: <a href =/detallesExploracion/{{x.id_exploracion}}><font color="#66B266">{{x.nombre}}</font></a> </li>
 		{% endfor %}
 		</ul>
 		{% else %}
-			<h3><font color="#F5F5DC">Este usuario no tiene exploraciones</font></h3>
+			<h3><font color="#66B266">Este usuario no tiene exploraciones</font></h3>
 		{% endif %}
 	</div>
 
-	<div><a href="{% url 'index' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
+	<div align="center" ><a href="{% url 'index' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
 
 	{% endblock content %}
 

@@ -1,74 +1,13 @@
 /* static/css/main.css */
 
-body { background-color: grey; }
-
-/************************************************************************************
-MEDIA QUERIES
-*************************************************************************************/
-/* para 980px o menos */
-@media screen and (max-width: 980px) {
-	
-	#pagewrap {
-		width: 94%;
-	}
-	#content {
-		width: 65%;
-	}
-	#sidebar {
-		width: 30%;
-	}
-	img{
-                width: 65%;
-                height: 30%;
-	}
-}
-
-/* para 700px o menos */
-@media screen and (max-width: 700px) {
-
-	#content {
-		width: auto;
-		height: auto;
-		float: none;
-	}
-	#sidebar {
-		width: auto;
-		float: top;
-		height: auto;
-	}
-        img{
-                width: 70%;
-                float: center
-                height: 40%;
-        }
-}
-
-/* para 480px o menos */
-@media screen and (max-width: 480px) {
-
-	#header {
-		height: auto;
-	}
-	h1 {
-		font-size: 24px;
-	}
-	#sidebar {
-		float: top;
-		height: auto;
-	}
-        img{
-                width: 70%;
-                float: center;
-                height: 40%;
-        }
-}
+body { background-color: #F5F5DC; }
 
 
 .btn-primary-raspirover {
   margin-top: 7px;
 }
 
-#checkbox_f1, #checkbox_f2, #checkbox_f3, #checkbox_f4,#checkbox_f5,#checkbox_f6,#checkbox_f7{
+#checkbox_f1, #checkbox_f2, #checkbox_f3, #checkbox_f4,#checkbox_f5,#checkbox_f6,#checkbox_f7,#checkbox_f8{
 	margin-left: 25px;
 	margin-right: 25px;
 	margin-top: 25px;
@@ -91,17 +30,20 @@ input.hide-checkbox {
 }  
 
 .servo{
+        width: 125px;
+        height: 100px;
 	margin-left: 5px;
-	margin-right: 5px;
+	margin-right: 175px;
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
 
 .control{
-	
+        width: 125px;
+        height: 100px;	
 	margin-left: 5x;
-	margin-right: 5px;
-	margin-top: 5px;
+	margin-right: -175px;
+	margin-top: -105px;
 	margin-bottom: 5px;
 }
 
@@ -110,7 +52,16 @@ input.hide-checkbox {
 	margin-right: 5px;
 }
 
-#checkbox_f1b, #checkbox_f2b, #checkbox_f3b, #checkbox_f4b,#checkbox_f5b,#checkbox_f6b,#checkbox_f7b{
+#cup, #cdown{
+	margin-left: 40px;
+}
+
+#dup, #ddown{
+	margin-right: 40px;
+}
+
+
+#checkbox_f1b, #checkbox_f2b, #checkbox_f3b, #checkbox_f4b,#checkbox_f5b,#checkbox_f6b,#checkbox_f7b,#checkbox_f8b{
 	margin-left: 5px;
 	margin-right: 5px;
 	margin-top: 5px;
