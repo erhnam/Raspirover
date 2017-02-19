@@ -1,6 +1,10 @@
 import RPi.GPIO as GPIO
 
 #Variables globales
+hora=' '
+altitud=' '
+latitud=' '
+altura=' '
 bot = ' '			#bot
 tg = ' '			#timer de telegram
 direccion = ' '
@@ -50,6 +54,10 @@ nombre=False        		#Variable del nombre del formulario
 #Funcion que inicializa las variables
 def inicializar():
 	print("inicializando variables...")
+	hora=' '
+	altitud=' '
+	latitud=' '
+	altura=' '
 	grabacion = 1
 	bot = ' '
 	tg = ' '

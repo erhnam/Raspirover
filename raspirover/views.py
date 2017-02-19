@@ -69,6 +69,14 @@ voltaje.start_timer()
 def apagar(request):
 	os.system("sudo shutdown -h now")	
 
+#funcion para reiniciar el sistema
+def reboot(request):
+	os.system("sudo reboot")	
+
+def gps(request):
+        context = {'voltaje': globales.porcentaje}
+        return render(request, 'gps.html', context)
+
 #Función de la página principal del programa
 def index(request):
 	#reinicia todas las variables

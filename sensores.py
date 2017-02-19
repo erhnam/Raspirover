@@ -18,7 +18,7 @@ def comprobarth():
 	#Sensor Adafruit
 	sensor = Adafruit_DHT.AM2302
 	#Obtiene los valores del sensor de temepratura y la humedad
-	globales.humedad, globales.temperatura = Adafruit_DHT.read_retry(sensor, 14)
+	globales.humedad, globales.temperatura = Adafruit_DHT.read_retry(sensor, 12)
 	#Redondea a 1 dígito decimal
 	globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0	
 	globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0	
