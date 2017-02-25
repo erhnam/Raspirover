@@ -2,13 +2,16 @@ import spidev
 import globales
 
 class CalcularVoltaje(object):
+	#R1 = 18100
+	#R2 = 11910
+	#Vin Max = 12,60v
 	#Constructor recibe el pin trigger y echo del sensor
-	def __init__(self, canal, resistencia1, resistencia2):
+	def __init__(self, canal, r1, r2):
 		# SPI bus
 		self.spi = spidev.SpiDev()
 		self.spi.open(0,0)
-		self.R1 = resistencia1
-		self.R2 = resistencia2
+		self.R1 = r1
+		self.R2 = r2
 		self.canal = canal
 
 	# Funcion que lee el dato del SPI desde el chip MCP3008
@@ -20,16 +23,22 @@ class CalcularVoltaje(object):
 	# Funcion que convierte el dato en voltaje
 	# redondeado a dos decimales
 	def convertirDatoAVoltios(self,dato,decimales):
-		vout = (dato * 5) / float(1023)
+		vout = (dato * 5.03) / 1023.0
 		vin = vout / (self.R2/(self.R1+self.R2))
 		vin = round(vin, decimales)
-		if (vin < 0.09):
-			vin = 0.0
 
 		return vin
 
 	# Funcion que ejecuta el valor del voltaje
 	def calcularVoltaje(self):
 		valorAnalogico = self.leerCanal()
-		globales.voltaje = self.convertirDatoAVoltios(valorAnalogico,2)
-		globales.porcentaje = int((globales.voltaje*100)/12.61)
+		for x in range(0,24):
+			globales.voltaje += self.convertirDatoAVoltios(valorAnalogico,2)
+
+		globales.voltaje = round(globales.voltaje/25,2)
+		valor = globales.voltaje - 10.50
+		globales.porcentaje = round(((valor * 100)/2.1),2)
+#		print(globales.voltaje)
+#		print (globales.porcentaje)
+		globales.voltaje=0.0
+		res = 0.0

@@ -59,7 +59,7 @@ globales.driver = DriverDosMotores (motorIzq, motorDer)
 
 #Calculo del voltaje
 #Canal mpc, Resitencia1, Resistencia2
-valorVoltaje = CalcularVoltaje(1, 98500.0, 9500.0)
+valorVoltaje = CalcularVoltaje(1, 18100, 11910)
 voltaje = TimerRecurrente(30, valorVoltaje.calcularVoltaje())
 voltaje.start_timer()
 
@@ -73,6 +73,7 @@ def apagar(request):
 def reboot(request):
 	os.system("sudo reboot")	
 
+#Funcion de GPS
 def gps(request):
         context = {'voltaje': globales.porcentaje}
         return render(request, 'gps.html', context)
