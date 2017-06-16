@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 ########################## LIBRERÍAS ###############################
+
 from django.db import transaction
 #para graficas Chartit2
 from chartit import DataPool, Chart
@@ -33,6 +34,7 @@ import picamera
 #Libreria para hilos
 import threading
 
+
 #Importaciones de ficheros creados para
 #sensores, camara, motores y globales.
 from .models import *
@@ -42,9 +44,19 @@ from motor import *
 from camara import *
 from dosMotores import *
 from sensores import *
-from timerRecurrente import *
 from globales import * 
 from voltaje import *
+from manager import *
+
+########################## MANAGER DE TAREAS ##########################
+
+s = Scheduler()
+
+########################## VOLTAJE ##########################
+
+#Canal mpc, Resitencia1, Resistencia2
+valorVoltaje = CalcularVoltaje(1, 19500, 12000)
+s.AddTask( valorVoltaje.calcularVoltaje , 30.0, 0.1 )
 
 ########################## CONTROLADOR ###############################
 
@@ -54,12 +66,6 @@ motorDer = Motor (5,6)
 
 #Creacion del driver L298N
 globales.driver = DriverDosMotores (motorIzq, motorDer)	
-
-#Calculo del voltaje
-#Canal mpc, Resitencia1, Resistencia2
-valorVoltaje = CalcularVoltaje(1, 19500, 12000)
-voltaje = TimerRecurrente(30, valorVoltaje.calcularVoltaje())
-voltaje.start_timer()
 
 ########################## INICIO  ###############################
 
@@ -80,10 +86,13 @@ def index(request):
 	salir(request)
 	globales.inicializar()
 	globales.salir=0
+	
+	#Centra la camara
 	servo_c()
 
 	#Se inicializa los puertos GPIO
-	setup(14,21,20,16,26,22,27,5,6)
+	setup(14,21,20,16,26,22,27,5,6,12)
+
 	#devuelve los valores a la pagina
 	context = {'voltaje': globales.porcentaje}
 	return render(request, 'index.html', context)
@@ -105,6 +114,7 @@ def explorar(request):
 			globales.sluz =  cleaned_data.get('luz')
 			globales.camara = cleaned_data.get('camara')
 			globales.tiempo = cleaned_data.get('tiempo')
+			globales.tiempo = globales.tiempo + 0.0
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
@@ -137,15 +147,18 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbhumedad)
 					globales.dbexplo.save()
 
-				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
+				#Si el tiempo es null se ejecuta el sensor cada 1 segundo			
 				if globales.tiempo is None:	
-					timerdth = TimerRecurrente(5.0, comprobarth)
-					timerdth.start_timer()
+					#timerdth = TimerRecurrente(5.0, comprobarth)
+					#timerdth.start_timer()
+					s.AddTask( comprobarth , 1.0 , 0.15 )
+
 				#Si el tiempo no es null se crea un timer de x segundos definidos por la variable tiempo
 				else:
-					timerdth = TimerRecurrente(float(globales.tiempo), comprobarth)
-					timerdth.start_timer()
-			
+					#timerdth = TimerRecurrente(float(globales.tiempo), comprobarth)
+					#timerdth.start_timer()
+					s.AddTask( comprobarth , globales.tiempo, 0.15 )
+
 			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
 				#Se crea sensor de Luz para manejar con Raspberry
@@ -158,13 +171,16 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbluz)
 					globales.dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
-					timerluz = TimerRecurrente(float(globales.tiempo),  sensorluz.comprobarLuz)
-					timerluz.start_timer()
+					#timerluz = TimerRecurrente(float(globales.tiempo),  sensorluz.comprobarLuz)
+					#timerluz.start_timer()
+					s.AddTask( sensorluz.comprobarLuz , globales.tiempo, 0.2 )
+
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
-					#Se crea un timer de 5 segundos
-					timerluz = TimerRecurrente(5.0, sensorluz.comprobarLuz)
-					timerluz.start_timer()
+					#Se crea un timer de 1 segundo
+					#timerluz = TimerRecurrente(5.0, sensorluz.comprobarLuz)
+					#timerluz.start_timer()
+					s.AddTask( sensorluz.comprobarLuz , 1.0 , 0.2 )
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
@@ -177,14 +193,18 @@ def explorar(request):
 					dbgas.save()
 					globales.dbexplo.sensores.add(dbgas)
 					globales.dbexplo.save()
+
 				#Se crea un timer de x segundos definidos por la variable tiempo
-					timergas = TimerRecurrente(float(globales.tiempo), sensorgas.comprobarGas)
-					timergas.start_timer()
+					#timergas = TimerRecurrente(float(globales.tiempo), sensorgas.comprobarGas)
+					#timergas.start_timer()
+					s.AddTask( sensorgas.comprobarGas , globales.tiempo, 0.25 )
+
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
-					#Se crea un timer de 5 segundos
-					timergas = TimerRecurrente(5.0, sensorgas.comprobarGas)
-					timergas.start_timer()
+					#Se crea un timer de 1 segundo
+					#timergas = TimerRecurrente(5.0, sensorgas.comprobarGas)
+					#timergas.start_timer()
+					s.AddTask( sensorgas.comprobarGas , 1.0 , 0.25 )
 
 			#Si se ha elegido cámara para streaming
 			if globales.camara == True:
@@ -193,8 +213,9 @@ def explorar(request):
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if globales.tiempo is not None:
-				trigger = TimerRecurrente(float(globales.tiempo) , BBDD, args=[globales.dbexplo.id_exploracion])
-				trigger.start_timer()
+				#trigger = TimerRecurrente(float(globales.tiempo) , BBDD, args=[globales.dbexplo.id_exploracion])
+				#trigger.start_timer()
+				s.AddTask( BBDD , globales.tiempo, 0.5, globales.dbexplo.id_exploracion )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
@@ -499,6 +520,12 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 @login_required(login_url='/')
 def salir(request):
 
+	#Para el Manager del sistema
+	s.StopAllTasks()
+
+	#Centra la camara
+	servo_c()
+
 	#Destruye los timers
 	globales.salir=1
 	
@@ -508,7 +535,6 @@ def salir(request):
 			globales.nombreFichero=globales.dbexplo.nombre + str(globales.dbexplo.id_exploracion)			
 			camara_stop(globales.nombreFichero)
 		camara_parar()
-
 
 	#si estaba en automático
 	if globales.auto == True:
@@ -589,8 +615,6 @@ def manu(request):
 		if (control == "camdown"):
 			servo_d()	
 
-
-
 #Función de control manual del sistema
 @login_required(login_url='/')
 def manual(request):
@@ -598,9 +622,14 @@ def manual(request):
 	#Activar modo manual	
 	globales.manu=True
 
+	#Activa todos los sensores asignados
+	s.StartAllTasks()
+
 	#Crear hilo de modo manual
 	globales.manual=threading.Thread(target=manu(request))
 	globales.manual.start()
+
+
 
 	#Se crea un contexto con las variables para devolver a la plantilla
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
@@ -692,6 +721,10 @@ def automatico():
 def auto(request):
 	#Indica que está el modo automatico activado
 	globales.auto=True	
+
+	#Activa todos los sensores asignados
+	s.StartAllTasks()
+
 	#Creamos un hilo para ejecutar el automatico
 	#así no bloquea a los demas hilos
 	globales.automatic=threading.Thread(target=automatico)
