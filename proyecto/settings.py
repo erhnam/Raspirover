@@ -24,7 +24,7 @@ SECRET_KEY = 'cv5+it_13@#(3*9p-p#3zbb7hff(3(iy7l74@_&673-a#8jd8v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = True
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com']
 

@@ -88,7 +88,7 @@ class sensorGas(Sensor):
 		db_table = 'SensorGas'
 	
 class Sensores(models.Model):
-	nombre = models.CharField(max_length=12, blank=False)
+	nombre = models.CharField(max_length=12, null=True)
 	temperatura = models.BooleanField()
 	humedad = models.BooleanField()
 	gas = models.BooleanField()

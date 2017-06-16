@@ -10,6 +10,6 @@ fi
 
 sudo kill -9 `pidof mjpg_streamer`
 
-sudo ffmpeg -i /dev/shm/temp.mjpg /home/pi/proyecto/media/videos/$1.mp4
+#sudo ffmpeg -i /dev/shm/temp.mjpg /home/pi/proyecto/media/videos/$1.mp4
 
-sudo rm -rf /dev/shm/temp.mjpg
+#sudo rm -rf /dev/shm/temp.mjpg

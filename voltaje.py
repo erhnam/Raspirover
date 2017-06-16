@@ -2,14 +2,13 @@ import spidev
 import globales
 
 class CalcularVoltaje(object):
-	#R1 = 18100
-	#R2 = 11910
 	#Vin Max = 12,60v
 	#Constructor recibe el pin trigger y echo del sensor
 	def __init__(self, canal, r1, r2):
 		# SPI bus
 		self.spi = spidev.SpiDev()
 		self.spi.open(0,0)
+		self.spi.max_speed_hz = 1000000
 		self.R1 = r1
 		self.R2 = r2
 		self.canal = canal
@@ -23,7 +22,7 @@ class CalcularVoltaje(object):
 	# Funcion que convierte el dato en voltaje
 	# redondeado a dos decimales
 	def convertirDatoAVoltios(self,dato,decimales):
-		vout = (dato * 5.03) / 1023.0
+		vout = (dato * 5.03) / 1024.0
 		vin = vout / (self.R2/(self.R1+self.R2))
 		vin = round(vin, decimales)
 
@@ -38,7 +37,5 @@ class CalcularVoltaje(object):
 		globales.voltaje = round(globales.voltaje/25,2)
 		valor = globales.voltaje - 10.50
 		globales.porcentaje = round(((valor * 100)/2.1),2)
-#		print(globales.voltaje)
-#		print (globales.porcentaje)
 		globales.voltaje=0.0
 		res = 0.0

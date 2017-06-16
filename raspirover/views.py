@@ -32,8 +32,6 @@ import RPi.GPIO as GPIO
 import picamera
 #Libreria para hilos
 import threading
-#Libreria telegram
-from telegrambot import *
 
 #Importaciones de ficheros creados para
 #sensores, camara, motores y globales.
@@ -59,7 +57,7 @@ globales.driver = DriverDosMotores (motorIzq, motorDer)
 
 #Calculo del voltaje
 #Canal mpc, Resitencia1, Resistencia2
-valorVoltaje = CalcularVoltaje(1, 18100, 11910)
+valorVoltaje = CalcularVoltaje(1, 19500, 12000)
 voltaje = TimerRecurrente(30, valorVoltaje.calcularVoltaje())
 voltaje.start_timer()
 
@@ -72,11 +70,6 @@ def apagar(request):
 #funcion para reiniciar el sistema
 def reboot(request):
 	os.system("sudo reboot")	
-
-#Funcion de GPS
-def gps(request):
-        context = {'voltaje': globales.porcentaje}
-        return render(request, 'gps.html', context)
 
 #Función de la página principal del programa
 def index(request):
@@ -210,10 +203,6 @@ def explorar(request):
 			#si se ha elegido automatico
 			if request.method=='POST' and 'automatico' in request.POST:
 				return redirect(reverse('auto'))
-
-			#si se ha elegido vigilancia
-			if request.method=='POST' and 'vigilancia' in request.POST:
-				return redirect(reverse('vigilancia'))
 
 	else:
 		form = ExploracionForm()
@@ -533,18 +522,6 @@ def salir(request):
 		globales.manu=False
 		del globales.manual
 
-	#si estaba el modo bot
-	#if globales.bot == True:
-		#borra hilo de automático
-		#globales.bot=False
-		#del globales.tg
-
-	#si estaba en manual
-	if globales.vigilancia == True:
-		#borra hilo de automático
-		globales.vigilancia=False
-		del globales.movimiento
-
 	#redirige al index
 	return redirect('index')
 
@@ -553,13 +530,8 @@ def salir(request):
 @login_required(login_url='/')
 def mostrardatos(request):
 
-	if vigilancia == True:
-		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-		'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje, 'numVideos': globales.grabacion}
-
-	else:
-		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
-		'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'spir': globales.vigilancia, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje, 'numVideos': globales.grabacion}
+	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje, 'numVideos': globales.grabacion}
 
 	template = "datos.html"
 	return render(request, template, context)
@@ -641,88 +613,6 @@ def manual(request):
 
 	#Devuelve el contexto a la página manul
 	return render_to_response(template, context, context_instance=RequestContext(request))
-
-#Función de control detectar movimiento
-@login_required(login_url='/')
-def vigilancia(request):
-
-	#Activar modo manual	
-	globales.vigilancia=True
-	#Activar el bot
-	#globales.bot=True
-	#Crear hilo de modo manual
-	globales.movimiento=threading.Thread(target=modoVigilancia)
-	globales.movimiento.start()
-
-	#Crear hilo para el telegram
-	#globales.tg=threading.Thread(target=arrancar)
-	#globales.tg.start()
-
-	#Se crea un contexto con las variables para devolver a la plantilla
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
-			'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
-			'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
-			'camara':globales.camara, 'voltaje': globales.porcentaje}
-
-	#Variable que guarda la página a cargar
-	template = "vigilancia.html"
-
-	#Devuelve el contexto a la página manul
-	return render_to_response(template, context, context_instance=RequestContext(request))
-
-def modoVigilancia():
-	salir=0	#Variable para salir del bucle while
-
-	#Se crea el sensor de distancia
-	sensorMovimiento=SensorMovimiento(19)
-	previous_state = False
-	current_state = False
-	#opciones de la camara
-	cam = picamera.PiCamera(resolution=(320, 240) )
-	cam.hflip = True
-	cam.vflip = True
-	cam.video_stabilization = True
-	cam.exposure_mode = 'auto'
-	cam.meter_mode = 'average'
-	cam.awb_mode = 'auto'
-	cam.image_effect = 'none'
-	cam.color_effects = None
-	#Comienzo de la vigilancia
-	while salir == 0:
-		time.sleep(0.1)
-		sensorMovimiento.detectarMovimiento()
-		previous_state = current_state
-		current_state = globales.detectar
-		if current_state != previous_state:
-			if current_state:
-				dbcamara = sensorCamara(video=globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".mp4", tipo="Camara", enable=True)
-				dbcamara.save()
-				globales.dbexplo.sensores.add(dbcamara)
-				globales.dbexplo.save()
-				filename = "/home/pi/proyecto/media/videos/"+globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".h264"	
-				cam.start_preview()
-				cam.start_recording(filename)
-				servo_lcr()
-			else:
-				cam.stop_preview()
-				cam.stop_recording()
-				os.system("sudo ffmpeg -i " + filename + " /home/pi/proyecto/media/videos/"+globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".mp4")
-				os.system("sudo rm -rf " + filename)
-				globales.direccion = "/home/pi/proyecto/media/videos/"+globales.dbexplo.nombre+str(globales.dbexplo.id_exploracion)+"video"+str(globales.grabacion)+".mp4"
-				#cambiarDireccion()
-				#mandarVideo()
-				globales.grabacion = globales.grabacion + 1
-				current_state = False
-  
-		#Comprueba la salida
-		if globales.salir == 1:
-			salir = 1
-			globales.vigilancia = False		
-	#Corta el hilo
-	salir=0
-	globales.salir=0	
-	return
-
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga(sensorDistancia):
@@ -830,7 +720,7 @@ def registro(request):
 			#Se comprueba que no exista un usuario con el email introducido
 			if(user):
 				form._errors['email']="Ya existe un usuario con ese email"
-				return render_to_response('registro.html',{'form':form}, context_instance=RequestContext(request))
+				return render_to_response('registro.html',{'form':form, 'voltaje': globales.porcentaje}, context_instance=RequestContext(request))
 		
 			#Antes de guardar el nuevo usuario en la base de datos
 			nuevo_usuario=form.save(commit=False)	
@@ -844,7 +734,7 @@ def registro(request):
 		#Formulario vacio
 		form=UsuarioForm()	
 	
-	return render_to_response('registro.html',{'form':form}, context_instance=RequestContext(request))
+	return render_to_response('registro.html',{'form':form, 'voltaje': globales.porcentaje}, context_instance=RequestContext(request))
 
 
 #Función para loguear al usuario
@@ -867,7 +757,7 @@ def login(request):
 			else:
 				pass
 		mensaje = 'Nombre de usuario o contraseña no valido'
-	return render(request, 'login.html', {'mensaje': mensaje})
+	return render(request, 'login.html', {'mensaje': mensaje, 'voltaje': globales.porcentaje})
  
 #Función para desloguear usuario
 @login_required(login_url='/')
@@ -928,5 +818,6 @@ def gracias(request, username, login):
 
 #Función para sobre mi
 def sobre_mi(request):
-	return render(request, 'sobre_mi.html')
+	
+	return render(request, 'sobre_mi.html', {'voltaje': globales.porcentaje})
 
