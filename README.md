@@ -10,15 +10,16 @@
 1. Sensor distancia HC-SR04
 2. Sensor Temperatura y humedad DTH22
 3. Sensor de Gas MQ-2
-4. Sensor De luz 
-5. Sensor de Movimiento HC-SR501
+4. Sensor De luz (proximamente analógico)
 6. Pi Camera V2
 
 ###Programación:
 
 1. Python 3.41
-2. Django Framework 1.8
+2. Django Framework 1.11
 3. Nginx Server   
 4. MJPEG-Streamer
 5. ServoBlaster
 6. Adafruit DHT22
+7. Django ChartIt
+8. SQL
