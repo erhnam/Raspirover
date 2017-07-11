@@ -8,7 +8,7 @@
 
 
      <div id="content" align="center">
-        <img class="img-responsive" width="640" height="480" src="http://192.168.1.144:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
+        <img class="img-responsive" width="640" height="480" src="http://192.168.0.1:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
             {% include 'datos.html' %} 
 	            <h5>Control de Cámara 
 		&nbsp;&nbsp;&nbsp;&nbsp;
@@ -52,7 +52,7 @@
                 </button> 
                 </tr><br>
                 <tr>
-                <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" ontouchstart="lefti()" ontouchend="stop()" onmouseup="stop()" onmousedown="left()">
+                <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" oclick="left()">
                      <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
                 </button>
                 </tr>
@@ -60,7 +60,7 @@
                      <span class="glyphicon glyphicon-stop" style="color:red" aria-hidden="true"></span>
                 </button>
                 <tr>
-                <button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" ontouchstart="righti()" ontouchend="stop()" onmouseup="stop()" onmousedown="right()">
+                <button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" onclick="right()">
                      <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
                 </button>
                 </tr><br>

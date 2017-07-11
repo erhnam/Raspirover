@@ -29,7 +29,7 @@ class CalcularVoltaje(object):
 		return vin
 
 	# Funcion que ejecuta el valor del voltaje
-	def calcularVoltaje(self):
+	def calcularVoltaje(self, arg=[]):
 		valorAnalogico = self.leerCanal()
 		for x in range(0,24):
 			globales.voltaje += self.convertirDatoAVoltios(valorAnalogico,2)

@@ -145,7 +145,8 @@ class EditarFotoForm(forms.Form):
 	imagen = forms.ImageField(required=False)
 
 
-class HorizRadioRenderer(forms.RadioSelect.renderer):
+#class HorizRadioRenderer(forms.RadioSelect.renderer):
+class HorizRadioRenderer(forms.RadioSelect):
     """ this overridcheckbox_1es widget method to put radio buttons horizontally
         instead of vertically.
     """
@@ -158,7 +159,7 @@ class ExploracionForm(forms.Form):
 
 	nombre = forms.CharField(label='Título de exploración', required=False, min_length=2, max_length=50)
 	descripcion = forms.CharField(label='Descripción', required=False, max_length=140)
-	tiempo = forms.DecimalField(label='Tiempo de disparo de la BBDD (segundos)',required=False)
+	tiempo = forms.FloatField(label='Tiempo de disparo de la BBDD (segundos)',required=False)
 	temperatura = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
 	humedad = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
 	gas = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
@@ -167,17 +168,3 @@ class ExploracionForm(forms.Form):
 
 	class Meta:
 		model = Sensores
-
-	#def __init__(self, *args, **kwargs):
-	#	super(ExploracionForm, self).__init__(*args, **kwargs)
-
-	#	for field in self.fields:
-	#		self.fields[field].error_messages = {'required': 'Nombre de la exploración es obligatorio'}
-
-		
-	#	#Se personalizan los mensajes de error
-	#	error_messages = {
-	#		'nombre': {
-	#			'required': ("El nombre de la exploración es obligatorio"),
-	#		},
-	#	}

@@ -1,0 +1,68 @@
+import spidev
+import time
+import os
+
+class SPI(object):
+	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz):
+		# Abrir puerto SPI
+		self.spi = spidev.SpiDev()
+		self.spi.open(0,0)
+		self.canalTemp = canalTemp
+		self.canalHum = canalHum
+		self.canalGas = canalGas
+		if canalLuz is not None:
+			self.led1=pinLed1
+			self.led2=pinLed2
+			GPIO.setmode(GPIO.BCM)
+			GPIO.setup(pinLed1,GPIO.OUT)
+			GPIO.setup(pinLed2,GPIO.OUT)
+			
+		self.canalLuz = canalLuz
+
+	#Funcion para leer el canal del ADC MCP3008
+	def LeerCanal(channel):
+		adc = spi.xfer2([1,(8+channel)<<4,0])
+		data = ((adc[1]&3) << 8) + adc[2]
+		return data
+ 
+	#Funcion que devuelve el voltaje del canal del ADC MCP3008
+	def ConvertirVoltios(data,places):
+		volts = (data * 3.3) / float(1023)
+		volts = round(volts,places)
+		return volts
+ 
+	#Funcion que devuelve la temperatura
+	def ObtenerTemperatura(self):
+		data = self.LeerCanal(self.canalTemp)
+		temp = ((data * 500)/float(1023))-50
+		temp = round(temp,2)
+		globales.temperatura = temp
+
+	#Funcion que devuelve la humedad
+	def ObtenerHumedad(self):
+		data = self.LeerCanal(self.canalHum)
+		globales.humedad = hum
+
+	#Funcion que devuelve el Gas
+	def ObtenerGas(self):
+		data = self.LeerCanal(self.canalGas)
+		if data > 120:
+			#Se detecta gas
+			globales.gas = 1
+		else:
+			#No se detecta gas
+			globales.gas = 0
+
+	#Funcion que devuelve la Luz
+	def ObtenerLuz(self):
+		data = self.LeerCanal(self.canalLuz)
+		if data > 600:
+			#Se detecta luz y apaga leds
+			GPIO.output(self.led1,GPIO.LOW)
+			GPIO.output(self.led2,GPIO.LOW)
+			globales.luz = 0
+		else:
+			#No se detecta luz y enciende leds
+			GPIO.output(self.led1,GPIO.HIGH)
+			GPIO.output(self.led2,GPIO.HIGH)
+			globales.luz = 1

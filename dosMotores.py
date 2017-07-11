@@ -1,5 +1,6 @@
 from motor import *
 import asyncio
+import time
 
 #Clase para el controlador de motor
 #Recibe dos clases Motor (Costado derecho e izquierdo)
@@ -28,11 +29,14 @@ class DriverDosMotores(object):
 	def Derecha(self):
 		self.motorDer.Atras()
 		self.motorIzq.Adelante()
+		#Para los motores
+		time.sleep(0.1)
 
 	#Giro a la izquierda	
 	def Izquierda(self):
 		self.motorDer.Adelante()
 		self.motorIzq.Atras()
+		time.sleep(0.1)
 	
 	#Giro a la derecha asincrono	
 	@asyncio.coroutine

@@ -36,6 +36,7 @@ timerluz=' '			#Timer para sensor de luz
 timergas=' '			#Timer para sensor de gas
 timerdth=' '			#Timer para sensor de DTH22
 timerpir=' '			#Timer para sensor de movimiento
+timerVcc=' '
 vigilancia=False		#Variable para detectar modo detectar movimiento
 auto=False      		#Variable para detectar modo automatico
 manu=False			#Variables para detectar modo manual
@@ -85,7 +86,9 @@ def inicializar():
 	timerluz=' '
 	timergas=' '
 	timerdth=' '
+	timerVcc=' '
 	automatic=' '
+	manager=' '
 	auto=False
 	manual=' '
 	manu=False

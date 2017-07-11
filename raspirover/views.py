@@ -33,7 +33,8 @@ import RPi.GPIO as GPIO
 import picamera
 #Libreria para hilos
 import threading
-
+#Libreria del sistema operativo
+#os.nice(49)
 
 #Importaciones de ficheros creados para
 #sensores, camara, motores y globales.
@@ -46,7 +47,9 @@ from dosMotores import *
 from sensores import *
 from globales import * 
 from voltaje import *
-from manager import *
+from timer import *
+
+#from gpiozero import *
 
 ########################## MANAGER DE TAREAS ##########################
 
@@ -56,7 +59,8 @@ s = Scheduler()
 
 #Canal mpc, Resitencia1, Resistencia2
 valorVoltaje = CalcularVoltaje(1, 19500, 12000)
-s.AddTask( valorVoltaje.calcularVoltaje , 30.0, 0.1 )
+#timerVcc = TimerRecurrente(30.01, valorVoltaje.calcularVoltaje)
+s.AddTask( 30.0 ,valorVoltaje.calcularVoltaje)
 
 ########################## CONTROLADOR ###############################
 
@@ -83,7 +87,7 @@ def index(request):
 	globales.salir=1
 	globales.auto=False
 	globales.manu=False
-	salir(request)
+#	salir(request)
 	globales.inicializar()
 	globales.salir=0
 	
@@ -114,7 +118,6 @@ def explorar(request):
 			globales.sluz =  cleaned_data.get('luz')
 			globales.camara = cleaned_data.get('camara')
 			globales.tiempo = cleaned_data.get('tiempo')
-			globales.tiempo = globales.tiempo + 0.0
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
@@ -149,15 +152,15 @@ def explorar(request):
 
 				#Si el tiempo es null se ejecuta el sensor cada 1 segundo			
 				if globales.tiempo is None:	
-					#timerdth = TimerRecurrente(5.0, comprobarth)
+					#timerdth = TimerRecurrente(1.00, comprobarth)
 					#timerdth.start_timer()
-					s.AddTask( comprobarth , 1.0 , 0.15 )
+					s.AddTask( 1.00, comprobarth )
 
 				#Si el tiempo no es null se crea un timer de x segundos definidos por la variable tiempo
 				else:
-					#timerdth = TimerRecurrente(float(globales.tiempo), comprobarth)
+					#timerdth = TimerRecurrente(globales.tiempo, comprobarth)
 					#timerdth.start_timer()
-					s.AddTask( comprobarth , globales.tiempo, 0.15 )
+					s.AddTask( globales.tiempo, comprobarth )
 
 			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
@@ -171,16 +174,16 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbluz)
 					globales.dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
-					#timerluz = TimerRecurrente(float(globales.tiempo),  sensorluz.comprobarLuz)
+					#timerluz = TimerRecurrente(globales.tiempo,  sensorluz.comprobarLuz)
 					#timerluz.start_timer()
-					s.AddTask( sensorluz.comprobarLuz , globales.tiempo, 0.2 )
+					s.AddTask( globales.tiempo, sensorluz.comprobarLuz)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
 					#Se crea un timer de 1 segundo
-					#timerluz = TimerRecurrente(5.0, sensorluz.comprobarLuz)
+					#timerluz = TimerRecurrente(1.00, sensorluz.comprobarLuz)
 					#timerluz.start_timer()
-					s.AddTask( sensorluz.comprobarLuz , 1.0 , 0.2 )
+					s.AddTask( 1.00 , sensorluz.comprobarLuz)
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
@@ -195,16 +198,16 @@ def explorar(request):
 					globales.dbexplo.save()
 
 				#Se crea un timer de x segundos definidos por la variable tiempo
-					#timergas = TimerRecurrente(float(globales.tiempo), sensorgas.comprobarGas)
+					#timergas = TimerRecurrente(globales.tiempo, sensorgas.comprobarGas)
 					#timergas.start_timer()
-					s.AddTask( sensorgas.comprobarGas , globales.tiempo, 0.25 )
+					s.AddTask( globales.tiempo , sensorgas.comprobarGas)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
 					#Se crea un timer de 1 segundo
-					#timergas = TimerRecurrente(5.0, sensorgas.comprobarGas)
+					#timergas = TimerRecurrente(1.00, sensorgas.comprobarGas)
 					#timergas.start_timer()
-					s.AddTask( sensorgas.comprobarGas , 1.0 , 0.25 )
+					s.AddTask( 1.00 , sensorgas.comprobarGas)
 
 			#Si se ha elegido cámara para streaming
 			if globales.camara == True:
@@ -213,12 +216,15 @@ def explorar(request):
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if globales.tiempo is not None:
-				#trigger = TimerRecurrente(float(globales.tiempo) , BBDD, args=[globales.dbexplo.id_exploracion])
+				#trigger = TimerRecurrente(globales.tiempo , BBDD, args=[globales.dbexplo.id_exploracion])
 				#trigger.start_timer()
-				s.AddTask( BBDD , globales.tiempo, 0.5, globales.dbexplo.id_exploracion )
+				s.AddTask( globales.tiempo, BBDD, args=[globales.dbexplo.id_exploracion] )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
+				#Activa todos los sensores asignados
+				#global s
+				s.StartAllTasks()
 				return redirect(reverse('manual'))
 
 			#si se ha elegido automatico
@@ -234,6 +240,7 @@ def explorar(request):
 @transaction.atomic
 def BBDD(id_exploracion):
 
+#	inicio = time.monotonic()
 	#Se busca la exploracion actual
 	globales.dbexplo = Exploracion.objects.get(pk=id_exploracion)
 
@@ -243,23 +250,20 @@ def BBDD(id_exploracion):
 		dbtemperatura = sensorTemperatura(temperatura=globales.temperatura, tipo="Temperatura", enable=True)
 		dbtemperatura.save()
 		globales.dbexplo.sensores.add(dbtemperatura)
-		globales.dbexplo.save()
 
-	#Si está activado el sensor de humedad
+		#Si está activado el sensor de humedad
 	if globales.shumedad == True:
 		#Se añade un nuevo valor de humedad a la base de datos
 		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
 		dbhumedad.save()
 		globales.dbexplo.sensores.add(dbhumedad)
-		globales.dbexplo.save()
 
-	#Si está activado el sensor de gas
+		#Si está activado el sensor de gas
 	if globales.sgas == True:
 		#Se añade un nuevo valor de gas a la base de datos
 		dbgas = sensorGas(gas=globales.gas, tipo="Gas")
 		dbgas.save()
 		globales.dbexplo.sensores.add(dbgas)
-		globales.dbexplo.save()
 
 	#Si está activado el sensor de luz
 	if globales.sluz == True:
@@ -267,14 +271,14 @@ def BBDD(id_exploracion):
 		dbluz = sensorLuz(luz=globales.luz, tipo="Luz")
 		dbluz.save()
 		globales.dbexplo.sensores.add(dbluz)
-		globales.dbexplo.save()
 
+	#	print(time.monotonic() - inicio)	
 
 #Funcion que accede a la página Analizar
 @login_required(login_url='/')
 def analizar(request):
 	globales.salir=1
-	salir(request)
+	#salir(request)
 	globales.inicializar()
 	#extraer todas las exploraciones del usuario
 	explo=Exploracion.objects.filter(usuariofk=request.user)
@@ -520,8 +524,11 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 @login_required(login_url='/')
 def salir(request):
 
+	global s
+
 	#Para el Manager del sistema
 	s.StopAllTasks()
+#	del globales.manager
 
 	#Centra la camara
 	servo_c()
@@ -531,9 +538,9 @@ def salir(request):
 	
 	#Para la cámara
 	if globales.camara == True:
-		if globales.tiempo is not None:
-			globales.nombreFichero=globales.dbexplo.nombre + str(globales.dbexplo.id_exploracion)			
-			camara_stop(globales.nombreFichero)
+	#	if globales.tiempo is not None:
+	#		globales.nombreFichero=globales.dbexplo.nombre + str(globales.dbexplo.id_exploracion)			
+	#		camara_stop(globales.nombreFichero)
 		camara_parar()
 
 	#si estaba en automático
@@ -577,6 +584,7 @@ def Izquierda():
 	eventloop.close()
 
 def manu(request):
+
 	#Se recoge la peticion de wmovimiento
 	if 'cmd' in request.GET and request.GET['cmd']:
 		control = request.GET['cmd']
@@ -622,14 +630,13 @@ def manual(request):
 	#Activar modo manual	
 	globales.manu=True
 
-	#Activa todos los sensores asignados
-	s.StartAllTasks()
+#	globales.manager=threading.Thread(target=s.StartAllTasks())
+#	globales.manager.start()
+
 
 	#Crear hilo de modo manual
-	globales.manual=threading.Thread(target=manu(request))
-	globales.manual.start()
-
-
+	globales.manual=threading.Thread(target=manu(request)).setDaemon(True)
+	#globales.manual.start()
 
 	#Se crea un contexto con las variables para devolver a la plantilla
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
@@ -641,7 +648,8 @@ def manual(request):
 	template = "manual.html"
 
 	#Devuelve el contexto a la página manul
-	return render_to_response(template, context, context_instance=RequestContext(request))
+	return render(request, template, context)
+	#return render_to_response(template, context, context_instance=RequestContext(request))
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga(sensorDistancia):
@@ -701,7 +709,7 @@ def automatico():
 		#Se obtiene una primera medida de distancia
 		globales.distancia = float(sensorDistancia.precisionDistancia())
 		#Si la distancia es menor de 30 busca la distancia mas larga
-		if globales.distancia < 60.0:
+		if globales.distancia < 30.0:
 			BuscarDistanciaMasLarga(sensorDistancia)
 		#Si es mayor de 30 prosigue su camino
 		else:
@@ -723,7 +731,7 @@ def auto(request):
 	globales.auto=True	
 
 	#Activa todos los sensores asignados
-	s.StartAllTasks()
+#	s.StartAllTasks()
 
 	#Creamos un hilo para ejecutar el automatico
 	#así no bloquea a los demas hilos
@@ -735,7 +743,8 @@ def auto(request):
 	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje }
 	
 	template = "auto.html"
-	return render_to_response(template, context, context_instance=RequestContext(request))
+	return render(request, template, context)
+	#return render_to_response(template, context, context_instance=RequestContext(request))
 	
 #Funcion que registra a un usuario en el sitema
 def registro(request):
@@ -753,7 +762,7 @@ def registro(request):
 			#Se comprueba que no exista un usuario con el email introducido
 			if(user):
 				form._errors['email']="Ya existe un usuario con ese email"
-				return render_to_response('registro.html',{'form':form, 'voltaje': globales.porcentaje}, context_instance=RequestContext(request))
+				return render(request, 'registro.html',{'form':form, 'voltaje': globales.porcentaje})
 		
 			#Antes de guardar el nuevo usuario en la base de datos
 			nuevo_usuario=form.save(commit=False)	
@@ -767,7 +776,7 @@ def registro(request):
 		#Formulario vacio
 		form=UsuarioForm()	
 	
-	return render_to_response('registro.html',{'form':form, 'voltaje': globales.porcentaje}, context_instance=RequestContext(request))
+	return render(request, 'registro.html',{'form':form, 'voltaje': globales.porcentaje})
 
 
 #Función para loguear al usuario

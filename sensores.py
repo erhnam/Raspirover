@@ -14,7 +14,7 @@ def setup(*pins):
 
 #Funcion para la temperatura y la humedad 
 #proporcionada por Adafruit
-def comprobarth():
+def comprobarth(arg=[]):
 	#Sensor Adafruit
 	sensor = Adafruit_DHT.AM2302
 	#Obtiene los valores del sensor de temepratura y la humedad
@@ -25,30 +25,9 @@ def comprobarth():
 
 
 #Sensor ultrasónico HC-SR04
-class SensorMovimiento(object):
-	#Constructor recibe el pin trigger y echo del sensor
-	def __init__(self, pirPin):
-		GPIO.setwarnings(False)
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setup(pirPin,GPIO.IN)
-		self.detectar = pirPin
-
-	#Detectar movimiento
-	def detectarMovimiento(self):
-		if GPIO.input(self.detectar) == 0: # No hay movimiento
-			globales.detectar = False
-			time.sleep(1)
-#			print("No se detecta movimiento")
-		else: # Hay movimiento
-			globales.detectar = True
-			time.sleep(1)
-#			print("Se detecta movimiento")
-
-
-#Sensor ultrasónico HC-SR04
 class SensorDistancia(object):
 	#Constructor recibe el pin trigger y echo del sensor
-	def __init__(self, pinTrigger, pinEcho):
+	def __init__(self, pinTrigger, pinEcho, arg=[]):
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(pinTrigger,GPIO.OUT)
 		GPIO.setup(pinEcho,GPIO.IN)
@@ -116,7 +95,7 @@ class SensorLuz(object):
 		self.led1=pinLed1
 		self.led2=pinLed2
 
-	def comprobarLuz(self):
+	def comprobarLuz(self, arg=[]):
 		#Detecta que hay Luz
 		if (GPIO.input(self.sensor) == 0):
 			GPIO.output(self.led1,GPIO.LOW)
@@ -141,7 +120,7 @@ class SensorGas(object):
 		self.pinGas = pinGas
 
 	#Funcion que comprueba si detecta gases
-	def comprobarGas(self):
+	def comprobarGas(self, arg=[]):
 		#Se detectan gases
 		if GPIO.input(self.pinGas) == 0:
 			globales.gas=1
