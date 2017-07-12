@@ -23,7 +23,7 @@
 
 ![](https://github.com/erhnam/Raspirover/blob/master/fotos/estructura.png)
 
-###Programación:
+### Programación:
 
 1. Python 3.42
 2. Django Framework 1.11
