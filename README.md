@@ -3,7 +3,8 @@
 ![](https://github.com/erhnam/Raspirover/blob/master/media/raspirover.png)
 
 
-***Sistema robótico móvil multisensorial con capacidad manual y autónoma de exploración de espacios***
+## Sistema robótico móvil multisensorial con capacidad manual y autónoma de exploración de espacios
+
 
 #### Visión general del proyecto
 
