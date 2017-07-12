@@ -33,6 +33,9 @@ import RPi.GPIO as GPIO
 import picamera
 #Libreria para hilos
 import threading
+#Libreria para Max, min y avg
+from django.db.models import Avg, Max, Min
+
 #Libreria del sistema operativo
 #os.nice(49)
 
@@ -48,7 +51,7 @@ from sensores import *
 from globales import * 
 from voltaje import *
 from timer import *
-
+from sensors import *
 #from gpiozero import *
 
 ########################## MANAGER DE TAREAS ##########################
@@ -57,10 +60,11 @@ s = Scheduler()
 
 ########################## VOLTAJE ##########################
 
-#Canal mpc, Resitencia1, Resistencia2
-valorVoltaje = CalcularVoltaje(1, 19500, 12000)
-#timerVcc = TimerRecurrente(30.01, valorVoltaje.calcularVoltaje)
-s.AddTask( 30.0 ,valorVoltaje.calcularVoltaje)
+spi = SPI(canalBateria=1, canalGas = 2, canalLuz = 3)
+
+voltaje = Task(30.0, spi.ObtenerBateria)
+
+voltaje.start_timer()
 
 ########################## CONTROLADOR ###############################
 
@@ -165,7 +169,7 @@ def explorar(request):
 			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
 				#Se crea sensor de Luz para manejar con Raspberry
-				sensorluz = SensorLuz(21,20,16)
+				#sensorluz = SensorLuz(21,20,16)
 				#Se crea un timer de x segundos definidos por la variable tiempo
 				if globales.tiempo is not None:	
 					#Se crea una tabla sensor de luz asociada a la exploracion	
@@ -176,19 +180,19 @@ def explorar(request):
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					#timerluz = TimerRecurrente(globales.tiempo,  sensorluz.comprobarLuz)
 					#timerluz.start_timer()
-					s.AddTask( globales.tiempo, sensorluz.comprobarLuz)
+					s.AddTask( globales.tiempo, spi.ObtenerLuz)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
 					#Se crea un timer de 1 segundo
 					#timerluz = TimerRecurrente(1.00, sensorluz.comprobarLuz)
 					#timerluz.start_timer()
-					s.AddTask( 1.00 , sensorluz.comprobarLuz)
+					s.AddTask( 1.00 , spi.ObtenerLuz)
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
 				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
-				sensorgas = SensorGas(26)
+				#sensorgas = SensorGas(26)
 				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				if globales.tiempo is not None:
 					#Se crea una tabla sensor de gas asociada a la exploracion	
@@ -200,14 +204,14 @@ def explorar(request):
 				#Se crea un timer de x segundos definidos por la variable tiempo
 					#timergas = TimerRecurrente(globales.tiempo, sensorgas.comprobarGas)
 					#timergas.start_timer()
-					s.AddTask( globales.tiempo , sensorgas.comprobarGas)
+					s.AddTask( globales.tiempo , spi.ObtenerGas)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
 					#Se crea un timer de 1 segundo
 					#timergas = TimerRecurrente(1.00, sensorgas.comprobarGas)
 					#timergas.start_timer()
-					s.AddTask( 1.00 , sensorgas.comprobarGas)
+					s.AddTask( 1.00 , spi.ObtenerGas)
 
 			#Si se ha elegido cámara para streaming
 			if globales.camara == True:
@@ -338,10 +342,15 @@ def detallesExploracion (request, id_exploracion):
 def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	#con sensor_tipo se sabe la gráfica que se ha seleccionado
 	explo = Exploracion.objects.get(pk=id_exploracion)
+
 	#Se ha seleccionado gráfica de temperatura
 	if sensor_tipo == "Temperatura":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Temperatura" 
 		sensor =  sensorTemperatura.objects.filter(exploracion=explo )
+
+		min = sensor.aggregate(Min('temperatura')).get('temperatura__min', 0.00)
+		max = sensor.aggregate(Max('temperatura')).get('temperatura__max', 0.00)
+		avg = round(sensor.aggregate(Avg('temperatura')).get('temperatura__avg', 0.00),2)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
 		data = \
@@ -378,15 +387,20 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'enabled': False},
 					'credits': {
 						'enabled': False}})		
+
 		#paso 3: Enviar la gráfica a la página.
-		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'min' : min , 'max' : max , 'avg' : avg }
 
 		return render(request, 'mostrarGrafica.html', context)
 
 	#Se ha seleccionado gráfica de humedad
-	if sensor_tipo == "Humedad":
+	elif sensor_tipo == "Humedad":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Humedad" 
 		sensor =  sensorHumedad.objects.filter(exploracion=explo )
+
+		min = sensor.aggregate(Min('humedad')).get('humedad__min', 0.00)
+		max = sensor.aggregate(Max('humedad')).get('humedad__max', 0.00)
+		avg = round(sensor.aggregate(Avg('humedad')).get('humedad__avg', 0.00),2)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
 		data = \
@@ -424,12 +438,12 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 					'credits': {
 						'enabled': False}})		
 		#paso 3: Enviar la gráfica a la página.
-		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'min' : min , 'max' : max , 'avg' : avg }
 
 		return render(request, 'mostrarGrafica.html', context)
 
 	#Se ha seleccionado gráfica de Gas
-	if sensor_tipo == "Gas":
+	elif sensor_tipo == "Gas":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Gas" 
 		sensor =  sensorGas.objects.filter(exploracion=explo)
 
@@ -475,7 +489,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 		return render(request, 'mostrarGrafica.html', context)
 
 	#Se ha seleccionado gráfica de Luz
-	if sensor_tipo == "Luz":
+	elif sensor_tipo == "Luz":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Luz" 
 		sensor =  sensorLuz.objects.filter(exploracion=explo)
 
@@ -592,7 +606,11 @@ def manu(request):
 		#Control del robot
 		#Mover hacia adelante
 		if (control == "fwd"):
-			globales.driver.Adelante()
+			eventloop = asyncio.new_event_loop()
+			asyncio.set_event_loop(eventloop)
+			eventloop.run_until_complete(globales.driver.Adelante())
+			eventloop.close()
+			#globales.driver.Adelante()
 		#Mover hacia atras
 		if (control == "bwd"):
 			globales.driver.Atras()

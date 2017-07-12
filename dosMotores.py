@@ -11,32 +11,42 @@ class DriverDosMotores(object):
 		self.motorDer = motorDer
 	
 	#Parar motores	
+	@asyncio.coroutine
 	def Parar(self):
 		self.motorIzq.Parar()
 		self.motorDer.Parar()
 
 	#Motores hacia adelante	
+	@asyncio.coroutine
 	def Adelante(self):
 		self.motorIzq.Adelante()
 		self.motorDer.Adelante()
+		#Gira hasta pasado este tiempo (~90º)
+		yield from asyncio.sleep(0.1)
+		#Para los motores
+#		self.motorDer.Parar()
+#		self.motorIzq.Parar()
 
 	#Motores hacia atrás
+	@asyncio.coroutine
 	def Atras(self):
 		self.motorIzq.Atras()
 		self.motorDer.Atras()
 
 	#Giro a la derecha
+	@asyncio.coroutine
 	def Derecha(self):
 		self.motorDer.Atras()
 		self.motorIzq.Adelante()
 		#Para los motores
-		time.sleep(0.1)
+		time.sleep(0.15)
 
 	#Giro a la izquierda	
+	@asyncio.coroutine
 	def Izquierda(self):
 		self.motorDer.Adelante()
 		self.motorIzq.Atras()
-		time.sleep(0.1)
+		time.sleep(0.15)
 	
 	#Giro a la derecha asincrono	
 	@asyncio.coroutine

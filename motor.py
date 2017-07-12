@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 
+
 #Clase motor
 class Motor(object):
 	#gpioPinIn1 IN1

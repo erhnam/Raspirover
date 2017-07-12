@@ -13,6 +13,22 @@
     
         <div id="grafica">{{ chart|load_charts:"grafica" }}</div>
 	<br>
+	<div align = 'center'> 
+		{% if tipo == 'Temperatura' %}		
+			<h3> <strong>Media:</strong>  <font color=" #2ecc71">{{ avg }}º</font></h3>
+			<h3> <strong>Máximo:</strong> <font color="#FF0000">{{ max }}º</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}º</font></h3> 
+		{% endif %}
+
+		{% if tipo == 'Humedad' %}		
+			<h3> <strong>Media:</strong>  <font color=" #2ecc71">{{ avg }}%</font></h3>
+			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
+		{% endif %}
+
+	</div>
+
+
 
 <div align="center"><a href =/detallesExploracion/{{explo.id_exploracion}}><label for="id_analizar"><img class="img-responsive" src="{{MEDIA_URL}}volver.png"></label></a></div>
 

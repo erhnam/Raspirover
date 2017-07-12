@@ -1,3 +1,26 @@
+document.onkeydown = checkKey;
+
+function checkKey(e) {
+
+    e = e || window.event;
+
+    if (e.keyCode == '38') {
+        fwd()
+    }
+    else if (e.keyCode == '40') {
+        bwd()
+    }
+    else if (e.keyCode == '37') {
+       left()
+    }
+    else if (e.keyCode == '39') {
+       right()
+    }
+
+}
+
+
+
 function fwd() {
 
 	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());

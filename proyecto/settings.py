@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_extensions',
     'raspirover',
-    'gunicorn',
+#    'gunicorn',
     'chartit',
 )
 
@@ -93,9 +93,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#        'NAME': '/home/pi/proyecto/db/db.sqlite3',
-#        'NAME': '/dev/shm/db.sqlite3',
-#        'NAME': '/run/shm/db.sqlite3',
 #        'TEST_CHARSET': 'UTF8',
 #        'TEST_NAME': None  # in-memory sqlite db
     }

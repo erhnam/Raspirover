@@ -26,7 +26,7 @@ class SPI(object):
 
 		#Se añade las resistncias usadas en el divisor de voltaje
 		if self.canalBateria is not None:
-			self.R1 = 19500
+			self.R1 = 18100
 			self.R2 = 12000
 
 		#Se añade los leds
@@ -71,7 +71,7 @@ class SPI(object):
 	#Funcion que devuelve el Gas
 	def ObtenerGas(self):
 		data = self.LeerCanal(self.canalGas)
-		if data > 120:
+		if data > 300:
 			#Se detecta gas
 			globales.gas = 1
 		else:
@@ -82,7 +82,7 @@ class SPI(object):
 	def ObtenerLuz(self):
 		data = self.LeerCanal(self.canalLuz)
 
-		if data < 400:
+		if data < 850:
 			#Se detecta luz y apaga leds
 			GPIO.output(self.pinLed1,GPIO.LOW)
 			GPIO.output(self.pinLed2,GPIO.LOW)
@@ -96,16 +96,10 @@ class SPI(object):
 
 	#Funcion que devuelve el voltaje de bateria
 	def ObtenerBateria(self):
-                data = self.LeerCanal(self.canalBateria)
-
-                for x in range(0,24):
-                        globales.voltaje += self.convertirDatoAVoltios(data)
-
-                globales.voltaje = round(globales.voltaje/25,2)
-                valor = globales.voltaje - 10.50
-                globales.porcentaje = round(((valor * 100.0)/2.1),2)
-                globales.voltaje=0.0
-                res = 0.0
+		data = self.LeerCanal(self.canalBateria)
+		globales.voltaje = self.convertirDatoAVoltios(data)
+		valor = globales.voltaje - 10.50
+		globales.porcentaje = round(((valor * 100.0)/2.1),2)
 
 	#Fin de la clase
 	def destroy(self):
