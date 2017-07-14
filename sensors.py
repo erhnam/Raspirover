@@ -165,5 +165,5 @@ class SensorDistancia(object):
 		distancia = (transcurrido * 34300.0)/2.0
 		if distancia < 0:
 			distancia = 32.0
-		print(distancia)
 		return distancia
+
