@@ -7,6 +7,28 @@ import globales
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
+import Adafruit_DHT
+
+#resetea los pins
+def setup(*pins):
+	GPIO.cleanup()
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
+	for pin in pins:
+		GPIO.setup(pin, GPIO.OUT)
+		GPIO.output(pin, GPIO.LOW)
+
+#Funcion para la temperatura y la humedad 
+#proporcionada por Adafruit
+def comprobarth(arg=[]):
+	#Sensor Adafruit
+	sensor = Adafruit_DHT.AM2302
+	#Obtiene los valores del sensor de temepratura y la humedad
+	globales.humedad, globales.temperatura = Adafruit_DHT.read_retry(sensor, 12)
+	#Redondea a 1 dígito decimal
+	globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0
+	globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0
+
 #Sensores SPI
 class SPI(object):
 	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz=None, canalBateria=None):
@@ -141,22 +163,7 @@ class SensorDistancia(object):
 		transcurrido = fin-inicio
                 #Formula para la distancia
 		distancia = (transcurrido * 34300.0)/2.0
+		if distancia < 0:
+			distancia = 32.0
+		print(distancia)
 		return distancia
-
-        #Funcion para conseguir mas precision en la medida de distancia
-	def precisionDistancia(self):
-                #Se calcula tres veces
-		distancia1 = self.calcularDistancia()
-		time.sleep(0.01)
-		distancia2 = self.calcularDistancia()
-		time.sleep(0.01)
-		distancia3 = self.calcularDistancia()
-		time.sleep(0.01)
-                #Se suman las tres distancias
-		distancia = distancia1 + distancia2 + distancia3
-                #se divide entre tres pruebas
-		distancia = distancia / 3.0
-                #se almacena valor
-		globales.distancia = distancia
-		return distancia
-

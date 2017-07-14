@@ -29,30 +29,22 @@ import asyncio
 import time
 #Librería para controlar GPIO
 import RPi.GPIO as GPIO
-#Librería para usar PiCamera
-import picamera
 #Libreria para hilos
 import threading
 #Libreria para Max, min y avg
 from django.db.models import Avg, Max, Min
 
-#Libreria del sistema operativo
-#os.nice(49)
-
-#Importaciones de ficheros creados para
-#sensores, camara, motores y globales.
+#Importaciones de ficheros creados para sensores, camara, motores y globales.
 from .models import *
 from .forms import *
 from servo import *
 from motor import *
 from camara import *
 from dosMotores import *
-from sensores import *
 from globales import * 
 from voltaje import *
 from timer import *
 from sensors import *
-#from gpiozero import *
 
 ########################## MANAGER DE TAREAS ##########################
 
@@ -91,7 +83,6 @@ def index(request):
 	globales.salir=1
 	globales.auto=False
 	globales.manu=False
-#	salir(request)
 	globales.inicializar()
 	globales.salir=0
 	
@@ -99,7 +90,7 @@ def index(request):
 	servo_c()
 
 	#Se inicializa los puertos GPIO
-	setup(14,21,20,16,26,22,27,5,6,12)
+	setup(14,21,20,16,26,22,27,5,6,12,23,24)
 
 	#devuelve los valores a la pagina
 	context = {'voltaje': globales.porcentaje}
@@ -156,20 +147,14 @@ def explorar(request):
 
 				#Si el tiempo es null se ejecuta el sensor cada 1 segundo			
 				if globales.tiempo is None:	
-					#timerdth = TimerRecurrente(1.00, comprobarth)
-					#timerdth.start_timer()
 					s.AddTask( 1.00, comprobarth )
 
 				#Si el tiempo no es null se crea un timer de x segundos definidos por la variable tiempo
 				else:
-					#timerdth = TimerRecurrente(globales.tiempo, comprobarth)
-					#timerdth.start_timer()
 					s.AddTask( globales.tiempo, comprobarth )
 
 			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
-				#Se crea sensor de Luz para manejar con Raspberry
-				#sensorluz = SensorLuz(21,20,16)
 				#Se crea un timer de x segundos definidos por la variable tiempo
 				if globales.tiempo is not None:	
 					#Se crea una tabla sensor de luz asociada a la exploracion	
@@ -178,21 +163,15 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbluz)
 					globales.dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
-					#timerluz = TimerRecurrente(globales.tiempo,  sensorluz.comprobarLuz)
-					#timerluz.start_timer()
 					s.AddTask( globales.tiempo, spi.ObtenerLuz)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
 					#Se crea un timer de 1 segundo
-					#timerluz = TimerRecurrente(1.00, sensorluz.comprobarLuz)
-					#timerluz.start_timer()
 					s.AddTask( 1.00 , spi.ObtenerLuz)
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
-				#Se crea sensor de gas (MQ-2) para manejar con Raspberry
-				#sensorgas = SensorGas(26)
 				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				if globales.tiempo is not None:
 					#Se crea una tabla sensor de gas asociada a la exploracion	
@@ -202,15 +181,11 @@ def explorar(request):
 					globales.dbexplo.save()
 
 				#Se crea un timer de x segundos definidos por la variable tiempo
-					#timergas = TimerRecurrente(globales.tiempo, sensorgas.comprobarGas)
-					#timergas.start_timer()
 					s.AddTask( globales.tiempo , spi.ObtenerGas)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
 					#Se crea un timer de 1 segundo
-					#timergas = TimerRecurrente(1.00, sensorgas.comprobarGas)
-					#timergas.start_timer()
 					s.AddTask( 1.00 , spi.ObtenerGas)
 
 			#Si se ha elegido cámara para streaming
@@ -220,31 +195,31 @@ def explorar(request):
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if globales.tiempo is not None:
-				#trigger = TimerRecurrente(globales.tiempo , BBDD, args=[globales.dbexplo.id_exploracion])
-				#trigger.start_timer()
 				s.AddTask( globales.tiempo, BBDD, args=[globales.dbexplo.id_exploracion] )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
 				#Activa todos los sensores asignados
-				#global s
 				s.StartAllTasks()
 				return redirect(reverse('manual'))
 
 			#si se ha elegido automatico
 			if request.method=='POST' and 'automatico' in request.POST:
+				#Activa todos los sensores asignados
+				s.StartAllTasks()
 				return redirect(reverse('auto'))
 
 	else:
 		form = ExploracionForm()
+
 	context = {'form': form, 'voltaje': globales.porcentaje}
+
 	return render(request, 'explorar.html', context)
 
 #Funcion que guarda valores de sensores en la base de datos
 @transaction.atomic
 def BBDD(id_exploracion):
 
-#	inicio = time.monotonic()
 	#Se busca la exploracion actual
 	globales.dbexplo = Exploracion.objects.get(pk=id_exploracion)
 
@@ -255,14 +230,14 @@ def BBDD(id_exploracion):
 		dbtemperatura.save()
 		globales.dbexplo.sensores.add(dbtemperatura)
 
-		#Si está activado el sensor de humedad
+	#Si está activado el sensor de humedad
 	if globales.shumedad == True:
 		#Se añade un nuevo valor de humedad a la base de datos
 		dbhumedad = sensorHumedad(humedad=globales.humedad, tipo="Humedad", enable=True)
 		dbhumedad.save()
 		globales.dbexplo.sensores.add(dbhumedad)
 
-		#Si está activado el sensor de gas
+	#Si está activado el sensor de gas
 	if globales.sgas == True:
 		#Se añade un nuevo valor de gas a la base de datos
 		dbgas = sensorGas(gas=globales.gas, tipo="Gas")
@@ -276,14 +251,13 @@ def BBDD(id_exploracion):
 		dbluz.save()
 		globales.dbexplo.sensores.add(dbluz)
 
-	#	print(time.monotonic() - inicio)	
 
 #Funcion que accede a la página Analizar
 @login_required(login_url='/')
 def analizar(request):
 	globales.salir=1
-	#salir(request)
 	globales.inicializar()
+
 	#extraer todas las exploraciones del usuario
 	explo=Exploracion.objects.filter(usuariofk=request.user)
 
@@ -294,8 +268,6 @@ def analizar(request):
 def eliminarExploracion(request, id_exploracion):
 	#Busca la exploracion
 	explo = Exploracion.objects.get(pk=id_exploracion)
-	#elimina el video
-	os.system("sudo rm -rf /home/pi/proyecto/media/videos/"+explo.nombre+str(explo.id_exploracion)+".mp4")
 	#elimina la exploracion de la base de datos
 	explo.delete()
 	#vuelve a la pagina de analisis
@@ -308,19 +280,16 @@ def detallesExploracion (request, id_exploracion):
 	h = "Humedad"
 	l = "Luz"
 	g = "Gas"
-	c = "Camara"
 	temperatura=False
 	humedad=False
 	gas=False
 	luz=False
-	camara=False
 
 	#extraer solo la exploracion seleccionada
 	explo = Exploracion.objects.get(pk=id_exploracion)
 	#extraer los sensores utilizados en la exploracion
 	sensores = Sensor.objects.filter(exploracion=explo)
-	#recorrer los sensores para saber cuales estan detectados
-	#y pasarlos a la pagina
+	#recorrer los sensores para saber cuales estan detectados y pasarlos a la pagina
 	for x in sensores:
 		if x.tipo == "Temperatura":
 			temperatura=True
@@ -330,11 +299,8 @@ def detallesExploracion (request, id_exploracion):
 			gas=True
 		if x.tipo == "Luz":
 			luz=True
-		if x.tipo == "Camara":
-			video = sensorCamara.objects.filter(exploracion=explo)
-			camara=True
-	
-	context = {'explo':explo, 'c':c, 't':t, 'h':h, 'l':l, 'g':g, 'camara':camara, 'voltaje': globales.porcentaje, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz, 'video':video}
+
+	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g,'voltaje': globales.porcentaje, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz}
 	return render(request, 'detalleExploracion.html', context)
 
 #Funcion que muestra una gráfica seleccionada
@@ -542,7 +508,6 @@ def salir(request):
 
 	#Para el Manager del sistema
 	s.StopAllTasks()
-#	del globales.manager
 
 	#Centra la camara
 	servo_c()
@@ -552,9 +517,6 @@ def salir(request):
 	
 	#Para la cámara
 	if globales.camara == True:
-	#	if globales.tiempo is not None:
-	#		globales.nombreFichero=globales.dbexplo.nombre + str(globales.dbexplo.id_exploracion)			
-	#		camara_stop(globales.nombreFichero)
 		camara_parar()
 
 	#si estaba en automático
@@ -597,6 +559,7 @@ def Izquierda():
 	eventloop.run_until_complete(globales.driver.GirarIzqAsync()) 
 	eventloop.close()
 
+#Funcion para realizar los movimientos manuales del robot
 def manu(request):
 
 	#Se recoge la peticion de wmovimiento
@@ -606,11 +569,7 @@ def manu(request):
 		#Control del robot
 		#Mover hacia adelante
 		if (control == "fwd"):
-			eventloop = asyncio.new_event_loop()
-			asyncio.set_event_loop(eventloop)
-			eventloop.run_until_complete(globales.driver.Adelante())
-			eventloop.close()
-			#globales.driver.Adelante()
+			globales.driver.Adelante()
 		#Mover hacia atras
 		if (control == "bwd"):
 			globales.driver.Atras()
@@ -648,13 +607,8 @@ def manual(request):
 	#Activar modo manual	
 	globales.manu=True
 
-#	globales.manager=threading.Thread(target=s.StartAllTasks())
-#	globales.manager.start()
-
-
 	#Crear hilo de modo manual
 	globales.manual=threading.Thread(target=manu(request)).setDaemon(True)
-	#globales.manual.start()
 
 	#Se crea un contexto con las variables para devolver a la plantilla
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
@@ -667,7 +621,6 @@ def manual(request):
 
 	#Devuelve el contexto a la página manul
 	return render(request, template, context)
-	#return render_to_response(template, context, context_instance=RequestContext(request))
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga(sensorDistancia):
@@ -679,7 +632,7 @@ def BuscarDistanciaMasLarga(sensorDistancia):
 	#Funcion asincrona de girar a la izquierda
 	Izquierda()
 	#Realiza una medida
-	distancia1 = sensorDistancia.precisionDistancia()
+	distancia1 = sensorDistancia.calcularDistancia()
 	#Se para el robot 1 segundo
 	driver.Parar()
 	time.sleep(1)
@@ -694,8 +647,7 @@ def BuscarDistanciaMasLarga(sensorDistancia):
 	driver.Parar()
 	time.sleep(1)
 	#Realiza otra medida
-	distancia2 = sensorDistancia.precisionDistancia()
-	
+	distancia2 = sensorDistancia.calcularDistancia()
 	#si la distancia de la izquierda es mayor q la derecha,
 	#gira dos veces a izq para volver a su posicion
 	if distancia1 > distancia2:
@@ -714,18 +666,17 @@ def BuscarDistanciaMasLarga(sensorDistancia):
 
 #Funcion que controla el modo automatico
 def automatico():
-	salir=0	#Variable para salir del bucle while
+	#Variable para salir del bucle while
+	salir=0	
 	#Se crea el sensor de distancia
 	sensorDistancia=SensorDistancia(23,24)
 	
 	#Comienzo de la automatización
 	
-	#Se toma una primera medida
-	globales.distancia = float(sensorDistancia.precisionDistancia())
-
 	while salir == 0:
 		#Se obtiene una primera medida de distancia
-		globales.distancia = float(sensorDistancia.precisionDistancia())
+		globales.distancia = sensorDistancia.calcularDistancia()
+
 		#Si la distancia es menor de 30 busca la distancia mas larga
 		if globales.distancia < 30.0:
 			BuscarDistanciaMasLarga(sensorDistancia)
@@ -748,21 +699,16 @@ def auto(request):
 	#Indica que está el modo automatico activado
 	globales.auto=True	
 
-	#Activa todos los sensores asignados
-#	s.StartAllTasks()
-
-	#Creamos un hilo para ejecutar el automatico
-	#así no bloquea a los demas hilos
-	globales.automatic=threading.Thread(target=automatico)
+	#Creamos un hilo para ejecutar el automatico así no bloquea a los demas hilos
+	globales.automatic=threading.Thread(target=automatico )
 	globales.automatic.start()
 
 	#creamos el contexto
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje }
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara': globales.camara, 'voltaje': globales.porcentaje }
 	
 	template = "auto.html"
 	return render(request, template, context)
-	#return render_to_response(template, context, context_instance=RequestContext(request))
 	
 #Funcion que registra a un usuario en el sitema
 def registro(request):

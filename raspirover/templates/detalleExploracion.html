@@ -27,27 +27,9 @@
 				{% if luz %}
 				<li> Sensor de luz: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{l}}><font color="#66B266">Mostrar gráfica</font></a> </li>
 				{% endif %}
-<!--
-				{% if camara %}
- 				<li> Video(s): </li>
--->
-				{% endif %}
 
 			</ul>			
 		</ul>
-<!--
-				{% if camara %}
-				{% for x in video %} 
- 				</li>
-					<div align="center">
-					<video width="320" height="240" controls>
-  						<source src="{{MEDIA_URL}}videos/{{x.video}}" type="video/mp4">
-					</video>
-					<div>
--->
-				{% endfor %}
-				{% endif %}
-
 
 	 	<br>
 	 	<div align="center" ><a href="{% url 'analizar' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>

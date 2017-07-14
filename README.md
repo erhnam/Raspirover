@@ -26,10 +26,10 @@
 ### Programación:
 
 1. Python 3.42
-2. Django Framework 1.11
-3. Nginx Server   
-4. MJPEG-Streamer
+2. Django Framework 1.11.3
+3. Nginx Server 1.62   
+4. MJPEG-Streamer 2.0
 5. ServoBlaster
 6. Adafruit DHT22
-7. Django ChartIt 2
+7. Django ChartIt 0.29
 8. SQLlite 3

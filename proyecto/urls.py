@@ -10,7 +10,7 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^', include('raspirover.urls')),
-    url(r'^admin/', include(admin.site.urls)),    
+#    url(r'^admin/', include(admin.site.urls)),    
     url (r'^login', views.login, name='login'),
     url (r'^logout', views.logout, name='logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
