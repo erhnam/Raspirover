@@ -157,7 +157,6 @@ image5.src = "/media/camaragris.png";
 image5alt = new Image();
 image5alt.src = "/media/camara.png";
 
-
 image6 = new Image();
 image6.src = "/media/manualgris.png";
 image6alt = new Image();
@@ -169,9 +168,9 @@ image7alt = new Image();
 image7alt.src = "/media/automatico.png";
 
 image8 = new Image();
-image8.src = "/media/vigilanciagris.png";
+image8.src = "/media/gpsgris.png";
 image8alt = new Image();
-image8alt.src = "/media/vigilancia.png";
+image8alt.src = "/media/gps.png";
 
 function cambiar1() {
 	if (document.getElementById('checkbox_f1').src != image1.src ) {
@@ -236,6 +235,22 @@ function cambiar5() {
 
 	}
 }
+
+function cambiar8() {
+
+	if (document.getElementById('checkbox_f8').src != image8.src ) {
+ 		document.getElementById('checkbox_f8').src = image8.src;
+ 		document.getElementById('checkbox_f8').checked = true;
+
+	} 
+	else {
+ 		document.getElementById('checkbox_f8').src = image8alt.src;
+ 		document.getElementById('checkbox_f8').checked = false;
+
+	}
+}
+
+
 function cambiar6() {
  		document.getElementById('checkbox_f6').src = image6alt.src;
 }
@@ -252,10 +267,3 @@ function cambiar7alt() {
  		document.getElementById('checkbox_f7').src = image7.src;
 }
 
-function cambiar8() {
- 		document.getElementById('checkbox_f8').src = image8alt.src;
-}
-
-function cambiar8alt() {
- 		document.getElementById('checkbox_f8').src = image8.src;
-}

@@ -1,13 +1,16 @@
+# -*- encoding: utf-8 -*-
+
 import RPi.GPIO as GPIO
 import spidev
 import time
 import os
 import globales
+import Adafruit_DHT
+import serial
+import math
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-
-import Adafruit_DHT
 
 #resetea los pins
 def setup(*pins):
@@ -29,6 +32,38 @@ def comprobarth(arg=[]):
 	globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0
 	globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0
 
+#Clase del sensor GPS
+class GPS():
+	def __init__(self):
+		self.gps = serial.Serial("/dev/ttyAMA0", baudrate = 9600)
+		self.coord = None
+		self.direccion = None
+		self.lat = None
+		self.lon = None
+
+	#Funcion que convierte los minutos devueltos por protocolo NMEA a grados
+	def minutos_a_grados(self, coord, direccion):
+		coord_float = coord/100.0;
+		coord_grados = math.floor(coord_float)+(coord_float%1.0)/0.6
+		if direccion =="S" or direccion == "W":
+			coord_grados = coord_grados * -1.0;
+		return round(coord_grados,6)
+
+	#Función que lee los datos del protocolo NMEA
+	def leer(self):
+#		for i in range(0,12):
+		while True:
+			line = self.gps.readline()
+			data = str(line).split(",")
+#			print(data)
+			if data[0] == "b'$GNRMC":
+				if data[2] == "A":
+					lat, latd = float(data[3]), data[4]
+					lon, lond = float(data[5]), data[6]
+					globales.lat = self.minutos_a_grados(lat, latd)
+					globales.lon = self.minutos_a_grados(lon, lond)
+						
+					print("%s , %s\n" % (globales.lat, globales.lon))
 #Sensores SPI
 class SPI(object):
 	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz=None, canalBateria=None):
@@ -133,7 +168,6 @@ class SPI(object):
 class SensorDistancia(object):
 	#Constructor recibe el pin trigger y echo del sensor
 	def __init__(self, pinTrigger, pinEcho, arg=[]):
-		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(pinTrigger,GPIO.OUT)
 		GPIO.setup(pinEcho,GPIO.IN)
 		GPIO.output(pinTrigger, False)

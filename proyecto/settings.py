@@ -13,10 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-#os.nice(49)
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -30,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.1.144', 'localhost', 'raspirover.local',]
 
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -42,7 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_extensions',
     'raspirover',
-#    'gunicorn',
     'chartit',
 )
 
@@ -113,6 +108,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_L10N = True
+
+DECIMAL_SEPARATOR = '.'
 
 USE_TZ = True
 

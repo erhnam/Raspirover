@@ -28,6 +28,10 @@
 				<li> Sensor de luz: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{l}}><font color="#66B266">Mostrar gráfica</font></a> </li>
 				{% endif %}
 
+				{% if gps %}
+				<li> Sensor de gps: <a href =/mostrarMapa/{{explo.id_exploracion}}><font color="#66B266">Mostrar mapa</font></a> </li>
+				{% endif %}
+
 			</ul>			
 		</ul>
 

@@ -111,6 +111,7 @@ def explorar(request):
 			globales.shumedad = cleaned_data.get('humedad')
 			globales.sgas =  cleaned_data.get('gas')
 			globales.sluz =  cleaned_data.get('luz')
+			globales.sgps = cleaned_data.get('gps')
 			globales.camara = cleaned_data.get('camara')
 			globales.tiempo = cleaned_data.get('tiempo')
 			nombre = cleaned_data.get('nombre')
@@ -121,13 +122,6 @@ def explorar(request):
 			if globales.tiempo is not None:
 				globales.dbexplo=Exploracion(nombre=nombre, tiempo=globales.tiempo, usuariofk=request.user, descripcion=descripcion)
 				globales.dbexplo.save()
-				#Si la camara está activada
-				if globales.camara == True:
-					dbcamara = sensorCamara(video=nombre+str(globales.dbexplo.id_exploracion)+".mp4", tipo="Camara", enable=True)
-					dbcamara.save()
-					globales.dbexplo.sensores.add(dbcamara)
-					globales.dbexplo.save()
-					camara_start()
 
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
@@ -187,6 +181,26 @@ def explorar(request):
 				else:
 					#Se crea un timer de 1 segundo
 					s.AddTask( 1.00 , spi.ObtenerGas)
+
+			#Se ha elegido en el formulario el sensor de gas
+			if globales.sgps == True:
+				print("gps activado")
+				gps = GPS()
+				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
+				if globales.tiempo is not None:
+					#Se crea una tabla sensor de gas asociada a la exploracion	
+					dbgps = sensorGps(tipo="Gps", enable=True)
+					dbgps.save()
+					globales.dbexplo.sensores.add(dbgps)
+					globales.dbexplo.save()
+
+				#Se crea un timer de x segundos definidos por la variable tiempo
+					s.AddTask( globales.tiempo , gps.leer )
+
+				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
+				else:
+					#Se crea un timer de 1 segundo
+					s.AddTask( 1.00 , gps.leer)
 
 			#Si se ha elegido cámara para streaming
 			if globales.camara == True:
@@ -251,6 +265,12 @@ def BBDD(id_exploracion):
 		dbluz.save()
 		globales.dbexplo.sensores.add(dbluz)
 
+	#Si está activado el sensor de gps
+	if globales.sgps == True:
+		#Se añade un nuevo valor de luz a la base de datos
+		dbgps = sensorGps(lat=globales.lat, lon=globales.lon, tipo="Gps")
+		dbgps.save()
+		globales.dbexplo.sensores.add(dbgps)
 
 #Funcion que accede a la página Analizar
 @login_required(login_url='/')
@@ -280,10 +300,12 @@ def detallesExploracion (request, id_exploracion):
 	h = "Humedad"
 	l = "Luz"
 	g = "Gas"
+	gp = "Gps"
 	temperatura=False
 	humedad=False
 	gas=False
 	luz=False
+	gps=False
 
 	#extraer solo la exploracion seleccionada
 	explo = Exploracion.objects.get(pk=id_exploracion)
@@ -299,9 +321,31 @@ def detallesExploracion (request, id_exploracion):
 			gas=True
 		if x.tipo == "Luz":
 			luz=True
+		if x.tipo == "Gps":
+			gps=True
 
-	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g,'voltaje': globales.porcentaje, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz}
+	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'gps': gp, 'voltaje': globales.porcentaje, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz, 'gps':gps }
 	return render(request, 'detalleExploracion.html', context)
+
+#Funcion que muestra una gráfica seleccionada
+@login_required(login_url='/')
+def mostrarMapa (request, id_exploracion):
+	#con sensor_tipo se sabe la gráfica que se ha seleccionado
+	explo = Exploracion.objects.get(pk=id_exploracion)
+
+	coords = sensorGps.objects.filter(exploracion=explo)
+ 
+	lats = []
+	lons = []
+
+	for i in coords:
+		lats.append(i.lat)
+		lons.append(i.lon)
+
+	context = {'voltaje': globales.porcentaje, 'coords': coords, 'explo' : explo , 'lats' : lats, 'lons' : lons}
+
+	return render(request, 'mostrarMapa.html', context)
+
 
 #Funcion que muestra una gráfica seleccionada
 @login_required(login_url='/')
@@ -540,7 +584,7 @@ def salir(request):
 def mostrardatos(request):
 
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje, 'numVideos': globales.grabacion}
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje}
 
 	template = "datos.html"
 	return render(request, template, context)

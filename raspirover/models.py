@@ -59,6 +59,17 @@ class sensorCamara(Sensor):
 	class Meta:
 		db_table = 'SensorCamara'	
 
+#Sensor de Camara
+class sensorGps(Sensor):
+	lat = models.FloatField(default=0,  null=True)
+	lon = models.FloatField(default=0,  null=True)
+
+	class Meta:
+		db_table = 'SensorGps'	
+
+	def __unicode__(self):
+		return self.lat+","+self.lon
+
 #Sensor de temperatura	
 class sensorTemperatura(Sensor):
 	temperatura = models.DecimalField(max_digits=3, decimal_places=1, null=True,validators=[MinValueValidator(-10),	MaxValueValidator(100)])

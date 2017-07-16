@@ -22,6 +22,8 @@
 
 			<label for="id_luz"><img class="img-responsive" id="checkbox_f4" src="{{MEDIA_URL}}luzgris.png" onclick="cambiar4()"></label>
 
+			<label for="id_gps"><img class="img-responsive" id="checkbox_f8" src="{{MEDIA_URL}}gpsgris.png" onclick="cambiar8()"></label>
+
 			<label for="id_camara"><img class="img-responsive" id="checkbox_f5" src="{{MEDIA_URL}}camaragris.png" onclick="cambiar5()"></label>
 		
 			<h3> <center>¿Qué  modo de exploración desea utilizar?</h3>
@@ -31,10 +33,6 @@
 
 			<label for="sba"><img class="img-responsive" id="checkbox_f7" src="{{MEDIA_URL}}automaticogris.png" onmouseover="cambiar7()" onmouseout="cambiar7alt()"></label>
 			<input type="submit" class="hide-checkbox" name="automatico" id="sba" value="Iniciar exploración automática" />
-<!--
-			<label for="sbv"><img class="img-responsive" id="checkbox_f8" src="{{MEDIA_URL}}vigilancia.png" onmouseover="cambiar8()" onmouseout="cambiar8alt()"></label>
-			<input type="submit" class="hide-checkbox" name="vigilancia" id="sbv" value="Iniciar modo vigilancia"/>
--->
 		</form>
 	<div><a href="{% url 'index' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
 	</div>

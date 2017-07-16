@@ -29,6 +29,11 @@ class sensorCamaraAdmin(admin.ModelAdmin):
 
 admin.site.register(sensorCamara, sensorCamaraAdmin)
 
+class sensorGpsAdmin(admin.ModelAdmin):
+    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
+
+admin.site.register(sensorGps, sensorGpsAdmin)
+
 class sensorTemperaturaAdmin(admin.ModelAdmin):
     list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
 
