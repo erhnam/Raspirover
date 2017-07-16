@@ -18,6 +18,7 @@
 4. Sensor De luz analógico
 5. Sensor de Batería (nuevo)
 6. Pi Camera V2
+7. Gps Ublox neo6-n8m
 
 #### Conexiones (anticuado)
 
