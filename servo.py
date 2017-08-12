@@ -15,10 +15,10 @@ def servo_lcr():
 	salir = 0
 	while i > min:
 		servo_r()
-		time.sleep(0.5)
+		time.sleep(0.1)
 	while i < max:
 		servo_l()
-		time.sleep(0.5)
+		time.sleep(0.1)
 	while i != center:
 		if i > center:
 			i = i - 5

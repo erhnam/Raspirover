@@ -23,28 +23,30 @@ class Task(threading.Timer):
 
 	#Función que inicia el timer
 	def stop (self):
+		globales.salir=1
 		self.running = 0
 
 
 #Manejador de Tareas    
 class Scheduler(object):
-        def __init__( self ):
-                self._tasks = []
+	def __init__( self ):
+		self._tasks = []
 
 	#Funcion que añade las tareas
-        def AddTask( self, *args, **kwargs):
-                task = Task( *args, **kwargs )
-                self._tasks.append( task )
+	def AddTask( self, *args, **kwargs):
+		task = Task( *args, **kwargs )
+		self._tasks.append( task )
 
 	#Funcion que ejecuta todas las tareas
-        def StartAllTasks( self ):
-                for task in self._tasks:
-                        task.start_timer()
+	def StartAllTasks( self ):
+		for task in self._tasks:
+			task.start_timer()
 
 	#Funcion que para y borra todas las tareas
-        def StopAllTasks( self ):
-                for task in self._tasks:
-                        task.stop()
+	def StopAllTasks( self ):
+		for task in self._tasks:
+			task.stop()
+
 		#Vacía la lista de tareas
-                self._tasks.clear()
+		self._tasks.clear()
 

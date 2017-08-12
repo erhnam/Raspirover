@@ -42,21 +42,19 @@ from motor import *
 from camara import *
 from dosMotores import *
 from globales import * 
-from voltaje import *
 from timer import *
 from sensors import *
 
 ########################## MANAGER DE TAREAS ##########################
 
-s = Scheduler()
+scheduler = Scheduler()
 
 ########################## VOLTAJE ##########################
 
 spi = SPI(canalBateria=1, canalGas = 2, canalLuz = 3)
 
-voltaje = Task(30.0, spi.ObtenerBateria)
+scheduler.AddTask( 5.0 , spi.ObtenerBateria )
 
-voltaje.start_timer()
 
 ########################## CONTROLADOR ###############################
 
@@ -77,20 +75,27 @@ def apagar(request):
 def reboot(request):
 	os.system("sudo reboot")	
 
+
+#Funcion que accede a la página Analizar
+@login_required(login_url='/')
+def analizar(request):
+	globales.salir=1
+	globales.inicializar()
+
+	#extraer todas las exploraciones del usuario
+	explo=Exploracion.objects.filter(usuariofk=request.user)
+
+	return render(request, 'analizar.html', {'explo': explo, 'voltaje': globales.porcentaje})
+
 #Función de la página principal del programa
 def index(request):
-	#reinicia todas las variables
-	globales.salir=1
-	globales.auto=False
-	globales.manu=False
 	globales.inicializar()
-	globales.salir=0
 	
 	#Centra la camara
 	servo_c()
 
 	#Se inicializa los puertos GPIO
-	setup(14,21,20,16,26,22,27,5,6,12,23,24)
+	setup(14,21,20,16,26,22,27,5,6,12,23)
 
 	#devuelve los valores a la pagina
 	context = {'voltaje': globales.porcentaje}
@@ -99,6 +104,9 @@ def index(request):
 #Funcion que ofrece las opciones para iniciar una exploración
 @login_required(login_url='/')
 def explorar(request):
+
+	global scheduler
+
 	#Si es método post
 	if request.method == "POST":
 		#se crea un formulaio
@@ -113,7 +121,7 @@ def explorar(request):
 			globales.sluz =  cleaned_data.get('luz')
 			globales.sgps = cleaned_data.get('gps')
 			globales.camara = cleaned_data.get('camara')
-			globales.tiempo = cleaned_data.get('tiempo')
+			globales.tiempo = float(cleaned_data.get('tiempo'))
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
@@ -141,11 +149,11 @@ def explorar(request):
 
 				#Si el tiempo es null se ejecuta el sensor cada 1 segundo			
 				if globales.tiempo is None:	
-					s.AddTask( 1.00, comprobarth )
+					scheduler.AddTask( 1.0 , comprobarth )
 
 				#Si el tiempo no es null se crea un timer de x segundos definidos por la variable tiempo
 				else:
-					s.AddTask( globales.tiempo, comprobarth )
+					scheduler.AddTask( globales.tiempo, comprobarth )
 
 			#Se ha elegido en el formulario el sensor de luz		
 			if globales.sluz == True:
@@ -157,12 +165,12 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbluz)
 					globales.dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
-					s.AddTask( globales.tiempo, spi.ObtenerLuz)
+					scheduler.AddTask( globales.tiempo, spi.ObtenerLuz)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos	
 				else:
 					#Se crea un timer de 1 segundo
-					s.AddTask( 1.00 , spi.ObtenerLuz)
+					scheduler.AddTask( 1.0 , spi.ObtenerLuz)
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgas == True:
@@ -174,17 +182,16 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbgas)
 					globales.dbexplo.save()
 
-				#Se crea un timer de x segundos definidos por la variable tiempo
-					s.AddTask( globales.tiempo , spi.ObtenerGas)
+					#Se crea un timer de x segundos definidos por la variable tiempo
+					scheduler.AddTask( globales.tiempo , spi.ObtenerGas)
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
 					#Se crea un timer de 1 segundo
-					s.AddTask( 1.00 , spi.ObtenerGas)
+					scheduler.AddTask( 1.0 , spi.ObtenerGas)
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgps == True:
-				print("gps activado")
 				gps = GPS()
 				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
 				if globales.tiempo is not None:
@@ -194,34 +201,50 @@ def explorar(request):
 					globales.dbexplo.sensores.add(dbgps)
 					globales.dbexplo.save()
 
-				#Se crea un timer de x segundos definidos por la variable tiempo
-					s.AddTask( globales.tiempo , gps.leer )
+					#Se crea un timer de x segundos definidos por la variable tiempo
+					scheduler.AddTask( globales.tiempo , gps.leer )
 
 				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
 				else:
 					#Se crea un timer de 1 segundo
-					s.AddTask( 1.00 , gps.leer)
+					scheduler.AddTask( 1.0 , gps.leer)
 
 			#Si se ha elegido cámara para streaming
 			if globales.camara == True:
-				camara_start()
-			
+				globales.cam=threading.Thread(target=camara_start)
+
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if globales.tiempo is not None:
-				s.AddTask( globales.tiempo, BBDD, args=[globales.dbexplo.id_exploracion] )
+				scheduler.AddTask( globales.tiempo, BBDD, args=[globales.dbexplo.id_exploracion] )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
+				#Ejecuta la camara si está activada
+				if globales.camara == True:
+					globales.cam.start()
+
+				#Ejecucion Manual sin sensores	
+				if globales.stemperatura == False and globales.shumedad == False and globales.sgas == False and globales.sluz == False:
+					return redirect('manual')
 				#Activa todos los sensores asignados
-				s.StartAllTasks()
-				return redirect(reverse('manual'))
+				else:
+					scheduler.StartAllTasks()
+					return redirect('manual')
 
 			#si se ha elegido automatico
 			if request.method=='POST' and 'automatico' in request.POST:
+				#Ejecuta la camara si está activada
+				if globales.camara == True:
+					globales.cam.start()
+
+				#Ejecucion Automatica sin sensores	
+				if globales.stemperatura == False and globales.shumedad == False and globales.sgas == False and globales.sluz == False:
+					return redirect('auto')
 				#Activa todos los sensores asignados
-				s.StartAllTasks()
-				return redirect(reverse('auto'))
+				else:
+					scheduler.StartAllTasks()
+					return redirect('auto')
 
 	else:
 		form = ExploracionForm()
@@ -271,17 +294,6 @@ def BBDD(id_exploracion):
 		dbgps = sensorGps(lat=globales.lat, lon=globales.lon, tipo="Gps")
 		dbgps.save()
 		globales.dbexplo.sensores.add(dbgps)
-
-#Funcion que accede a la página Analizar
-@login_required(login_url='/')
-def analizar(request):
-	globales.salir=1
-	globales.inicializar()
-
-	#extraer todas las exploraciones del usuario
-	explo=Exploracion.objects.filter(usuariofk=request.user)
-
-	return render(request, 'analizar.html', {'explo': explo, 'voltaje': globales.porcentaje})
 
 #Elimina una exploración elegida por el usuario
 @login_required(login_url='/')
@@ -548,32 +560,38 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 @login_required(login_url='/')
 def salir(request):
 
-	global s
+	global scheduler
 
 	#Para el Manager del sistema
-	s.StopAllTasks()
+	scheduler.StopAllTasks()
 
 	#Centra la camara
 	servo_c()
 
 	#Destruye los timers
 	globales.salir=1
-	
+
+	camara_parar()	
 	#Para la cámara
 	if globales.camara == True:
+		globales.camara == False
+		del globales.cam
 		camara_parar()
+		globales.cam = None
 
 	#si estaba en automático
 	if globales.auto == True:
 		#borra hilo de automático
 		globales.auto=False
 		del globales.automatic
+		globales.automatic = None
 
 	#si estaba en manual
 	if globales.manu == True:
-		#borra hilo de automático
+		#borra hilo de manual
 		globales.manu=False
 		del globales.manual
+		globales.manual = None
 
 	#redirige al index
 	return redirect('index')
@@ -603,8 +621,10 @@ def Izquierda():
 	eventloop.run_until_complete(globales.driver.GirarIzqAsync()) 
 	eventloop.close()
 
-#Funcion para realizar los movimientos manuales del robot
-def manu(request):
+
+#Función de control manual del sistema
+@login_required(login_url='/')
+def manual(request):
 
 	#Se recoge la peticion de wmovimiento
 	if 'cmd' in request.GET and request.GET['cmd']:
@@ -644,27 +664,27 @@ def manu(request):
 		if (control == "camdown"):
 			servo_d()	
 
-#Función de control manual del sistema
-@login_required(login_url='/')
-def manual(request):
-
-	#Activar modo manual	
-	globales.manu=True
-
-	#Crear hilo de modo manual
-	globales.manual=threading.Thread(target=manu(request)).setDaemon(True)
-
 	#Se crea un contexto con las variables para devolver a la plantilla
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
-			'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
-			'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
-			'camara':globales.camara, 'voltaje': globales.porcentaje}
+	context = {'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 
+				'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara' : globales.camara, 
+				'voltaje': globales.porcentaje, 'sgps' : globales.sgps}
 
 	#Variable que guarda la página a cargar
 	template = "manual.html"
 
 	#Devuelve el contexto a la página manul
 	return render(request, template, context)
+	"""
+		#Se crea un contexto con las variables para devolver a la plantilla
+		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
+				'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
+				'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
+				'camara':globales.camara, 'voltaje': globales.porcentaje}
+
+		#Variable que guarda la página a cargar
+		template = "manual.html"
+	"""
+
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga(sensorDistancia):
@@ -713,7 +733,7 @@ def automatico():
 	#Variable para salir del bucle while
 	salir=0	
 	#Se crea el sensor de distancia
-	sensorDistancia=SensorDistancia(23,24)
+	sensorDistancia=SensorDistancia(23)
 	
 	#Comienzo de la automatización
 	
@@ -729,8 +749,7 @@ def automatico():
 			globales.driver.Adelante()
 		#Comprueba la salida
 		if globales.salir == 1:
-			salir = 1
-			globales.auto = False		
+			salir = 1	
 
 	#Corta el hilo
 	salir=0
@@ -741,16 +760,25 @@ def automatico():
 @login_required(login_url='/')
 def auto(request):
 	#Indica que está el modo automatico activado
-	globales.auto=True	
+	globales.auto=True
 
 	#Creamos un hilo para ejecutar el automatico así no bloquea a los demas hilos
-	globales.automatic=threading.Thread(target=automatico )
+	globales.automatic=threading.Thread(target=automatico)
 	globales.automatic.start()
 
-	#creamos el contexto
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara': globales.camara, 'voltaje': globales.porcentaje }
-	
+	"""
+		#creamos el contexto
+		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
+					'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
+					'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
+					'camara': globales.camara, 'voltaje': globales.porcentaje }
+	"""
+
+	#Se crea un contexto con las variables para devolver a la plantilla
+	context = {'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 
+				'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara' : globales.camara, 
+				'voltaje': globales.porcentaje, 'sgps' : globales.sgps}
+
 	template = "auto.html"
 	return render(request, template, context)
 	
@@ -868,6 +896,5 @@ def gracias(request, username, login):
 
 #Función para sobre mi
 def sobre_mi(request):
-	
 	return render(request, 'sobre_mi.html', {'voltaje': globales.porcentaje})
 

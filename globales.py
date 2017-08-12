@@ -22,6 +22,7 @@ luz=0				#Valor de luz
 trigger=None			#Trigger para almacenar los datos
 auto=False      		#Variable para detectar modo automatico
 manu=False			#Variables para detectar modo manual
+cam=None
 automatic=None			#Variable que carga hilo de modo automatico
 manual=None			#Variable que carga hilo de modo manual
 sdistancia=False    		#Variable del sensor distancia del formulario 
@@ -68,3 +69,4 @@ def inicializar():
 	camara=False        		#Variable de la camara del formulario
 	tiempo=None        		#Variable de tiempo del formulario 
 	nombre=False        		#Variable del nombre del formulario
+	cam=None

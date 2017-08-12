@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,7 +26,9 @@ SECRET_KEY = 'cv5+it_13@#(3*9p-p#3zbb7hff(3(iy7l74@_&673-a#8jd8v'
 #DEBUG = True
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.1.144', 'localhost', 'raspirover.local',]
+ip = subprocess.check_output(['hostname', '-I']).decode('ascii')
+
+ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.1.141', 'localhost', 'raspirover.local',]
 
 # Application definition
 

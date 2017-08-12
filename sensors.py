@@ -38,8 +38,6 @@ class GPS():
 		self.gps = serial.Serial("/dev/ttyAMA0", baudrate = 9600)
 		self.coord = None
 		self.direccion = None
-		self.lat = None
-		self.lon = None
 
 	#Funcion que convierte los minutos devueltos por protocolo NMEA a grados
 	def minutos_a_grados(self, coord, direccion):
@@ -47,12 +45,14 @@ class GPS():
 		coord_grados = math.floor(coord_float)+(coord_float%1.0)/0.6
 		if direccion =="S" or direccion == "W":
 			coord_grados = coord_grados * -1.0;
-		return round(coord_grados,6)
+
+		if round(coord_grados,6) != 0.0:
+			return round(coord_grados,6)
+
 
 	#Función que lee los datos del protocolo NMEA
 	def leer(self):
-#		for i in range(0,12):
-		while True:
+		for i in range(0,14):
 			line = self.gps.readline()
 			data = str(line).split(",")
 #			print(data)
@@ -60,10 +60,12 @@ class GPS():
 				if data[2] == "A":
 					lat, latd = float(data[3]), data[4]
 					lon, lond = float(data[5]), data[6]
+					
 					globales.lat = self.minutos_a_grados(lat, latd)
 					globales.lon = self.minutos_a_grados(lon, lond)
 						
 					print("%s , %s\n" % (globales.lat, globales.lon))
+
 #Sensores SPI
 class SPI(object):
 	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz=None, canalBateria=None):
@@ -166,38 +168,40 @@ class SPI(object):
 
 #Sensor ultrasónico HC-SR04
 class SensorDistancia(object):
-	#Constructor recibe el pin trigger y echo del sensor
-	def __init__(self, pinTrigger, pinEcho, arg=[]):
-		GPIO.setup(pinTrigger,GPIO.OUT)
-		GPIO.setup(pinEcho,GPIO.IN)
-		GPIO.output(pinTrigger, False)
-		self.echo = pinEcho
-		self.trigger = pinTrigger
+        timeout = 0.05
 
-	#funcion que calcula la distancia
-	def calcularDistancia(self):
-		#Se crean las variables para controlar tiempo
-		inicio = 0
-		fin = 0
-		#Manda señal
-		GPIO.output(self.trigger, True)
-		#Espera respuesta
-		time.sleep(0.00001)
-                #Recoge la señal
-		GPIO.output(self.trigger, False)
+        def __init__(self, channel):
+                self.channel = channel
+                GPIO.setmode(GPIO.BCM)
 
-                #Manda señal de inicio
-		while GPIO.input(self.echo)==0:
-			inicio = time.time()
-                #Recibe la señal
-		while GPIO.input(self.echo)==1:
-			fin = time.time()
+        def calcularDistancia(self):
+                pulse_end = 0
+                pulse_start = 0
+                GPIO.setup(self.channel,GPIO.OUT)
+                GPIO.output(self.channel, False)
+                time.sleep(0.01)
+                GPIO.output(self.channel, True)
+                time.sleep(0.00001)
+                GPIO.output(self.channel, False)
+                GPIO.setup(self.channel,GPIO.IN)
 
-                #Calculo del tiempo tardado
-		transcurrido = fin-inicio
-                #Formula para la distancia
-		distancia = (transcurrido * 34300.0)/2.0
-		if distancia < 0:
-			distancia = 32.0
-		return distancia
+                timeout_start = time.time()
+                while GPIO.input(self.channel)==0:
+                        pulse_start = time.time()
+                        if pulse_start - timeout_start > self.timeout:
+                                return 32.0
+                while GPIO.input(self.channel)==1:
+                        pulse_end = time.time()
+                        if pulse_start - timeout_start > self.timeout:
+                                return 32.0
 
+                if pulse_start != 0 and pulse_end != 0:
+                        pulse_duration = pulse_end - pulse_start
+                        distance = pulse_duration * 100 * 343.0 /2
+                        distance = int(distance)
+                        if distance >= 0:
+                                return distance
+                        else:
+                                return 32.0
+                else :
+                        return 32.0

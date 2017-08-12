@@ -8,12 +8,40 @@
 
 
      <div id="content" align="center">
-        <img class="img-responsive" width="320" height="240" src="http://192.168.1.144:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
-            {% include 'datos.html' %} 
-	            <h5>Control de Cámara 
+        <img class="img-responsive" width="320" height="240" src="http://192.168.1.141:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
+
+        <div id="auto">
+            {% if stemp == True %}
+            <label for="id_temperatura"><img id="checkbox_f1b" src="{{MEDIA_URL}}temperatura.png" > </label>
+            {% endif %}
+            
+            {% if shum == True %}
+            <label for="id_humedad"><img id="checkbox_f2b" src="{{MEDIA_URL}}humedad.png" > </label>
+            {% endif %}
+            
+            {% if sgas == True %}
+            <label for="id_gas"><img id="checkbox_f3b" src="{{MEDIA_URL}}gas.png" > </label>
+            {% endif %}
+            
+            {% if sluz == True %}
+            <label for="id_luz"><img id="checkbox_f4b" src="{{MEDIA_URL}}luz.png" > </label>
+            {% endif %}
+
+            {% if sgps == True %}
+            <label for="id_gps"><img id="checkbox_f8b" src="{{MEDIA_URL}}gps.png" > </label>
+            {% endif %}
+            
+            {% if camara == True %}
+            <label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" ></label>
+            {% endif %}
+
+        </div>
+
+        <h5>Control de Cámara 
 		&nbsp;&nbsp;&nbsp;&nbsp;
 		&nbsp;&nbsp;&nbsp;&nbsp;
-	        Control de dirección</h5>  
+        Control de dirección</h5> 
+         
      </div>
 
      	   <div class="servo" align="left">
@@ -23,7 +51,7 @@
                 <button id="cup" type="button" class="btn btn-default btn-mv" aria-label="Top Arrow" onclick="camup();">
                     <span class="glyphicon glyphicon-arrow-up" style="color:green" aria-hidden="true"></span>
                 </tr>
-		<br>
+				<br>
                 <tr>
                 <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="camleft();">
                      <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
@@ -74,7 +102,3 @@
             <br><a href="{% url 'salir' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>   
 
 {% endblock centro %}
-
-
-
-

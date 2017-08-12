@@ -18,7 +18,7 @@ function loadMap() {
     // Create the map.
     var mapOptions = {
         zoom: 18,
-        center: new google.maps.LatLng(lats[0], lons[0]),
+        center: new google.maps.LatLng(lats[1], lons[1]),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
@@ -26,7 +26,7 @@ function loadMap() {
         document.getElementById('map-canvas'),
         mapOptions
     );
-    for( var i = 0;  i < puntos; i++ ) { 
+    for( var i = 1;  i < puntos; i++ ) { 
         var lat = lats[i];
         var lng = lons[i];
 
