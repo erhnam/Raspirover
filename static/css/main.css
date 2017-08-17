@@ -7,7 +7,7 @@ body { background-color: #F5F5DC; }
   margin-top: 7px;
 }
 
-#checkbox_f1, #checkbox_f2, #checkbox_f3, #checkbox_f4,#checkbox_f5,#checkbox_f6,#checkbox_f7,#checkbox_f8{
+#checkbox_f1, #checkbox_f2, #checkbox_f3, #checkbox_f4, #checkbox_f5, #checkbox_f6, #checkbox_f7, #checkbox_f8, #checkbox_f9{
 	margin-left: 25px;
 	margin-right: 25px;
 	margin-top: 25px;
@@ -61,7 +61,7 @@ input.hide-checkbox {
 }
 
 
-#checkbox_f1b, #checkbox_f2b, #checkbox_f3b, #checkbox_f4b,#checkbox_f5b,#checkbox_f6b,#checkbox_f7b,#checkbox_f8b{
+#checkbox_f1b, #checkbox_f2b, #checkbox_f3b, #checkbox_f4b, #checkbox_f5b, #checkbox_f6b, #checkbox_f7b, #checkbox_f8b, #checkbox_f9b{
 	margin-left: 5px;
 	margin-right: 5px;
 	margin-top: 5px;

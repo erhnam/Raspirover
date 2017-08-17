@@ -51,9 +51,9 @@ scheduler = Scheduler()
 
 ########################## VOLTAJE ##########################
 
-spi = SPI(canalBateria=1, canalGas = 2, canalLuz = 3)
+spi = SPI(canalGas = 7, canalLuz = 6, canalFuego = 0)
 
-scheduler.AddTask( 5.0 , spi.ObtenerBateria )
+#scheduler.AddTask( 5.0 , spi.ObtenerBateria )
 
 
 ########################## CONTROLADOR ###############################
@@ -118,18 +118,21 @@ def explorar(request):
 			globales.stemperatura = cleaned_data.get('temperatura')
 			globales.shumedad = cleaned_data.get('humedad')
 			globales.sgas =  cleaned_data.get('gas')
+			globales.sfuego =  cleaned_data.get('fuego')
 			globales.sluz =  cleaned_data.get('luz')
 			globales.sgps = cleaned_data.get('gps')
 			globales.camara = cleaned_data.get('camara')
-			globales.tiempo = float(cleaned_data.get('tiempo'))
+			globales.tiempo = cleaned_data.get('tiempo')
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 	
 			#Se crea una exploracion con parte de los valores del formulario
 			#Si tiempo no está vacío se crea una exploracion	
 			if globales.tiempo is not None:
+				globales.tiempo = float(globales.tiempo)
 				globales.dbexplo=Exploracion(nombre=nombre, tiempo=globales.tiempo, usuariofk=request.user, descripcion=descripcion)
 				globales.dbexplo.save()
+
 
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
@@ -189,6 +192,25 @@ def explorar(request):
 				else:
 					#Se crea un timer de 1 segundo
 					scheduler.AddTask( 1.0 , spi.ObtenerGas)
+
+			#Se ha elegido en el formulario el sensor de fuego
+			if globales.sfuego == True:
+				#Si el tiempo no es null se ejecuta el sensor segun tiempo asignado	
+				if globales.tiempo is not None:
+					#Se crea una tabla sensor de gas asociada a la exploracion	
+					dbfuego = sensorFuego(tipo="Fuego", enable=True)
+					dbfuego.save()
+					globales.dbexplo.sensores.add(dbfuego)
+					globales.dbexplo.save()
+
+					#Se crea un timer de x segundos definidos por la variable tiempo
+					scheduler.AddTask( globales.tiempo , spi.ObtenerFuego)
+
+				#Si el tiempo es null se ejecuta el sensor cada 5 segundos			
+				else:
+					#Se crea un timer de 1 segundo
+					scheduler.AddTask( 1.0 , spi.ObtenerFuego)
+
 
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgps == True:
@@ -281,6 +303,13 @@ def BBDD(id_exploracion):
 		dbgas.save()
 		globales.dbexplo.sensores.add(dbgas)
 
+	#Si está activado el sensor de fuego
+	if globales.sfuego == True:
+		#Se añade un nuevo valor de gas a la base de datos
+		dbfuego = sensorFuego(fuego=globales.fuego, tipo="Fuego")
+		dbfuego.save()
+		globales.dbexplo.sensores.add(dbfuego)
+
 	#Si está activado el sensor de luz
 	if globales.sluz == True:
 		#Se añade un nuevo valor de luz a la base de datos
@@ -312,10 +341,12 @@ def detallesExploracion (request, id_exploracion):
 	h = "Humedad"
 	l = "Luz"
 	g = "Gas"
+	f = "Fuego"
 	gp = "Gps"
 	temperatura=False
 	humedad=False
 	gas=False
+	fuego=False
 	luz=False
 	gps=False
 
@@ -331,12 +362,15 @@ def detallesExploracion (request, id_exploracion):
 			humedad=True
 		if x.tipo == "Gas":
 			gas=True
+		if x.tipo == "Fuego":
+			fuego=True
 		if x.tipo == "Luz":
 			luz=True
 		if x.tipo == "Gps":
 			gps=True
 
-	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'gps': gp, 'voltaje': globales.porcentaje, 'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'luz':luz, 'gps':gps }
+	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'f':f, 'gps': gp, 'voltaje': globales.porcentaje, 
+	'temperatura':temperatura, 'humedad':humedad, 'gas':gas, 'fuego':fuego, 'luz':luz, 'gps':gps }
 	return render(request, 'detalleExploracion.html', context)
 
 #Funcion que muestra una gráfica seleccionada
@@ -510,6 +544,52 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 		return render(request, 'mostrarGrafica.html', context)
 
+	#Se ha seleccionado gráfica de Fuego
+	elif sensor_tipo == "Fuego":
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Fuego" 
+		sensor =  sensorFuego.objects.filter(exploracion=explo)
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': sensorFuego.objects.filter(exploracion=explo)},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					'fuego']}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'fuego']
+					  }}],
+				chart_options={
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'Fuego'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})
+
+		#paso 3: Enviar la gráfica a la página.
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+
+		return render(request, 'mostrarGrafica.html', context)	
+
 	#Se ha seleccionado gráfica de Luz
 	elif sensor_tipo == "Luz":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Luz" 
@@ -575,14 +655,18 @@ def salir(request):
 	#Para la cámara
 	if globales.camara == True:
 		globales.camara == False
-		del globales.cam
 		camara_parar()
+		globales.cam.join()
+		del globales.cam
 		globales.cam = None
 
 	#si estaba en automático
 	if globales.auto == True:
 		#borra hilo de automático
 		globales.auto=False
+#		print("Haciendo join de automatico")
+		globales.automatic.join()
+#		print("Borrando hilo automatico")
 		del globales.automatic
 		globales.automatic = None
 
@@ -590,6 +674,9 @@ def salir(request):
 	if globales.manu == True:
 		#borra hilo de manual
 		globales.manu=False
+#		print("Haciendo join de manual")
+		globales.manual.join()
+#		print("Borrando hilo manual")		
 		del globales.manual
 		globales.manual = None
 
@@ -602,7 +689,7 @@ def salir(request):
 def mostrardatos(request):
 
 	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje}
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sfuego':globales.sfuego, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje}
 
 	template = "datos.html"
 	return render(request, template, context)
@@ -667,24 +754,13 @@ def manual(request):
 	#Se crea un contexto con las variables para devolver a la plantilla
 	context = {'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 
 				'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara' : globales.camara, 
-				'voltaje': globales.porcentaje, 'sgps' : globales.sgps}
+				'voltaje': globales.porcentaje, 'sfuego' : globales.sfuego ,'sgps' : globales.sgps}
 
 	#Variable que guarda la página a cargar
 	template = "manual.html"
 
 	#Devuelve el contexto a la página manul
 	return render(request, template, context)
-	"""
-		#Se crea un contexto con las variables para devolver a la plantilla
-		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
-				'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
-				'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
-				'camara':globales.camara, 'voltaje': globales.porcentaje}
-
-		#Variable que guarda la página a cargar
-		template = "manual.html"
-	"""
-
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga(sensorDistancia):
@@ -766,18 +842,10 @@ def auto(request):
 	globales.automatic=threading.Thread(target=automatico)
 	globales.automatic.start()
 
-	"""
-		#creamos el contexto
-		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 
-					'gas' : globales.gas, 'luz' : globales.luz, 'stemp' : globales.stemperatura, 
-					'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sluz' : globales.sluz, 
-					'camara': globales.camara, 'voltaje': globales.porcentaje }
-	"""
-
 	#Se crea un contexto con las variables para devolver a la plantilla
 	context = {'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 
 				'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara' : globales.camara, 
-				'voltaje': globales.porcentaje, 'sgps' : globales.sgps}
+				'voltaje': globales.porcentaje, 'sgps' : globales.sgps, 'sfuego' : globales.sfuego}
 
 	template = "auto.html"
 	return render(request, template, context)

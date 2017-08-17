@@ -172,6 +172,11 @@ image8.src = "/media/gpsgris.png";
 image8alt = new Image();
 image8alt.src = "/media/gps.png";
 
+image9 = new Image();
+image9.src = "/media/fuegogris.png";
+image9alt = new Image();
+image9alt.src = "/media/fuego.png";
+
 function cambiar1() {
 	if (document.getElementById('checkbox_f1').src != image1.src ) {
  		document.getElementById('checkbox_f1').checked = true;		
@@ -250,6 +255,20 @@ function cambiar8() {
 	}
 }
 
+
+function cambiar9() {
+
+	if (document.getElementById('checkbox_f9').src != image9.src ) {
+ 		document.getElementById('checkbox_f9').src = image9.src;
+ 		document.getElementById('checkbox_f9').checked = true;
+
+	} 
+	else {
+ 		document.getElementById('checkbox_f9').src = image9alt.src;
+ 		document.getElementById('checkbox_f9').checked = false;
+
+	}
+}
 
 function cambiar6() {
  		document.getElementById('checkbox_f6').src = image6alt.src;

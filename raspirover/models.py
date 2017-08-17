@@ -97,12 +97,20 @@ class sensorGas(Sensor):
 	
 	class Meta:
 		db_table = 'SensorGas'
+
+#medida de fuego
+class sensorFuego(Sensor):
+	fuego = models.IntegerField(null=True)
+	
+	class Meta:
+		db_table = 'SensorFuego'
 	
 class Sensores(models.Model):
 	nombre = models.CharField(max_length=12, null=True)
 	temperatura = models.BooleanField()
 	humedad = models.BooleanField()
 	gas = models.BooleanField()
+	fuego = models.BooleanField()	
 	luz = models.BooleanField()
 	camara = models.BooleanField()
 	descripcion = models.CharField(max_length=140, null=True)

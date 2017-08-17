@@ -68,13 +68,14 @@ class GPS():
 
 #Sensores SPI
 class SPI(object):
-	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz=None, canalBateria=None):
+	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz=None, canalBateria=None, canalFuego=None):
 		# Abrir puerto SPI
 		self.spi = spidev.SpiDev()
 		self.spi.open(0,0)
 		self.spi.max_speed_hz = 1000000
 		self.canalTemp = canalTemp
 		self.canalHum = canalHum
+		self.canalFuego = canalFuego
 		self.canalGas = canalGas
 		self.canalLuz = canalLuz
 		self.canalBateria = canalBateria
@@ -107,13 +108,12 @@ class SPI(object):
 		volts = round(volts,2)
 		return volts
 
- 	#Funcion para convertir valor analogico en voltaje para la bateria
+	#Funcion para convertir valor analogico en voltaje para la bateria
 	def convertirDatoAVoltios(self,dato):
-                vout = (dato * 5.03) / float(1024)
-                vin = vout / (self.R2/(self.R1+self.R2))
-                vin = round(vin,2)
-
-                return vin
+		vout = (dato * 5.03) / float(1024)
+		vin = vout / (self.R2/(self.R1+self.R2))
+		vin = round(vin,2)
+		return vin
 
 	#Funcion que devuelve la temperatura
 	def ObtenerTemperatura(self):
@@ -132,10 +132,20 @@ class SPI(object):
 		data = self.LeerCanal(self.canalGas)
 		if data > 300:
 			#Se detecta gas
-			globales.gas = 1
+			globales.gas = data
 		else:
 			#No se detecta gas
-			globales.gas = 0
+			globales.gas = data
+
+	#Funcion que devuelve el Gas
+	def ObtenerFuego(self):
+		data = self.LeerCanal(self.canalFuego)
+		if data > 300:
+			#Se detecta gas
+			globales.fuego = data
+		else:
+			#No se detecta gas
+			globales.fuego = data
 
 	#Funcion que devuelve la Luz
 	def ObtenerLuz(self):
@@ -145,13 +155,12 @@ class SPI(object):
 			#Se detecta luz y apaga leds
 			GPIO.output(self.pinLed1,GPIO.LOW)
 			GPIO.output(self.pinLed2,GPIO.LOW)
-			globales.luz = 1
+			globales.luz = data
 		else:
 			#No se detecta luz y enciende leds
 			GPIO.output(self.pinLed1,GPIO.HIGH)
 			GPIO.output(self.pinLed2,GPIO.HIGH)
-			globales.luz = 0
-
+			globales.luz = data
 
 	#Funcion que devuelve el voltaje de bateria
 	def ObtenerBateria(self):
@@ -165,43 +174,43 @@ class SPI(object):
 		time.sleep(1)
 		GPIO.cleanup()
 
-
 #Sensor ultrasónico HC-SR04
 class SensorDistancia(object):
-        timeout = 0.05
+		timeout = 0.05
 
-        def __init__(self, channel):
-                self.channel = channel
-                GPIO.setmode(GPIO.BCM)
+		def __init__(self, channel):
+			self.channel = channel
+			GPIO.setmode(GPIO.BCM)
 
-        def calcularDistancia(self):
-                pulse_end = 0
-                pulse_start = 0
-                GPIO.setup(self.channel,GPIO.OUT)
-                GPIO.output(self.channel, False)
-                time.sleep(0.01)
-                GPIO.output(self.channel, True)
-                time.sleep(0.00001)
-                GPIO.output(self.channel, False)
-                GPIO.setup(self.channel,GPIO.IN)
+		def calcularDistancia(self):
+			pulse_end = 0
+			pulse_start = 0
+			GPIO.setup(self.channel,GPIO.OUT)
+			GPIO.output(self.channel, False)
+			time.sleep(0.01)
+			GPIO.output(self.channel, True)
+			time.sleep(0.00001)
+			GPIO.output(self.channel, False)
+			GPIO.setup(self.channel,GPIO.IN)
 
-                timeout_start = time.time()
-                while GPIO.input(self.channel)==0:
-                        pulse_start = time.time()
-                        if pulse_start - timeout_start > self.timeout:
-                                return 32.0
-                while GPIO.input(self.channel)==1:
-                        pulse_end = time.time()
-                        if pulse_start - timeout_start > self.timeout:
-                                return 32.0
+			timeout_start = time.time()
+			while GPIO.input(self.channel)==0:
+				pulse_start = time.time()
+				if pulse_start - timeout_start > self.timeout:
+					return 32.0
+			while GPIO.input(self.channel)==1:
+				pulse_end = time.time()
+				if pulse_start - timeout_start > self.timeout:
+					return 32.0
 
-                if pulse_start != 0 and pulse_end != 0:
-                        pulse_duration = pulse_end - pulse_start
-                        distance = pulse_duration * 100 * 343.0 /2
-                        distance = int(distance)
-                        if distance >= 0:
-                                return distance
-                        else:
-                                return 32.0
-                else :
-                        return 32.0
+			if pulse_start != 0 and pulse_end != 0:
+				pulse_duration = pulse_end - pulse_start
+				distance = pulse_duration * 100 * 343.0 /2
+				distance = int(distance)
+#				print (distance)
+				if distance >= 0:
+					return distance
+				else:
+					return 32.0
+			else :
+				return 32.0
