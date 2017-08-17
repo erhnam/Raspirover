@@ -51,10 +51,10 @@ scheduler = Scheduler()
 
 ########################## VOLTAJE ##########################
 
-spi = SPI(canalGas = 7, canalLuz = 6, canalFuego = 0)
+spi = SPI(canalGas = 7, canalLuz = 6, canalFuego = 0, canalBateria = 2)
 
-#scheduler.AddTask( 5.0 , spi.ObtenerBateria )
-
+bateria = Task( 2.0 , spi.ObtenerBateria )
+bateria.start_timer()
 
 ########################## CONTROLADOR ###############################
 
@@ -69,7 +69,7 @@ globales.driver = DriverDosMotores (motorIzq, motorDer)
 
 #funcion para apagar el sistema
 def apagar(request):
-	os.system("sudo shutdown -h now")	
+	os.system("sudo halt")	
 
 #funcion para reiniciar el sistema
 def reboot(request):
@@ -687,11 +687,13 @@ def salir(request):
 #En la pantalla de control del sistema
 @login_required(login_url='/')
 def mostrardatos(request):
+	"""
+		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
+		'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sfuego':globales.sfuego, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje}
+	"""
+	context = {'voltaje': globales.porcentaje}
 
-	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
-	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sfuego':globales.sfuego, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje}
-
-	template = "datos.html"
+	template = "manual.html"
 	return render(request, template, context)
 
 #Funcion para girar a la derecha en asincrono

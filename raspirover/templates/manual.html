@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-    
+
 {% load static %}
 
 {% block title %}Manual{% endblock title %}
@@ -10,7 +10,6 @@
      <div id="content" align="center">
         <img class="img-responsive" width="320" height="240" src="http://192.168.1.141:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
 
-        <div id="auto">
             {% if stemp == True %}
             <label for="id_temperatura"><img id="checkbox_f1b" src="{{MEDIA_URL}}temperatura.png" > </label>
             {% endif %}
@@ -39,7 +38,6 @@
             <label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" ></label>
             {% endif %}
 
-        </div>
 
         <h5>Control de Cámara 
 		&nbsp;&nbsp;&nbsp;&nbsp;
@@ -104,5 +102,7 @@
 
     
             <br><a href="{% url 'salir' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>   
+
+
 
 {% endblock centro %}

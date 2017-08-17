@@ -72,7 +72,7 @@ class SPI(object):
 		# Abrir puerto SPI
 		self.spi = spidev.SpiDev()
 		self.spi.open(0,0)
-		self.spi.max_speed_hz = 1000000
+		self.spi.max_speed_hz=30500
 		self.canalTemp = canalTemp
 		self.canalHum = canalHum
 		self.canalFuego = canalFuego
@@ -86,8 +86,8 @@ class SPI(object):
 
 		#Se añade las resistncias usadas en el divisor de voltaje
 		if self.canalBateria is not None:
-			self.R1 = 18100
-			self.R2 = 12000
+			self.R1 = 30000.0
+			self.R2 = 7500.0
 
 		#Se añade los leds
 		if self.canalLuz is not None:
@@ -110,8 +110,8 @@ class SPI(object):
 
 	#Funcion para convertir valor analogico en voltaje para la bateria
 	def convertirDatoAVoltios(self,dato):
-		vout = (dato * 5.03) / float(1024)
-		vin = vout / (self.R2/(self.R1+self.R2))
+		vout = float((dato * 5.0) / 1024.0)
+		vin = float(vout / (self.R2/(self.R1+self.R2)))
 		vin = round(vin,2)
 		return vin
 
