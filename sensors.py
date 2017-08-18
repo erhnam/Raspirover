@@ -27,10 +27,13 @@ def comprobarth(arg=[]):
 	#Sensor Adafruit
 	sensor = Adafruit_DHT.AM2302
 	#Obtiene los valores del sensor de temepratura y la humedad
-	globales.humedad, globales.temperatura = Adafruit_DHT.read_retry(sensor, 12)
-	#Redondea a 1 dígito decimal
-	globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0
-	globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0
+	hum, temp = Adafruit_DHT.read_retry(sensor, 12)
+	if hum != 0.0 and temp != 0.0:
+		globales.humedad = hum
+		globales.temperatura = temp
+		#Redondea a 1 dígito decimal
+		globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0
+		globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0
 
 #Clase del sensor GPS
 class GPS():
@@ -104,7 +107,7 @@ class SPI(object):
  
 	#Funcion que devuelve el voltaje del canal del ADC MCP3008
 	def ConvertirVoltios(self, data):
-		volts = (data * 3.3) / float(1024)
+		volts = (data * 5.0) / 1024.0
 		volts = round(volts,2)
 		return volts
 
@@ -124,34 +127,23 @@ class SPI(object):
 
 	#Funcion que devuelve la humedad
 	def ObtenerHumedad(self):
-		data = self.LeerCanal(self.canalHum)
-		globales.humedad = hum
+		globales.humedad = self.LeerCanal(self.canalHum)
 
 	#Funcion que devuelve el Gas
 	def ObtenerGas(self):
-		data = self.LeerCanal(self.canalGas)
-		if data > 300:
-			#Se detecta gas
-			globales.gas = data
-		else:
-			#No se detecta gas
-			globales.gas = data
+		globales.gas = self.LeerCanal(self.canalGas)
 
 	#Funcion que devuelve el Gas
 	def ObtenerFuego(self):
 		data = self.LeerCanal(self.canalFuego)
-		if data > 300:
-			#Se detecta gas
-			globales.fuego = data
-		else:
-			#No se detecta gas
-			globales.fuego = data
+		globales.fuego = 1023 - data
+#		print("Fuego: %d\n" % (globales.fuego) )
 
 	#Funcion que devuelve la Luz
 	def ObtenerLuz(self):
 		data = self.LeerCanal(self.canalLuz)
-
-		if data < 850:
+		data = 1023 - data
+		if data > 200:
 			#Se detecta luz y apaga leds
 			GPIO.output(self.pinLed1,GPIO.LOW)
 			GPIO.output(self.pinLed2,GPIO.LOW)
@@ -168,6 +160,7 @@ class SPI(object):
 		globales.voltaje = self.convertirDatoAVoltios(data)
 		valor = globales.voltaje - 10.50
 		globales.porcentaje = round(((valor * 100.0)/2.1),2)
+#		print("Bateria: %f\n" % (globales.porcentaje) )
 
 	#Fin de la clase
 	def destroy(self):
@@ -176,41 +169,41 @@ class SPI(object):
 
 #Sensor ultrasónico HC-SR04
 class SensorDistancia(object):
-		timeout = 0.05
+	timeout = 0.05
 
-		def __init__(self, channel):
-			self.channel = channel
-			GPIO.setmode(GPIO.BCM)
+	def __init__(self, channel):
+		self.channel = channel
+		GPIO.setmode(GPIO.BCM)
 
-		def calcularDistancia(self):
-			pulse_end = 0
-			pulse_start = 0
-			GPIO.setup(self.channel,GPIO.OUT)
-			GPIO.output(self.channel, False)
-			time.sleep(0.01)
-			GPIO.output(self.channel, True)
-			time.sleep(0.00001)
-			GPIO.output(self.channel, False)
-			GPIO.setup(self.channel,GPIO.IN)
+	def calcularDistancia(self):
+		pulse_end = 0
+		pulse_start = 0
+		GPIO.setup(self.channel,GPIO.OUT)
+		GPIO.output(self.channel, False)
+		time.sleep(0.01)
+		GPIO.output(self.channel, True)
+		time.sleep(0.00001)
+		GPIO.output(self.channel, False)
+		GPIO.setup(self.channel,GPIO.IN)
 
-			timeout_start = time.time()
-			while GPIO.input(self.channel)==0:
-				pulse_start = time.time()
-				if pulse_start - timeout_start > self.timeout:
-					return 32.0
-			while GPIO.input(self.channel)==1:
-				pulse_end = time.time()
-				if pulse_start - timeout_start > self.timeout:
-					return 32.0
-
-			if pulse_start != 0 and pulse_end != 0:
-				pulse_duration = pulse_end - pulse_start
-				distance = pulse_duration * 100 * 343.0 /2
-				distance = int(distance)
-#				print (distance)
-				if distance >= 0:
-					return distance
-				else:
-					return 32.0
-			else :
+		timeout_start = time.time()
+		while GPIO.input(self.channel)==0:
+			pulse_start = time.time()
+			if pulse_start - timeout_start > self.timeout:
 				return 32.0
+		while GPIO.input(self.channel)==1:
+			pulse_end = time.time()
+			if pulse_start - timeout_start > self.timeout:
+				return 32.0
+
+		if pulse_start != 0 and pulse_end != 0:
+			pulse_duration = pulse_end - pulse_start
+			distance = pulse_duration * 100 * 343.0 /2
+			distance = int(distance)
+#				print (distance)
+			if distance >= 0:
+				return distance
+			else:
+				return 32.0
+		else :
+			return 32.0

@@ -29,6 +29,7 @@ urlpatterns = [
 	url(r'apagar/$', raspirover_views.apagar, name='apagar'), 	
 	url(r'reboot/$', raspirover_views.reboot, name='reboot'), 	
 	url(r'mostrardatos/$', raspirover_views.mostrardatos, name='mostrardatos'),
+	url(r'mostrarvoltaje/$', raspirover_views.mostrarvoltaje, name='mostrarvoltaje'),
 	url(r'^detallesExploracion/(?P<id_exploracion>\d+)', raspirover_views.detallesExploracion, name='detallesExploracion'),
 	url(r'^eliminarExploracion/(?P<id_exploracion>\d+)', raspirover_views.eliminarExploracion, name='eliminarExploracion'),
 	url(r'^mostrarGrafica/(?P<id_exploracion>\d+)/(?P<sensor_tipo>[\w]+)', raspirover_views.mostrarGrafica, name='mostrarGrafica'),	

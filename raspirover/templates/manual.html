@@ -10,34 +10,7 @@
      <div id="content" align="center">
         <img class="img-responsive" width="320" height="240" src="http://192.168.1.141:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
 
-            {% if stemp == True %}
-            <label for="id_temperatura"><img id="checkbox_f1b" src="{{MEDIA_URL}}temperatura.png" > </label>
-            {% endif %}
-            
-            {% if shum == True %}
-            <label for="id_humedad"><img id="checkbox_f2b" src="{{MEDIA_URL}}humedad.png" > </label>
-            {% endif %}
-            
-            {% if sgas == True %}
-            <label for="id_gas"><img id="checkbox_f3b" src="{{MEDIA_URL}}gas.png" > </label>
-            {% endif %}
-            
-            {% if sfuego == True %}
-            <label for="id_fuego"><img id="checkbox_f9b" src="{{MEDIA_URL}}fuego.png" > </label>
-            {% endif %}
-
-            {% if sluz == True %}
-            <label for="id_luz"><img id="checkbox_f4b" src="{{MEDIA_URL}}luz.png" > </label>
-            {% endif %}
-
-            {% if sgps == True %}
-            <label for="id_gps"><img id="checkbox_f8b" src="{{MEDIA_URL}}gps.png" > </label>
-            {% endif %}
-            
-            {% if camara == True %}
-            <label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" ></label>
-            {% endif %}
-
+        {% include "datos.html" %}
 
         <h5>Control de Cámara 
 		&nbsp;&nbsp;&nbsp;&nbsp;

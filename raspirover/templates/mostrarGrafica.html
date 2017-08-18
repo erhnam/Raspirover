@@ -15,19 +15,54 @@
 	<br>
 	<div align = 'center'> 
 		{% if tipo == 'Temperatura' %}		
-			<h3> <strong>Media:</strong>  <font color=" #2ecc71">{{ avg }}º</font></h3>
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}º</font></h3>
 			<h3> <strong>Máximo:</strong> <font color="#FF0000">{{ max }}º</font></h3>
 			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}º</font></h3> 
 		{% endif %}
 
 		{% if tipo == 'Humedad' %}		
-			<h3> <strong>Media:</strong>  <font color=" #2ecc71">{{ avg }}%</font></h3>
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
 			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
 			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
 		{% endif %}
 
-	</div>
+		{% if tipo == 'Fuego' %}
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}</font></h3>
+			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}</font></h3> 
+			{% if max > 100 %}		
+				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado fuego !!!</strong> </font></h3>
+			{% else %}
+				<h3>   <font color="#2ecc71"> <strong> Exploración libre de fuego </strong>  </font></h3>
+			{% endif %}
 
+		{% endif %}
+
+		{% if tipo == 'Gas' %}
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}</font></h3>
+			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}</font></h3> 
+			{% if max > 50 %}		
+				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado gas en el ambiente !!!</strong> </font></h3>
+			{% else %}
+				<h3>   <font color="#2ecc71"> <strong> Exploración con ambiente limpio </strong>  </font></h3>
+			{% endif %}
+
+		{% endif %}
+
+		{% if tipo == 'Luz' %}
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}</font></h3>
+			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}</font></h3> 
+			{% if min < 150 %}		
+				<h3>   <font color=" #FF0000"> <strong>Ha habido momento sin luz</strong> </font></h3>
+			{% else %}
+				<h3>   <font color="#2ecc71"> <strong> Exploración con luz </strong>  </font></h3>
+			{% endif %}
+
+		{% endif %}		
+
+	</div>
 
 
 <div align="center"><a href =/detallesExploracion/{{explo.id_exploracion}}><label for="id_analizar"><img class="img-responsive" src="{{MEDIA_URL}}volver.png"></label></a></div>

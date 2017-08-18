@@ -53,7 +53,7 @@ scheduler = Scheduler()
 
 spi = SPI(canalGas = 7, canalLuz = 6, canalFuego = 0, canalBateria = 2)
 
-bateria = Task( 2.0 , spi.ObtenerBateria )
+bateria = Task( 59.0 , spi.ObtenerBateria )
 bateria.start_timer()
 
 ########################## CONTROLADOR ###############################
@@ -74,7 +74,6 @@ def apagar(request):
 #funcion para reiniciar el sistema
 def reboot(request):
 	os.system("sudo reboot")	
-
 
 #Funcion que accede a la página Analizar
 @login_required(login_url='/')
@@ -132,7 +131,6 @@ def explorar(request):
 				globales.tiempo = float(globales.tiempo)
 				globales.dbexplo=Exploracion(nombre=nombre, tiempo=globales.tiempo, usuariofk=request.user, descripcion=descripcion)
 				globales.dbexplo.save()
-
 
 			#Se ha elegido en el formulario el sensor de temperatura o humedad (es el mismo)			
 			if globales.stemperatura == True or globales.shumedad == True:
@@ -211,7 +209,6 @@ def explorar(request):
 					#Se crea un timer de 1 segundo
 					scheduler.AddTask( 1.0 , spi.ObtenerFuego)
 
-
 			#Se ha elegido en el formulario el sensor de gas
 			if globales.sgps == True:
 				gps = GPS()
@@ -238,7 +235,7 @@ def explorar(request):
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if globales.tiempo is not None:
-				scheduler.AddTask( globales.tiempo, BBDD, args=[globales.dbexplo.id_exploracion] )
+				scheduler.AddTask( (globales.tiempo+0.5), BBDD, args=[globales.dbexplo.id_exploracion] )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
@@ -502,6 +499,9 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	elif sensor_tipo == "Gas":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Gas" 
 		sensor =  sensorGas.objects.filter(exploracion=explo)
+		min = sensor.aggregate(Min('gas')).get('gas__min', 0)
+		max = sensor.aggregate(Max('gas')).get('gas__max', 0)
+		avg = round(sensor.aggregate(Avg('gas')).get('gas__avg', 0.00),2)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
 		data = \
@@ -540,7 +540,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'enabled': False}})
 
 		#paso 3: Enviar la gráfica a la página.
-		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'min' : min , 'max' : max , 'avg' : avg}
 
 		return render(request, 'mostrarGrafica.html', context)
 
@@ -548,6 +548,9 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	elif sensor_tipo == "Fuego":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Fuego" 
 		sensor =  sensorFuego.objects.filter(exploracion=explo)
+		min = sensor.aggregate(Min('fuego')).get('fuego__min', 0)
+		max = sensor.aggregate(Max('fuego')).get('fuego__max', 0)
+		avg = round(sensor.aggregate(Avg('fuego')).get('fuego__avg', 0.00),2)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
 		data = \
@@ -586,7 +589,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'enabled': False}})
 
 		#paso 3: Enviar la gráfica a la página.
-		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo}
+		context = {'voltaje': globales.porcentaje, 'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'min' : min , 'max' : max , 'avg' : avg }
 
 		return render(request, 'mostrarGrafica.html', context)	
 
@@ -594,6 +597,9 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 	elif sensor_tipo == "Luz":
 		titulo = "Gráfica de la exploracion " + explo.nombre + " de Luz" 
 		sensor =  sensorLuz.objects.filter(exploracion=explo)
+		min = sensor.aggregate(Min('luz')).get('luz__min', 0)
+		max = sensor.aggregate(Max('luz')).get('luz__max', 0)
+		avg = round(sensor.aggregate(Avg('luz')).get('luz__avg', 0.00),2)
 
 		#paso 1: Crear el datapool con los datos que queremos recibir.
 		data = \
@@ -632,7 +638,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 						'enabled': False}})
 								
 		#paso 3: Enviar la gráfica a la página.
-		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'voltaje': globales.porcentaje}
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'voltaje': globales.porcentaje, 'min' : min , 'max' : max , 'avg' : avg}
 
 		return render(request, 'mostrarGrafica.html', context)
 
@@ -645,13 +651,10 @@ def salir(request):
 	#Para el Manager del sistema
 	scheduler.StopAllTasks()
 
-	#Centra la camara
-	servo_c()
-
 	#Destruye los timers
 	globales.salir=1
 
-	camara_parar()	
+	camara_parar()
 	#Para la cámara
 	if globales.camara == True:
 		globales.camara == False
@@ -683,17 +686,24 @@ def salir(request):
 	#redirige al index
 	return redirect('index')
 
+#Función que muestra el porcentaje del voltaje de la pila
+#En la pantalla de control del sistema
+@login_required(login_url='/')
+def mostrarvoltaje(request):
+
+	context = {'voltaje': globales.porcentaje}
+
+	template = "base.html"
+	return render(request, template, context)
+
 #Función que muestra los datos de los sensores en pantalla modo de control
 #En la pantalla de control del sistema
 @login_required(login_url='/')
 def mostrardatos(request):
-	"""
-		context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz,
-		'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sfuego':globales.sfuego, 'sluz' : globales.sluz, 'camara':globales.camara, 'voltaje': globales.porcentaje}
-	"""
-	context = {'voltaje': globales.porcentaje}
+	context = {'temperatura': globales.temperatura, 'humedad': globales.humedad, 'gas' : globales.gas, 'luz' : globales.luz, 'fuego' : globales.fuego,
+	'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 'sgas' : globales.sgas, 'sfuego':globales.sfuego, 'sluz' : globales.sluz, 'camara':globales.camara}
 
-	template = "manual.html"
+	template = "datos.html"
 	return render(request, template, context)
 
 #Funcion para girar a la derecha en asincrono
@@ -753,16 +763,12 @@ def manual(request):
 		if (control == "camdown"):
 			servo_d()	
 
-	#Se crea un contexto con las variables para devolver a la plantilla
-	context = {'stemp' : globales.stemperatura, 'shum' : globales.shumedad, 
-				'sgas' : globales.sgas, 'sluz' : globales.sluz, 'camara' : globales.camara, 
-				'voltaje': globales.porcentaje, 'sfuego' : globales.sfuego ,'sgps' : globales.sgps}
 
 	#Variable que guarda la página a cargar
 	template = "manual.html"
 
 	#Devuelve el contexto a la página manul
-	return render(request, template, context)
+	return render(request, template)
 
 #Funcion que se ejecuta cuando la distancia es menor de la requerida
 def BuscarDistanciaMasLarga(sensorDistancia):
