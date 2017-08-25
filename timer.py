@@ -1,5 +1,6 @@
 import threading
 import globales
+import time
 
 #Clase que crea un timer
 class Task(threading.Timer):
@@ -11,10 +12,13 @@ class Task(threading.Timer):
 
 	#Funcion principal de ejecucion			
 	def run(self):
+		time.sleep(2)
 		while self.running == 1:
 			self.finished.wait (self.interval)
 			self.function (*self.args, **self.kwargs)
-		print("Saliendo...\n")
+		print("Tarea Finalizada...\n")		
+		self.cancel()
+		time.sleep(2)
 		return
 
 	#Función que inicia el timer
@@ -38,11 +42,13 @@ class Scheduler(object):
 
 	#Funcion que ejecuta todas las tareas
 	def StartAllTasks( self ):
+		print("Iniciando tareas...\n")		
 		for task in self._tasks:
 			task.start_timer()
 
 	#Funcion que para y borra todas las tareas
 	def StopAllTasks( self ):
+		print("Parando tareas...\n")
 		for task in self._tasks:
 #			print("Parando hilo %s\n" % (task))
 			task.stop()

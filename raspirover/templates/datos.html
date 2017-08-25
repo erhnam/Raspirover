@@ -17,11 +17,11 @@
     {% if shum == True %}
     <label for="id_humedad"><img id="checkbox_f2b" src="{{MEDIA_URL}}humedad.png" >
             {% if humedad < 30.0 %}      
-                <font color="#00BFFF"> {{humedad}}º </font>
+                <font color="#00BFFF"> {{humedad}}% </font>
             {% elif humedad >= 30.0 and humedad < 50.0 %}
-                <font color="#2ecc71"> {{humedad}}º </font>
+                <font color="#2ecc71"> {{humedad}}% </font>
             {% elif humedad >= 50.0 %}
-                <font color="#FF0000"> {{humedad}}º </font>
+                <font color="#FF0000"> {{humedad}}% </font>
             {% endif %}
     </label>
     {% endif %}
@@ -48,7 +48,7 @@
 
     {% if sluz == True %}
     <label for="id_luz"><img id="checkbox_f3b" src="{{MEDIA_URL}}luz.png" >
-            {% if luz < 150 %}      
+            {% if luz < 350 %}      
                 <font color=" #FF0000"> <strong> {{luz}} </font>
             {% else %}
                 <font color="#2ecc71"> <strong> {{luz}} </font>
@@ -64,14 +64,19 @@
     <label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" ></label>
     {% endif %}
 
+    {% if camera != True and sgps != True and sluz != True and sgas != True and sfuego != True and stemp != True and shum != True  %}
+    <h2> Exploración sin sensores </h2>
+    {% endif %}
+
+
 </div>
 
 <script type="text/javascript">
 
-    function actualizar(){
-        $('#datos').load('{% url 'mostrardatos' %} #datos');
-    }
+    setInterval(function () {
 
-    setInterval( "actualizar()", 1000 );
+        $("#datos").load("{% url 'mostrardatos' %} #datos");
+
+    }, 1500); // This reloads the <div> every 1 second.
 
 </script>

@@ -32,8 +32,8 @@ def comprobarth(arg=[]):
 		globales.humedad = hum
 		globales.temperatura = temp
 		#Redondea a 1 dígito decimal
-		globales.temperatura = int((globales.temperatura * 100) + 0.5) / 100.0
-		globales.humedad = int((globales.humedad * 100) + 0.5) / 100.0
+		globales.temperatura = round(globales.temperatura,1)
+		globales.humedad = round(globales.humedad,1)
 
 #Clase del sensor GPS
 class GPS():
@@ -73,6 +73,23 @@ class GPS():
 class SPI(object):
 	def __init__(self, canalTemp=None, canalHum=None, canalGas=None, canalLuz=None, canalBateria=None, canalFuego=None):
 		# Abrir puerto SPI
+		"""
+		125.0 MHz 	125000000
+		62.5 MHz 	62500000
+		31.2 MHz 	31200000
+		15.6 MHz 	15600000
+		7.8 MHz 	7800000
+		3.9 MHz 	3900000
+		1953 kHz 	1953000
+		976 kHz 	976000
+		488 kHz 	488000
+		244 kHz 	244000
+		122 kHz 	122000
+		61 kHz 		61000
+		30.5 kHz 	30500
+		15.2 kHz 	15200
+		7629 Hz 	7629
+		"""
 		self.spi = spidev.SpiDev()
 		self.spi.open(0,0)
 		self.spi.max_speed_hz=30500
@@ -143,7 +160,7 @@ class SPI(object):
 	def ObtenerLuz(self):
 		data = self.LeerCanal(self.canalLuz)
 		data = 1023 - data
-		if data > 200:
+		if data > 350:
 			#Se detecta luz y apaga leds
 			GPIO.output(self.pinLed1,GPIO.LOW)
 			GPIO.output(self.pinLed2,GPIO.LOW)
