@@ -24,11 +24,6 @@ class SensorAdmin(admin.ModelAdmin):
 
 admin.site.register(Sensor, SensorAdmin)
 
-class sensorCamaraAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
-
-admin.site.register(sensorCamara, sensorCamaraAdmin)
-
 class sensorGpsAdmin(admin.ModelAdmin):
     list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
 
@@ -58,5 +53,20 @@ class sensorFuegoAdmin(admin.ModelAdmin):
     list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
 
 admin.site.register(sensorFuego, sensorFuegoAdmin)
+
+class sensorDatoSpiAdmin(admin.ModelAdmin):
+    list_display = (  )
+
+admin.site.register(sensorDatoSpi, sensorDatoSpiAdmin)
+
+class sensorDatoGpioAdmin(admin.ModelAdmin):
+    list_display = (  )
+
+admin.site.register(sensorDatoGpio, sensorDatoGpioAdmin)
+
+class sensorDatoUartAdmin(admin.ModelAdmin):
+    list_display = (  )
+
+admin.site.register(sensorDatoUart, sensorDatoUartAdmin)
 
 admin.site.register(Usuario)
