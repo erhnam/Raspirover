@@ -1,30 +1,45 @@
 import RPi.GPIO as GPIO
 
-
 #Clase motor
 class Motor(object):
 	#gpioPinIn1 IN1
 	#gpioPinIn2 IN2
 	#velocidad pedida por usuario
 	def __init__(self, gpioPinIn1, gpioPinIn2):
+		
 		GPIO.setwarnings(False)
 		GPIO.setmode(GPIO.BCM)
-		GPIO.setup(gpioPinIn1, GPIO.OUT)
-		GPIO.setup(gpioPinIn2, GPIO.OUT)
-		self.motorGpioPinA = gpioPinIn1
-		self.motorGpioPinB = gpioPinIn2
+		self.pinA = gpioPinIn1
+		self.pinB = gpioPinIn2
+		self.speed = 30
+
+		GPIO.setup(self.pinA, GPIO.OUT)
+		GPIO.setup(self.pinB, GPIO.OUT)
+
+		self.pwm_adelante = GPIO.PWM(self.pinA, 100)
+		self.pwm_adelante.start(0)
+
+		self.pwm_atras = GPIO.PWM(self.pinB, 100)
+		self.pwm_atras.start(0)
 
 	#Motor hacia adelante
 	def Adelante(self):
-		GPIO.output(self.motorGpioPinA, GPIO.LOW)
-		GPIO.output(self.motorGpioPinB, GPIO.HIGH)
+		self.pwm_adelante.ChangeDutyCycle(0)
+		self.pwm_atras.ChangeDutyCycle(self.speed)
 
 	#Motor hacia atrás
 	def Atras(self):
-		GPIO.output(self.motorGpioPinA, GPIO.HIGH)
-		GPIO.output(self.motorGpioPinB, GPIO.LOW)
+		self.pwm_adelante.ChangeDutyCycle(self.speed)
+		self.pwm_atras.ChangeDutyCycle(0)
 
 	#Motor parado
 	def Parar(self):
-		GPIO.output(self.motorGpioPinA, GPIO.LOW)
-		GPIO.output(self.motorGpioPinB, GPIO.LOW)
+		self.pwm_adelante.ChangeDutyCycle(0)
+		self.pwm_atras.ChangeDutyCycle(0)
+
+	#Cambiar la velodidad
+	def SetSpeed(self, speed):
+		self.speed = speed
+		print ("Speed: %d" % (self.speed))
+			
+

@@ -126,12 +126,23 @@ function camright() {
 	xhttp.send();
 }
 
+function speedup() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", "?cmd=sup", true);
+	xhttp.send();
+}
+
+function speeddown() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", "?cmd=sdown", true);
+	xhttp.send();
+}
+
 function salir() {
 	var xhttp = new XMLHttpRequest();
 	xhttp.open("GET", "?cmd=salir", true);
 	xhttp.send();
 }
-
 image1 = new Image();
 image1.src = "/media/temperaturagris.png";
 image1alt = new Image();

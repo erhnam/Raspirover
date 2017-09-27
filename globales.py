@@ -35,6 +35,7 @@ sgps=False			#Variable del sensor gps del formulario
 camara=False        #Variable de la camara del formulario
 tiempo=None        	#Variable de tiempo del formulario 
 nombre=False        #Variable del nombre del formulario
+velocidad=30		#Variable que indica la velocidad del robot
 
 #Funcion que inicializa las variables
 def inicializar():
@@ -74,3 +75,4 @@ def inicializar():
 	camara=False        #Variable de la camara del formulario
 	tiempo=None        	#Variable de tiempo del formulario 
 	nombre=False        #Variable del nombre del formulario
+	velocidad=30		#Variable que indica la velocidad del robot

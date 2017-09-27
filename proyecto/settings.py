@@ -26,9 +26,7 @@ SECRET_KEY = 'cv5+it_13@#(3*9p-p#3zbb7hff(3(iy7l74@_&673-a#8jd8v'
 #DEBUG = True
 DEBUG = True
 
-ip = subprocess.check_output(['hostname', '-I']).decode('ascii')
-
-ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.1.141', 'localhost', 'raspirover.local',]
+ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.1.137', 'localhost', 'raspirover.local',]
 
 # Application definition
 

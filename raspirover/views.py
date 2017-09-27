@@ -25,6 +25,7 @@ from django.template import Context, RequestContext
 import asyncio
 #Librería time
 import time
+from datetime import datetime
 #Librería para controlar GPIO
 import RPi.GPIO as GPIO
 #Libreria para hilos
@@ -43,35 +44,58 @@ from globales import *
 from timer import *
 from sensors import *
 
+
+########################## PINES GPIO ##########################
+
+DTH22 = 2
+LEDIZQ = 16
+LEDDER = 20
+SFSR02 = 23
+MOTORIN1 = 6  
+MOTORIN2 = 5
+MOTORENA = 13
+MOTORIN3 = 27 
+MOTORIN4 = 22
+MOTORENB = 12
+SERVOHOR = 17 
+SERVOVER = 4
+
+########################## CANAL SPI ##########################
+
+SENSORFUEGO = 0 
+SENSORGAS = 7
+SENSORLUZ = 6
+
 ########################## MANAGER DE TAREAS ##########################
 
 scheduler = Scheduler()
 
 ########################## VOLTAJE ##########################
 
-spi = SPI(canalGas = 7, canalLuz = 6, canalFuego = 0, canalBateria = 2)
+spi = SPI(canalGas = SENSORGAS, canalLuz = SENSORLUZ, canalFuego = SENSORFUEGO)
 
-bateria = Task( 59.0 , spi.ObtenerBateria )
-bateria.start_timer()
+#bateria = Task( 59.0 , spi.ObtenerBateria )
+#bateria.start_timer()
 
 #Creacion de los motores por parejas
-motorIzq = Motor (27,22)
-motorDer = Motor (5,6)
+MOTORDER = Motor (MOTORIN2,MOTORIN1)
+MOTORIZQ = Motor (MOTORIN3,MOTORIN4)
 
 #Creacion del driver L298N
-driver = DriverDosMotores (motorIzq, motorDer)
+driver = DriverDosMotores (MOTORIZQ, MOTORDER)
 
 ########################## INICIO  ###############################
 
 #funcion para apagar el sistema
 def apagar(request):
-	os.system("sudo halt")	
+	os.system("sudo shutdown -h now")	
 
 #funcion para reiniciar el sistema
 def reboot(request):
 	os.system("sudo reboot")	
 
 def inicializar(request):
+
 	request.session['stemp'] = False
 	request.session['shum'] = False	
 	request.session['sgas'] = False
@@ -94,6 +118,8 @@ def index(request):
 	servo_c()
 
 	#Se inicializa los puertos GPIO
+	#setup(DTH22,LEDIZQ,LEDDER,SFSR02,MOTORIN1,MOTORIN2,MOTORENA,MOTORIN3,MOTORIN4,MOTORENB)
+	#setup(DTH22,LEDIZQ,LEDDER,SFSR02)
 	setup(14,21,20,16,26,22,27,5,6,12,23)
 
 	return render(request, 'index.html')
@@ -148,14 +174,12 @@ def explorar(request):
 					dbtemperatura = sensorTemperatura(tipo="Temperatura", enable=True)
 					dbtemperatura.save()
 					dbexplo.sensores.add(dbtemperatura)
-					dbexplo.save()
 	
 				#Se crea una tabla sensor de humedad asociada a la exploracion	
 				if request.session['shum'] == True and request.session['tiempo'] is not None:
 					dbhumedad = sensorHumedad(tipo="Humedad", enable=True)
 					dbhumedad.save()
 					dbexplo.sensores.add(dbhumedad)
-					dbexplo.save()
 
 				#Si el tiempo es null se ejecuta el sensor cada 1 segundo			
 				if request.session['tiempo'] is None:	
@@ -173,7 +197,6 @@ def explorar(request):
 					dbluz = sensorLuz(tipo="Luz", enable=True)
 					dbluz.save()
 					dbexplo.sensores.add(dbluz)
-					dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					scheduler.AddTask( request.session['tiempo'], spi.ObtenerLuz)
 
@@ -190,7 +213,6 @@ def explorar(request):
 					dbgas = sensorGas(tipo="Gas", enable=True)
 					dbgas.save()
 					dbexplo.sensores.add(dbgas)
-					dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					scheduler.AddTask( request.session['tiempo'] , spi.ObtenerGas)
 
@@ -207,7 +229,6 @@ def explorar(request):
 					dbfuego = sensorFuego(tipo="Fuego", enable=True)
 					dbfuego.save()
 					dbexplo.sensores.add(dbfuego)
-					dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					scheduler.AddTask( request.session['tiempo'] , spi.ObtenerFuego)
 
@@ -225,7 +246,6 @@ def explorar(request):
 					dbgps = sensorGps(tipo="Gps", enable=True)
 					dbgps.save()
 					dbexplo.sensores.add(dbgps)
-					dbexplo.save()
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					scheduler.AddTask( request.session['tiempo'] , gps.leer )
 
@@ -242,7 +262,7 @@ def explorar(request):
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if request.session['tiempo'] is not None:
-				scheduler.AddTask( (request.session['tiempo']+0.5), BBDD, args=[request, dbexplo.id_exploracion] )
+				scheduler.AddTask( (request.session['tiempo']+1.0), BBDD, args=[request, dbexplo.id_exploracion] )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
@@ -272,55 +292,53 @@ def explorar(request):
 	return render(request, 'explorar.html', context)
 
 #Funcion que guarda valores de sensores en la base de datos
-@transaction.atomic
+#@transaction.atomic
+#@transaction.commit_manually
 def BBDD(request, id_exploracion):
 
+	start = datetime.now()
+	
 	#Se busca la exploracion actual
 	explo = Exploracion.objects.get(pk=id_exploracion)
 	sensores = Sensor.objects.filter(exploracion=explo)
 
-	for sensor in sensores:
-		if sensor.tipo == "Luz":
-			dbluz = sensorDatoSpi(data=globales.luz)
-			dbluz.save()
-			s = sensorLuz.objects.get(exploracion=explo)
-			s.luz.add(dbluz)
-			s.save()
+	with transaction.atomic():
+		for sensor in sensores:
+			if sensor.tipo == "Luz":
+				dbluz = sensorDatoSpi.objects.create(data=globales.luz)
+				s = sensorLuz.objects.get(exploracion=explo)
+				s.luz.add(dbluz)
 
-		elif sensor.tipo == "Gas":
-			dbgas = sensorDatoSpi(data=globales.gas)
-			dbgas.save()
-			s = sensorGas.objects.get(exploracion=explo)
-			s.gas.add(dbgas)
-			s.save()
+			elif sensor.tipo == "Gas":
+				dbgas = sensorDatoSpi.objects.create(data=globales.gas)
+				s = sensorGas.objects.get(exploracion=explo)
+				s.gas.add(dbgas)
 
-		elif sensor.tipo == "Fuego":
-			dbfuego = sensorDatoSpi(data=globales.fuego)
-			dbfuego.save()
-			s = sensorFuego.objects.get(exploracion=explo)
-			s.fuego.add(dbfuego)
-			s.save()
+			elif sensor.tipo == "Fuego":
+				dbfuego = sensorDatoSpi.objects.create(data=globales.fuego)
+				s = sensorFuego.objects.get(exploracion=explo)
+				s.fuego.add(dbfuego)
 
-		elif sensor.tipo == "Temperatura":
-			dbtemperatura = sensorDatoGpio(data=globales.temperatura)
-			dbtemperatura.save()
-			s = sensorTemperatura.objects.get(exploracion=explo)
-			s.temperatura.add(dbtemperatura)
-			s.save()
+			elif sensor.tipo == "Temperatura":
+				dbtemperatura = sensorDatoGpio.objects.create(data=globales.temperatura)
+				s = sensorTemperatura.objects.get(exploracion=explo)
+				s.temperatura.add(dbtemperatura)
 
-		elif sensor.tipo == "Humedad":
-			dbhumedad = sensorDatoGpio(data=globales.humedad)
-			dbhumedad.save()
-			s = sensorHumedad.objects.get(exploracion=explo)
-			s.humedad.add(dbhumedad)
-			s.save()
+			elif sensor.tipo == "Humedad":
+				dbhumedad = sensorDatoGpio.objects.create(data=globales.humedad)
+				s = sensorHumedad.objects.get(exploracion=explo)
+				s.humedad.add(dbhumedad)
 
-		elif sensor.tipo == "Gps":
-			dbgps = sensorDatoUart(lat=globales.lat, lon=globales.lon)
-			dbgps.save()
-			s = sensorGps.objects.get(exploracion=explo)
-			s.gps.add(dbgps)
-			s.save()
+			elif sensor.tipo == "Gps":
+				dbgps = sensorDatoUart.objects.create(lat=globales.lat, lon=globales.lon)
+				s = sensorGps.objects.get(exploracion=explo)
+				s.gps.add(dbgps)
+
+	end = datetime.now()
+	diff = end - start
+	elapsed_ms = (diff.days * 86400000) + (diff.seconds * 1000) + (diff.microseconds / 1000)
+	print(elapsed_ms)
+
 			
 #Elimina una exploración elegida por el usuario
 @login_required(login_url='/')
@@ -330,52 +348,54 @@ def eliminarExploracion(request, id_exploracion):
 	#Se busca los sensores utilizados en la exploracion
 	sensores = Sensor.objects.filter(exploracion=explo)
 
-	#Se eliminan los sensores y tambien los datos
-	for sensor in sensores:
-		if sensor.tipo == "Luz":
-			s = sensorLuz.objects.get(exploracion=explo)
-			for x in s.luz.all():
-				x.delete()
-			s.delete()
-			sensor.delete()
+	with transaction.atomic():
 
-		elif sensor.tipo == "Gas":
-			s = sensorGas.objects.get(exploracion=explo)
-			for x in s.gas.all():
-				x.delete()
-			s.delete()
-			sensor.delete()
+		#Se eliminan los sensores y tambien los datos
+		for sensor in sensores:
+			if sensor.tipo == "Luz":
+				s = sensorLuz.objects.get(exploracion=explo)
+				for x in s.luz.all():
+					x.delete()
+				s.delete()
+				sensor.delete()
 
-		elif sensor.tipo == "Fuego":
-			s = sensorFuego.objects.get(exploracion=explo)
-			for x in s.fuego.all():
-				x.delete()
-			s.delete()
-			sensor.delete()
+			elif sensor.tipo == "Gas":
+				s = sensorGas.objects.get(exploracion=explo)
+				for x in s.gas.all():
+					x.delete()
+				s.delete()
+				sensor.delete()
 
-		elif sensor.tipo == "Temperatura":
-			s = sensorTemperatura.objects.get(exploracion=explo)
-			for x in s.temperatura.all():
-				x.delete()
-			s.delete()
-			sensor.delete()
+			elif sensor.tipo == "Fuego":
+				s = sensorFuego.objects.get(exploracion=explo)
+				for x in s.fuego.all():
+					x.delete()
+				s.delete()
+				sensor.delete()
 
-		elif sensor.tipo == "Humedad":
-			s = sensorHumedad.objects.get(exploracion=explo)
-			for x in s.humedad.all():
-				x.delete()
-			s.delete()
-			sensor.delete()
+			elif sensor.tipo == "Temperatura":
+				s = sensorTemperatura.objects.get(exploracion=explo)
+				for x in s.temperatura.all():
+					x.delete()
+				s.delete()
+				sensor.delete()
 
-		elif sensor.tipo == "Gps":
-			s = sensorGps.objects.get(exploracion=explo)
-			for x in s.gps.all():
-				x.delete()
-			s.delete()
-			sensor.delete()
+			elif sensor.tipo == "Humedad":
+				s = sensorHumedad.objects.get(exploracion=explo)
+				for x in s.humedad.all():
+					x.delete()
+				s.delete()
+				sensor.delete()
 
-	#elimina la exploracion de la base de datos
-	explo.delete()
+			elif sensor.tipo == "Gps":
+				s = sensorGps.objects.get(exploracion=explo)
+				for x in s.gps.all():
+					x.delete()
+				s.delete()
+				sensor.delete()
+
+		#elimina la exploracion de la base de datos
+		explo.delete()
 
 	#vuelve a la pagina de analisis
 	return redirect('analizar')
@@ -755,38 +775,46 @@ def manual(request):
 	if 'cmd' in request.GET and request.GET['cmd']:
 		control = request.GET['cmd']
 
-		#Control del robot
+		#Control de la direccion
 		#Mover hacia adelante
 		if (control == "fwd"):
 			driver.Adelante()
 		#Mover hacia atras
-		if (control == "bwd"):
+		elif (control == "bwd"):
 			driver.Atras()
 		#Mover a la izquierda
-		if (control == "left"):
+		elif (control == "left"):
 			driver.Izquierda()
 		#Mover a la derecha
-		if (control == "right"):
+		elif (control == "right"):
 			driver.Derecha()
-		#Parar los motors		
-		if (control == "stop"):
+		#Parar los motores		
+		elif (control == "stop"):
 			driver.Parar()  	
+		#Aumentar velocidad
+		elif (control == "sup"):
+			globales.velocidad = globales.velocidad + 10
+			driver.SetSpeed(globales.velocidad)
+		#Disminuir velocidad	
+		elif (control == "sdown"):
+			globales.velocidad = globales.velocidad - 10
+			driver.SetSpeed(globales.velocidad)  
 
 		#Control de la cámara
 		#Mover a la izquierda
-		if (control == "camleft"):
+		elif (control == "camleft"):
 			servo_l()
 		#Mover al centro
-		if (control == "camcenter"):
+		elif (control == "camcenter"):
 			servo_c()
 		#Mover a la derecha  
-		if (control == "camright"):
+		elif (control == "camright"):
 			servo_r()	
 		#Mover arriba  
-		if (control == "camup"):
+		elif (control == "camup"):
 			servo_u()	
 		#Mover abajao  
-		if (control == "camdown"):
+		elif (control == "camdown"):
 			servo_d()	
 
 	#Variable que guarda la página a cargar
@@ -838,14 +866,14 @@ def BuscarDistanciaMasLarga(sensorDistancia):
 		return
 
 #Funcion que controla el modo automatico
-def automatico():
+def automatico(request):
 
 	global driver
 
 	#Variable para salir del bucle while
 	salir=0	
 	#Se crea el sensor de distancia
-	sensorDistancia=SensorDistancia(23)
+	sensorDistancia=SensorDistancia(SFSR02)
 	
 	#Comienzo de la automatización
 	
@@ -876,7 +904,7 @@ def auto(request):
 	globales.auto = True
 
 	#Creamos un hilo para ejecutar el automatico así no bloquea a los demas hilos
-	globales.automatic = threading.Thread(target=automatico)
+	globales.automatic = threading.Thread(target=automatico, args=[request])
 	globales.automatic.start()
 
 	template = "auto.html"

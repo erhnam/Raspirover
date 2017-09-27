@@ -8,7 +8,7 @@
 
 
      <div id="content" align="center">
-        <img class="img-responsive" width="320" height="240" src="http://192.168.1.141:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
+        <img class="img-responsive" width="320" height="200" src="http://192.168.1.137:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
      </div>
         {% include "datos.html" %}
      <div>
@@ -36,16 +36,24 @@
                      <span class="glyphicon glyphicon-stop" style="color:green" aria-hidden="true"></span>
                 </button>
                 <tr>
-                <button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" onclick="camright();">
+
+                <button type="button" class="btn btn-default btn-mv" aria-label="Right 
+                Arrow" onclick="camright();">
                      <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
                 </button>
                 </tr><br>
                 <button type="button" id="cdown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" onclick="camdown();">
                      <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
                 </button>
+
+
             </table>
-        </div>
-    
+
+
+        </div>      
+
+     
+
         <div class="control" align="right">       
 
             <table border="0" cellpadding="3" cellspacing="0">
@@ -69,13 +77,22 @@
                 </tr><br>
                 <button type="button" id="ddown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" ontouchstart="bwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="bwd();">
                      <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
+
                 </button>
-            </table>
+
+             </table>
         </div>
 
-    
+        <h5>Velocidad</h5> 
+         <div class="speed" align="center">       
+            <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="speedup();">
+             <span class="glyphicon glyphicon-plus" style="color:red" aria-hidden="true"></span>
+            </button>
+             <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="speeddown();">
+             <span class="glyphicon glyphicon-minus" style="color:blue" aria-hidden="true"></span>
+            </button>
+        </div> 
+
             <br><a href="{% url 'salir' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>   
 
-
-
-{% endblock centro %}
+{% endblock centro%}

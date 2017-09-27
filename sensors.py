@@ -27,7 +27,7 @@ def comprobarth(arg=[]):
 	#Sensor Adafruit
 	sensor = Adafruit_DHT.AM2302
 	#Obtiene los valores del sensor de temepratura y la humedad
-	hum, temp = Adafruit_DHT.read_retry(sensor, 12)
+	hum, temp = Adafruit_DHT.read_retry(sensor, 2)
 	if hum != 0.0 and temp != 0.0:
 		globales.humedad = hum
 		globales.temperatura = temp
@@ -217,7 +217,7 @@ class SensorDistancia(object):
 			pulse_duration = pulse_end - pulse_start
 			distance = pulse_duration * 100 * 343.0 /2
 			distance = int(distance)
-#				print (distance)
+			print (distance)
 			if distance >= 0:
 				return distance
 			else:

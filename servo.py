@@ -22,9 +22,9 @@ def servo_lcr():
 	while i != center:
 		if i > center:
 			i = i - 5
-			os.system('echo P1-12=-5 > /dev/servoblaster')
+			os.system('echo P1-11=-5 > /dev/servoblaster')
 		else:
-			os.system('echo P1-12=-0 > /dev/servoblaster')
+			os.system('echo P1-11=-0 > /dev/servoblaster')
 		time.sleep(0.5)
 
 #Girar servo motor a la derecha
@@ -33,9 +33,9 @@ def servo_r():
 	global min
 	if i > min:
 		i = i - 5
-		os.system('echo P1-12=-5 > /dev/servoblaster')
+		os.system('echo P1-11=-5 > /dev/servoblaster')
 	else:
-		os.system('echo P1-12=-0 > /dev/servoblaster')
+		os.system('echo P1-11=-0 > /dev/servoblaster')
 
 #Girar servo motor a la izquierda
 def servo_l():
@@ -44,9 +44,9 @@ def servo_l():
 	global max
 	if i < max:
 		i = i + 5
-		os.system('echo P1-12=+5 > /dev/servoblaster')
+		os.system('echo P1-11=+5 > /dev/servoblaster')
 	else:
-		os.system('echo P1-12=+0 > /dev/servoblaster')
+		os.system('echo P1-11=+0 > /dev/servoblaster')
 
 #Girar servo motor arriba
 def servo_u():
@@ -74,9 +74,9 @@ def servo_c():
         global i
         global center
         i = center
-        os.system('echo P1-12=50% > /dev/servoblaster')
+        os.system('echo P1-11=50% > /dev/servoblaster')
         os.system('echo P1-7=50% > /dev/servoblaster')
 
 #Para el servo
 def servo_s():
-        os.system('echo P1-12=+0 > /dev/servoblaster')
+        os.system('echo P1-11=+0 > /dev/servoblaster')

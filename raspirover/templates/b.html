@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="es">
+  <head>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<title>{% block title %} Raspirover {% endblock title %}</title>
+
+	<link rel="shortcut icon" href="{%  static 'rr.ico' %}">
+
+
+	<!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+	<!-- Bootstrap theme -->
+	<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-theme.min.css' %}">
+
+	<!-- Custom styles for this template -->
+	<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+  </head>
+
+   <body role="document">
+
+   {% block nav %}
+
+   <div  class="page-header"></div>
+
+	<nav  id="auto" class="navbar navbar-inverse navbar-fixed-top">
+	 	<div class="container">
+		<div  class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="{% url 'index' %}"><img class="img-responsive" weight="30px" height="30px" src="{{MEDIA_URL}}rr.png"></a>
+		  <a class="navbar-brand" href="#"><img class="img-responsive" src="{{MEDIA_URL}}battery.png" align="left" ><font size=2 color="white">{{ voltaje }}%</font></a>
+
+
+		<script type="text/javascript">
+
+		    function actualizar(){
+		        $('#auto').load('{% url 'mostrarvoltaje' %} #auto');
+		    }
+
+		    setInterval( "actualizar()", 60000 );
+
+		</script>
+		</div>
+		<div id="navbar" class="navbar-collapse collapse">
+		  <ul class="nav navbar-nav">
+			<li><a href="{% url 'sobre_mi' %}">Información</a></li>
+		  </ul>
+			<ul class="nav navbar-nav navbar-right">
+			  {% if user.is_authenticated %}
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img class="img-responsive src="{% if user.photo %}{{ MEDIA_URL }}{{ user.photo }}{% else %}{{ MEDIA_URL }}default.png{% endif %}" width="20" height="20" >Ajustes<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="{% url 'editar_contrasena' %}">Cambiar contraseña</a></li>
+						<li><a href="{% url 'editar_foto' %}">Cambiar Foto</a></li>
+						<li><a href="{% url 'eliminar_usuario' %}">Eliminar Usuario</a></li>                        
+						<li><a href="logout">Salir</a></li>
+					</ul>
+				</li>             
+			  {% else %}
+				<ul class="nav navbar-nav navbar-right">
+				<li><a href="{% url 'registro' %}">Registrarse</a></li>
+				<li><a href="{% url 'login' %}">Iniciar sesión</a></li>
+				</ul>
+			  {% endif %}
+			</ul>
+		</div><!--/.nav-collapse -->
+	  </div>
+	</nav>
+
+	{% endblock nav %}
+
+	<div class="container">
+	
+	{% block content %}	{% endblock content %}
+	
+	</div><!-- /.container -->    
+
+		<div class="row">
+			
+			<div class="col-sm-3" align="center">
+				{% block izquierda %} {% endblock izquierda %}
+			</div>
+			
+			<div class="col-sm-6" align="center">
+				{% block centro %}	{% endblock centro %}
+			</div>
+
+			<div class="col-sm-3" align="center">
+				{% block derecha %} {% endblock derecha %}
+			</div>
+
+		</div>
+
+
+<!--	 <footer>
+		<div class=" navbar-fixed-bottom" style="color:black; text-align:center;">
+				Copyright © Francisco Arcos, 2017
+		</div>
+	</footer>
+-->
+    <script src="{% static 'js/custom.js' %}"></script>
+    <script src="{% static 'jquery/jquery.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+
+  </body>
+</html>
+

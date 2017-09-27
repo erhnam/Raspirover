@@ -1,6 +1,7 @@
 from motor import *
 import asyncio
 import time
+import globales
 
 #Clase para el controlador de motor
 #Recibe dos clases Motor (Costado derecho e izquierdo)
@@ -10,6 +11,21 @@ class DriverDosMotores(object):
 		self.motorIzq = motorIzq
 		self.motorDer = motorDer
 	
+	#Ajusta la velocidad de los motores
+	def SetSpeed (self,speed):
+		if (speed >= 100):
+			globales.velocidad = 100
+			self.motorDer.SetSpeed(100)
+			self.motorIzq.SetSpeed(100)
+		elif (speed <= 10 ):
+			globales.velocidad = 20
+			self.motorDer.SetSpeed(20)
+			self.motorIzq.SetSpeed(20)
+		else:
+			globales.velocidad = speed
+			self.motorDer.SetSpeed(speed)
+			self.motorIzq.SetSpeed(speed)
+
 	#Parar motores	
 	def Parar(self):
 		self.motorIzq.Parar()

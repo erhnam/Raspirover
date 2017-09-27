@@ -1,11 +1,14 @@
 /* static/css/main.css */
 
-body { background-color: #F5F5DC; }
-
 
 .btn-primary-raspirover {
   margin-top: 7px;
 }
+
+#page-wrapper{
+  background-color: rgb(199, 200, 242);
+}
+
 
 #checkbox_f1, #checkbox_f2, #checkbox_f3, #checkbox_f4, #checkbox_f5, #checkbox_f6, #checkbox_f7, #checkbox_f8, #checkbox_f9{
 	margin-left: 25px;
@@ -30,18 +33,24 @@ input.hide-checkbox {
 }  
 
 .servo{
-        width: 125px;
-        height: 100px;
+    width: 125px;
+    height: 100px;
 	margin-left: 5px;
 	margin-right: 175px;
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
 
+.speed{
+    width: 84px;
+    height: 30px;
+
+}
+
 .control{
-        width: 125px;
-        height: 100px;	
-	margin-left: 5x;
+    width: 125px;
+    height: 100px;	
+	margin-left: 5px;
 	margin-right: -175px;
 	margin-top: -105px;
 	margin-bottom: 5px;
