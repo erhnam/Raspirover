@@ -20,7 +20,6 @@ class Usuario(AbstractUser):
 	class Meta:
 		db_table = 'Usuario'
 
-
 #Sensor
 class Sensor(models.Model):
 	id_sensor = models.AutoField(db_column='ID_Sensor', primary_key=True)
@@ -33,6 +32,19 @@ class Sensor(models.Model):
 
 	class Meta:
 		db_table = 'Sensor'
+
+class Lecturas(models.Model):
+	id_lecturas = models.AutoField(db_column='ID_Lecturas', primary_key=True)
+	dato = models.CharField(max_length=22)
+	fecha = models.DateTimeField(null=True)
+	sensor = models.ForeignKey(Sensor, db_column='SensorFK', on_delete=models.CASCADE, null=True)
+
+	def __unicode__(self):
+		return u'%s' % (self.dato)	
+
+	class Meta:
+		db_table = 'Lecturas'
+
 
 #Exploración
 class Exploracion(models.Model):
@@ -50,83 +62,8 @@ class Exploracion(models.Model):
 	class Meta:
 		db_table = 'Exploracion'	
 		#La solucion es añadir este constraint para que no haya dos parejas iguales
-		unique_together = (("usuariofk", "id_exploracion"),)	
+		#unique_together = (("usuariofk", "id_exploracion"),)	
 
-#medida del sensor Spi
-class sensorDatoSpi(models.Model):
-	data = models.PositiveSmallIntegerField(null=True)
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
-
-#medida del sensor Gpio
-class sensorDatoGpio(models.Model):
-	data = models.DecimalField(max_digits=3, decimal_places=1, null=True, validators=[MinValueValidator(-10), MaxValueValidator(100)])
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
-
-#medida del sensor Uart(Gps)
-class sensorDatoUart(models.Model):
-	lat = models.FloatField(default=0,  null=True)
-	lon = models.FloatField(default=0,  null=True)
-	fecha = models.DateTimeField(auto_now_add=True, null=True)
-	
-#Sensor de Gps
-class sensorGps(Sensor):
-	gps = models.ManyToManyField(sensorDatoUart)
-
-	class Meta:
-		db_table = 'SensorGps'	
-
-	def __unicode__(self):
-		return self.lat+","+self.lon
-
-#Sensor de temperatura	
-class sensorTemperatura(Sensor):
-	temperatura = models.ManyToManyField(sensorDatoGpio)
-	
-	class Meta:
-		db_table = 'SensorTemperatura'	
-
-	def __unicode__(self):
-		return self.tipo
-
-
-#Sensor de humedad	
-class sensorHumedad(Sensor):
-	humedad = models.ManyToManyField(sensorDatoGpio)
-
-	class Meta:
-		db_table = 'SensorHumedad'
-
-	def __unicode__(self):
-		return self.tipo
-
-#Medidas de luz
-class sensorLuz(Sensor):
-	luz = models.ManyToManyField(sensorDatoSpi)
-	
-	class Meta:
-		db_table = 'SensorLuz'
-
-	def __unicode__(self):
-		return self.tipo
-
-#medida de gas
-class sensorGas(Sensor):
-	gas = models.ManyToManyField(sensorDatoSpi)
-	class Meta:
-		db_table = 'SensorGas'
-
-	def __unicode__(self):
-		return self.tipo
-
-#medida de fuego
-class sensorFuego(Sensor):
-	fuego = models.ManyToManyField(sensorDatoSpi)
-	
-	class Meta:
-		db_table = 'SensorFuego'
-
-	def __unicode__(self):
-		return self.tipo
 	
 class Sensores(models.Model):
 	nombre = models.CharField(max_length=12, null=True)

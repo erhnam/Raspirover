@@ -24,49 +24,10 @@ class SensorAdmin(admin.ModelAdmin):
 
 admin.site.register(Sensor, SensorAdmin)
 
-class sensorGpsAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
+class LecturasAdmin(admin.ModelAdmin):
+    list_display = ( 'dato','fecha' )
 
-admin.site.register(sensorGps, sensorGpsAdmin)
+admin.site.register(Lecturas, LecturasAdmin)
 
-class sensorTemperaturaAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
-
-admin.site.register(sensorTemperatura, sensorTemperaturaAdmin)
-
-class sensorHumedadAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
-
-admin.site.register(sensorHumedad, sensorHumedadAdmin)
-
-class sensorLuzAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
-
-admin.site.register(sensorLuz, sensorLuzAdmin)
-
-class sensorGasAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable')
-
-admin.site.register(sensorGas, sensorGasAdmin)
-
-class sensorFuegoAdmin(admin.ModelAdmin):
-    list_display = ( 'id_sensor', 'tipo', 'fecha', 'enable' )
-
-admin.site.register(sensorFuego, sensorFuegoAdmin)
-
-class sensorDatoSpiAdmin(admin.ModelAdmin):
-    list_display = (  )
-
-admin.site.register(sensorDatoSpi, sensorDatoSpiAdmin)
-
-class sensorDatoGpioAdmin(admin.ModelAdmin):
-    list_display = (  )
-
-admin.site.register(sensorDatoGpio, sensorDatoGpioAdmin)
-
-class sensorDatoUartAdmin(admin.ModelAdmin):
-    list_display = (  )
-
-admin.site.register(sensorDatoUart, sensorDatoUartAdmin)
 
 admin.site.register(Usuario)
