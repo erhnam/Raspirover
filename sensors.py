@@ -215,8 +215,8 @@ class SensorDistancia(object):
 
 		if pulse_start != 0 and pulse_end != 0:
 			pulse_duration = pulse_end - pulse_start
-			distance = pulse_duration * 100 * 343.0 /2
-			distance = int(distance)
+			distance = (pulse_duration * 100 * 343.0) /2
+			distance = distance
 			print (distance)
 			if distance >= 0:
 				return distance

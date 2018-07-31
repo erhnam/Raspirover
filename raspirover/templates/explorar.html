@@ -9,10 +9,14 @@
 	<div align="center" >
 		<form name="formulario"  method="POST">
 
+			<h4> <center>Datos de la exploración</h4>
+			<br>
+
 			{% csrf_token %}
 			{{ form.as_p }}
-			
-			<h3> <center>¿Qué sensores deseas utilizar para la exploración?</h3>
+
+			<br>			
+			<h4> <center>¿Qué sensores deseas utilizar para la exploración?</h4>
 			
 			<label for="id_temperatura"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}temperaturagris.png" onclick="cambiar1()"></label>
 			
@@ -28,7 +32,7 @@
 
 			<label for="id_camara"><img class="img-responsive" id="checkbox_f5" src="{{MEDIA_URL}}camaragris.png" onclick="cambiar5()"></label>
 		
-			<h3> <center>¿Qué  modo de exploración desea utilizar?</h3>
+			<h4> <center>¿Qué  modo de exploración desea utilizar?</h4>
 
 			<label for="sbm"><img class="img-responsive" id="checkbox_f6" src="{{MEDIA_URL}}manualgris.png" onmouseover="cambiar6()" onmouseout="cambiar6alt()"></label>
 			<input type="submit" class="hide-checkbox" name="manual" id="sbm" value="Iniciar exploración manual" />

@@ -11,12 +11,12 @@
 
 
 #checkbox_f1, #checkbox_f2, #checkbox_f3, #checkbox_f4, #checkbox_f5, #checkbox_f6, #checkbox_f7, #checkbox_f8, #checkbox_f9{
-	margin-left: 25px;
-	margin-right: 25px;
-	margin-top: 25px;
-	margin-bottom: 25px;
-	width: 72px;
-	height: 72px;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	width: 48px;
+	height: 48px;
 }
 
 #decimales{

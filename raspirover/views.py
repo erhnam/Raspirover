@@ -57,8 +57,8 @@ MOTORENA = 13
 MOTORIN3 = 27 
 MOTORIN4 = 22
 MOTORENB = 12
-SERVOHOR = 17 
-SERVOVER = 4
+SERVOHOR = 18 
+SERVOVER = 21
 
 ########################## CANAL SPI ##########################
 
@@ -83,6 +83,10 @@ MOTORIZQ = Motor (MOTORIN3,MOTORIN4)
 
 #Creacion del driver L298N
 driver = DriverDosMotores (MOTORIZQ, MOTORDER)
+
+#Creacion de los Servos
+#servoHor = Servo(SERVOHOR)
+#servoVer = Servo(SERVOVER)
 
 ########################## INICIO  ###############################
 
@@ -110,11 +114,16 @@ def inicializar(request):
 #Función de la página principal del programa
 def index(request):
 
+#	global servoHor
+#	global servoVer
 	salir(request)
 
 	inicializar(request)
 
 	#Centra la camara
+#	servoHor.center()
+#	servoVer.center()
+
 	servo_c()
 
 	#Se inicializa los puertos GPIO
@@ -262,7 +271,7 @@ def explorar(request):
 			#Si se ha insertado tiempo se lanza un trigger para la bbdd
 			#definida por la variable tiempo
 			if request.session['tiempo'] is not None:
-				scheduler.AddTask( (request.session['tiempo']+1.0), BBDD, args=[request, dbexplo.id_exploracion] )
+				scheduler.AddTask( (request.session['tiempo']), BBDD, args=[request, dbexplo.id_exploracion] )
 
 			#Si se ha elegido manual
 			if request.method=='POST' and 'manual' in request.POST:				
@@ -715,12 +724,15 @@ def salir(request):
 		print("Eliminando sesion Auto\n")
 		#borra hilo de automático
 		globales.auto = False
-		globales.automatic.join()
+		#globales.automatic.join()
 		del globales.automatic
 		globales.automatic = None
 
+	request.session['salir'] = False
+
 	#Inicializacion de variables
 	globales.inicializar()
+
 
 	#redirige al index
 	return redirect('index')
@@ -769,6 +781,8 @@ def Izquierda():
 @login_required(login_url='/')
 def manual(request):
 	global driver
+#	global servoHor
+#	global servoVer
 
 	#Se recoge la peticion de wmovimiento
 	if 'cmd' in request.GET and request.GET['cmd']:
@@ -868,6 +882,8 @@ def BuscarDistanciaMasLarga(sensorDistancia):
 def automatico(request):
 
 	global driver
+
+	driver.SetSpeed(35)
 
 	#Variable para salir del bucle while
 	salir=0	
