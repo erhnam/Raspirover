@@ -103,6 +103,27 @@ class SPI(object):
 		self.pinLed2 = None
 		self.R1 = None
 		self.R2 = None
+		#Lux
+		self.MAX_ADC_READING = 1023  # 10bit adc 2^10 == 1023
+		self.ADC_REF_VOLTAGE = 5.0 # 5 volts
+		self.REF_RESISTANCE  = 10030 # 10k resistor 
+		self.LUX_CALC_SCALAR = 12518931 # Formula 
+		self.LUX_CALC_EXPONENT = -1.405  # exponent first calculated with calculator 
+
+		#GAS
+		self.calibration = False
+		self.RL_VALUE = 5   #define the load resistance on the board, in kilo ohms
+		self.RO_CLEAN_AIR_FACTOR = 9.83  #RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
+									 #which is derived from the chart in datasheet
+		#/**********************Application Related Macros**********************************/
+		self.GAS_LPG = 0
+		self.GAS_CO = 1
+		self.GAS_SMOKE =2
+
+		self.LPGCurve = [2.3,0.21,-0.47]
+		self.COCurve = [2.3,0.72,-0.34]
+		self.SmokeCurve = [2.3,0.53,-0.44]
+		self.Ro = 10
 
 		#Se añade las resistncias usadas en el divisor de voltaje
 		if self.canalBateria is not None:
@@ -148,28 +169,85 @@ class SPI(object):
 
 	#Funcion que devuelve el Gas
 	def ObtenerGas(self):
-		globales.gas = self.LeerCanal(self.canalGas)
+		#calibration for first time
+		if self.calibration == False:
+				val = 0.0
+				for x in range(50):
+						raw_adc = self.LeerCanal(self.canalGas)
+						val += float(self.RL_VALUE*(1023.0-raw_adc)/float(raw_adc))
+				val = val / 50
+				self.Ro = val/self.RO_CLEAN_AIR_FACTOR
+#				print("Ro: %f kohm\n" % self.Ro)
+				self.calibration = True
 
-	#Funcion que devuelve el Gas
+		raw_adc = self.LeerCanal(self.canalGas)
+		read = raw_adc/self.Ro
+		globales.gas = math.pow(10,( ((math.log(read)-self.LPGCurve[1])/ self.LPGCurve[2]) + self.LPGCurve[0]))
+		globales.co = math.pow(10,( ((math.log(read)-self.COCurve[1])/ self.COCurve[2]) + self.COCurve[0]))
+		globales.smoke = math.pow(10,( ((math.log(read)-self.SmokeCurve[1])/ self.SmokeCurve[2]) + self.SmokeCurve[0]))
+
+	#Funcion que devuelve el Fuego
 	def ObtenerFuego(self):
+		'''
+		y = 0.7616x - 5.3018
+		y = distance in inches, x = ADC counts
+		'''
 		data = self.LeerCanal(self.canalFuego)
-		globales.fuego = 1023 - data
-#		print("Fuego: %d\n" % (globales.fuego) )
+		print("Fuego: %f" % data)
+		if data < 800:
+			inches = 0.7616 * data - 5.3018; 
+			globales.fuego = inches / 2.54 #cm
 
 	#Funcion que devuelve la Luz
 	def ObtenerLuz(self):
+		''' 
+		Intensidad de la luz diurna bajo diversas condiciones
+		Iluminancia		Ejemplo
+		120000 lux	Luz diurna más brillante
+		110000 lux	Luz diurna brillante
+		20000 lux	Sombra iluminada por un cielo completamente azul, al mediodía.
+		10000 - 25000 lux	Típico día nublado o al mediodía.
+		<200 lux	Extremo de las más oscuras nubes tempestuosas y al mediodía.
+		400 lux	Orto u ocaso en un día claro (iluminación ambiental).
+		40 lux	Completamente nublado, en el orto/ocaso.
+		<1 lux	Extremo de las más oscuras nubes tempestuosas, en el orto/ocaso.
+
+		Para comparar, los niveles de iluminación en la noche son:
+
+		<1 lux	Claro de luna1​
+		0.25 lux	Luna llena en una noche clara2​
+		0.01 lux	Cuarto de luna
+		0.001 lux	Cielo claro en una noche sin luna
+		0.0001 lux	Cielo nocturno nublado y sin luna
+		0.00005 lux	Luz de estrellas
+		'''
+
 		data = self.LeerCanal(self.canalLuz)
 		data = 1023 - data
-		if data > 350:
+		# RESISTOR VOLTAGE_CONVERSION
+		# Convert the raw digital data back to the voltage that was measured on the analog pin
+		resistorVoltage = float(data / self.MAX_ADC_READING * self.ADC_REF_VOLTAGE);
+		# voltage across the LDR is the 5V supply minus the 5k resistor voltage
+		ldrVoltage = self.ADC_REF_VOLTAGE - resistorVoltage;
+  
+		# LDR_RESISTANCE_CONVERSION
+		# resistance that the LDR would have for that voltage  
+		ldrResistance = ldrVoltage/resistorVoltage * self.REF_RESISTANCE;
+  
+		# LDR_LUX
+		# Change the code below to the proper conversion from ldrResistance to ldrLux
+		ldrLux = self.LUX_CALC_SCALAR * pow(ldrResistance, self.LUX_CALC_EXPONENT); #LUX
+
+		if ldrLux > 40:
 			#Se detecta luz y apaga leds
 			GPIO.output(self.pinLed1,GPIO.LOW)
 			GPIO.output(self.pinLed2,GPIO.LOW)
-			globales.luz = data
+			globales.luz = ldrLux
 		else:
 			#No se detecta luz y enciende leds
 			GPIO.output(self.pinLed1,GPIO.HIGH)
 			GPIO.output(self.pinLed2,GPIO.HIGH)
-			globales.luz = data
+			globales.luz = ldrLux
 
 	#Funcion que devuelve el voltaje de bateria
 	def ObtenerBateria(self):

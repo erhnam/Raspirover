@@ -17,6 +17,8 @@ distancia=0.0		#Distancia proporcionada por el sensor
 temperatura=0.0		#Valor de la temperatura
 humedad=0.0			#Valor de la humedad
 gas=0				#Valor de gas
+co=0				#Valor de CO
+smoke=0				#Valor de humo
 fuego=0				#Valor de fuego
 luz=0				#Valor de luz
 trigger=None		#Trigger para almacenar los datos
@@ -57,6 +59,8 @@ def inicializar():
 	temperatura=0.0		#Valor de la temperatura
 	humedad=0.0			#Valor de la humedad
 	gas=0				#Valor de gas
+	co=0				#Valor de CO
+	smoke=0				#Valor de humo
 	fuego=0				#Valor de fuego
 	luz=0				#Valor de luz
 	trigger=None		#Trigger para almacenar los datos
