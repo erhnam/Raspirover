@@ -22,7 +22,9 @@
 				{% endif %}
 			
 				{% if x.tipo == 'Gas' %}
-				<li> Sensor de gas: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{g}}><font color="#66B266">Mostrar gráfica</font></a> </li>
+				<li> Sensor de gas LPG: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{g}}><font color="#66B266">Mostrar gráfica</font></a> </li>
+				<li> Sensor de monóxido de carbono: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{c}}><font color="#66B266">Mostrar gráfica</font></a> </li>
+				<li> Sensor de Humo: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{s}}><font color="#66B266">Mostrar gráfica</font></a> </li>
 				{% endif %}
 
 				{% if x.tipo == 'Fuego' %}

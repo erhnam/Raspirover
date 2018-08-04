@@ -222,6 +222,12 @@ def explorar(request):
 					dbgas = Sensor(tipo="Gas", enable=True)
 					dbgas.save()
 					dbexplo.sensores.add(dbgas)
+					dbgas = Sensor(tipo="Co", enable=True)
+					dbgas.save()
+					dbexplo.sensores.add(dbgas)
+					dbgas = Sensor(tipo="Humo", enable=True)
+					dbgas.save()
+					dbexplo.sensores.add(dbgas)
 					#Se crea un timer de x segundos definidos por la variable tiempo
 					scheduler.AddTask( request.session['tiempo'] , spi.ObtenerGas)
 
@@ -310,6 +316,7 @@ def BBDD(request, id_exploracion):
 
 	#Se busca la exploracion actual
 	explo = Exploracion.objects.get(pk=id_exploracion)
+	#Se obtienen los sensores utilizados en la exploración
 	sensores = Sensor.objects.filter(exploracion=explo)
 
 	with transaction.atomic():
@@ -319,6 +326,12 @@ def BBDD(request, id_exploracion):
 
 			elif sensor.tipo == "Gas":
 				valor = Lecturas.objects.create(dato=globales.gas, fecha=start, sensor=sensor)
+
+			elif sensor.tipo == "Co":
+				valor = Lecturas.objects.create(dato=globales.co, fecha=start, sensor=sensor)
+
+			elif sensor.tipo == "Humo":
+				valor = Lecturas.objects.create(dato=globales.smoke, fecha=start, sensor=sensor)
 
 			elif sensor.tipo == "Fuego":
 				valor = Lecturas.objects.create(dato=globales.fuego, fecha=start, sensor=sensor)
@@ -331,7 +344,6 @@ def BBDD(request, id_exploracion):
 
 			elif sensor.tipo == "Gps":
 				valor = Lecturas.objects.create(dato=(globales.luz+"-"+globales.lon), fecha=start, sensor=sensor)
-
 
 	end = datetime.now()
 	diff = end - sta
@@ -394,6 +406,8 @@ def detallesExploracion (request, id_exploracion):
 	h = "Humedad"
 	l = "Luz"
 	g = "Gas"
+	c = "Co"
+	s = "Humo"
 	f = "Fuego"
 	gp = "Gps"
 
@@ -402,7 +416,7 @@ def detallesExploracion (request, id_exploracion):
 	#extraer los sensores utilizados en la exploracion
 	sensores = Sensor.objects.filter(exploracion=explo)
 
-	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'f':f, 'gps': gp, 'sensores' : sensores }
+	context = {'explo':explo, 't':t, 'h':h, 'l':l, 'g':g, 'f':f, 'gps': gp, 's':s, 'c':c, 'sensores' : sensores }
 
 	return render(request, 'detalleExploracion.html', context)
 
@@ -595,6 +609,112 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 
 		return render(request, 'mostrarGrafica.html', context)
 
+	elif sensor_tipo == "Co":
+
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Co" 
+
+		sensor =  Sensor.objects.get(exploracion=explo, tipo="Co")
+
+		lecturas = Lecturas.objects.filter(sensor=sensor)
+
+		min = lecturas.all().aggregate(Min('dato')).get('dato__min', 0)
+		max = lecturas.all().aggregate(Max('dato')).get('dato__max', 0)
+		avg = round(lecturas.all().aggregate(Avg('dato')).get('dato__avg', 0.00),2)
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': lecturas.all()},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					('dato',lambda e: int(e))]}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'dato']
+					  }}],
+				chart_options={
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'CO'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})
+
+		#paso 3: Enviar la gráfica a la página.
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'min' : min , 'max' : max , 'avg' : avg }
+
+		return render(request, 'mostrarGrafica.html', context)
+
+	elif sensor_tipo == "Humo":
+
+		titulo = "Gráfica de la exploracion " + explo.nombre + " de Humo" 
+
+		sensor =  Sensor.objects.get(exploracion=explo, tipo="Humo")
+
+		lecturas = Lecturas.objects.filter(sensor=sensor)
+
+		min = lecturas.all().aggregate(Min('dato')).get('dato__min', 0)
+		max = lecturas.all().aggregate(Max('dato')).get('dato__max', 0)
+		avg = round(lecturas.all().aggregate(Avg('dato')).get('dato__avg', 0.00),2)
+
+		#paso 1: Crear el datapool con los datos que queremos recibir.
+		data = \
+			DataPool(
+			   series=
+				[{'options': {
+				   'source': lecturas.all()},
+				  'terms': [
+					('fecha',lambda d: d.strftime("%H:%M:%S") ),
+					('dato',lambda e: int(e))]}
+				 ])
+
+		#paso 2: Crear la gráfica
+		cht = Chart(
+				datasource = data,
+				series_options =
+				  [{'options':{
+					  'type': 'line',
+					  'stacking': False},
+					'terms':{
+					  'fecha': [
+						'dato']
+					  }}],
+				chart_options={
+					'title': {
+						'text': titulo},
+					'xAxis': {
+						'title': {
+							'text': 'Tiempo'}},
+					'yAxis': {
+						'title': {
+							'text': 'Humo'}},
+					'legend': {
+						'enabled': False},
+					'credits': {
+						'enabled': False}})
+
+		#paso 3: Enviar la gráfica a la página.
+		context = {'sensor':sensor, 'chart': cht, 'tipo': sensor_tipo ,'explo' : explo, 'min' : min , 'max' : max , 'avg' : avg }
+
+		return render(request, 'mostrarGrafica.html', context)
+
 	#Se ha seleccionado gráfica de Fuego
 	elif sensor_tipo == "Fuego":
 
@@ -693,7 +813,7 @@ def mostrarGrafica (request, id_exploracion, sensor_tipo):
 							'text': 'Tiempo'}},
 					'yAxis': {
 						'title': {
-							'text': 'Luz'}},
+							'text': 'Lx'}},
 					'legend': {
 						'enabled': False},
 					'credits': {

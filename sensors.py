@@ -238,7 +238,7 @@ class SPI(object):
 		# Change the code below to the proper conversion from ldrResistance to ldrLux
 		ldrLux = self.LUX_CALC_SCALAR * pow(ldrResistance, self.LUX_CALC_EXPONENT); #LUX
 
-		if ldrLux > 40:
+		if ldrLux > 400:
 			#Se detecta luz y apaga leds
 			GPIO.output(self.pinLed1,GPIO.LOW)
 			GPIO.output(self.pinLed2,GPIO.LOW)

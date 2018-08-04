@@ -50,11 +50,37 @@
 
 		{% endif %}
 
+
+		{% if tipo == 'Humo' %}
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}</font></h3>
+			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}</font></h3> 
+			{% if max > 50 %}		
+				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado humo en el ambiente !!!</strong> </font></h3>
+			{% else %}
+				<h3>   <font color="#2ecc71"> <strong> Exploración sin humo </strong>  </font></h3>
+			{% endif %}
+
+		{% endif %}
+
+		{% if tipo == 'Co' %}
+			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}</font></h3>
+			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}</font></h3>
+			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}</font></h3> 
+			{% if max > 50 %}		
+				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado CO en el ambiente !!!</strong> </font></h3>
+			{% else %}
+				<h3>   <font color="#2ecc71"> <strong> Exploración con ambiente limpio </strong>  </font></h3>
+			{% endif %}
+
+		{% endif %}
+
+
 		{% if tipo == 'Luz' %}
 			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}</font></h3>
 			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}</font></h3>
 			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}</font></h3> 
-			{% if min < 150 %}		
+			{% if min < 400 %}		
 				<h3>   <font color=" #FF0000"> <strong>Ha habido momento sin luz</strong> </font></h3>
 			{% else %}
 				<h3>   <font color="#2ecc71"> <strong> Exploración con luz </strong>  </font></h3>
