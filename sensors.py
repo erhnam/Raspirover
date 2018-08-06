@@ -182,9 +182,10 @@ class SPI(object):
 
 		raw_adc = self.LeerCanal(self.canalGas)
 		read = raw_adc/self.Ro
-		globales.gas = math.pow(10,( ((math.log(read)-self.LPGCurve[1])/ self.LPGCurve[2]) + self.LPGCurve[0]))
-		globales.co = math.pow(10,( ((math.log(read)-self.COCurve[1])/ self.COCurve[2]) + self.COCurve[0]))
-		globales.smoke = math.pow(10,( ((math.log(read)-self.SmokeCurve[1])/ self.SmokeCurve[2]) + self.SmokeCurve[0]))
+		# Obtain % is ppm/10000
+		globales.gas = (math.pow(10,( ((math.log(read)-self.LPGCurve[1])/ self.LPGCurve[2]) + self.LPGCurve[0])))/10000
+		globales.co = (math.pow(10,( ((math.log(read)-self.COCurve[1])/ self.COCurve[2]) + self.COCurve[0])))/10000
+		globales.smoke = (math.pow(10,( ((math.log(read)-self.SmokeCurve[1])/ self.SmokeCurve[2]) + self.SmokeCurve[0])))/10000
 
 	#Funcion que devuelve el Fuego
 	def ObtenerFuego(self):
@@ -192,11 +193,12 @@ class SPI(object):
 		y = 0.7616x - 5.3018
 		y = distance in inches, x = ADC counts
 		'''
+		#0 hay  mucho fuego 1023 ausencia de fuego.
 		data = self.LeerCanal(self.canalFuego)
-		print("Fuego: %f" % data)
-		if data < 800:
-			inches = 0.7616 * data - 5.3018; 
-			globales.fuego = inches / 2.54 #cm
+		#print("Fuego: %f" % data)
+		#inches = 0.7616 * data - 5.3018;
+		#globales.fuego = inches * 2.54 # 2.54 to get cm
+		globales.fuego = (data*100)/1023 # cm -> 1023 es 100 cm
 
 	#Funcion que devuelve la Luz
 	def ObtenerLuz(self):

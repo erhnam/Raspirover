@@ -39,7 +39,7 @@ from .forms import *
 from servo import *
 from motor import *
 from camara import *
-from dosMotores import *
+from driver import *
 from globales import * 
 from timer import *
 from sensors import *
