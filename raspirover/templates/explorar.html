@@ -1,47 +1,49 @@
 
-{% extends 'base.html' %}
+{% extends 'estructura.html' %}
 
-{% block title %}Explorar{% endblock title %}
+{% block titulo %}Explorar{% endblock  %}
 
-{% block content %}
+{% block informacion %} 
+	<ul>
+		<li>En esta sección podrás configurar la exploración eligiendo nombre, descripción, y los sensores.</li>
+		<li>Si elijes no guardar valores en la base de datos solo tienes que dejar el tiempo de captura de datos sin tocar </li>
+	</ul>
+{% endblock %}
 
+{% block contenido %}
 
-	<div align="center" >
+{% include "_messages.html" %} <!-- incluimos el html messages para imprimir los mensajes -->
+	
+<div class="row" align="center">
 		<form name="formulario"  method="POST">
 
-			<h4> <center>Datos de la exploración</h4>
+			<h4> <center>Configurar la exploración</h4>
 			<br>
 
 			{% csrf_token %}
 			{{ form.as_p }}
-
-			<br>			
-			<h4> <center>¿Qué sensores deseas utilizar para la exploración?</h4>
 			
-			<label for="id_temperatura"><img class="img-responsive" id="checkbox_f1" src="{{MEDIA_URL}}temperaturagris.png" onclick="cambiar1()"></label>
-			
-			<label for="id_humedad"><img class="img-responsive" id="checkbox_f2" src="{{MEDIA_URL}}humedadgris.png" onclick="cambiar2()"></label>
+		        <label for="sbm"><img class="img-responsive" id="checkbox_f6" src="{{MEDIA_URL}}manualgris.png" onmouseover="cambiar6()" onmouseout="cambiar6alt()"></label>
+			<input type="submit" class="hide-checkbox" name="manual" id="sbm" value="Comenzar" />
 
-			<label for="id_gas"><img class="img-responsive" id="checkbox_f3" src="{{MEDIA_URL}}gasgris.png" onclick="cambiar3()"></label>
-
-			<label for="id_fuego"><img class="img-responsive" id="checkbox_f9" src="{{MEDIA_URL}}fuegogris.png" onclick="cambiar9()"></label>
-
-			<label for="id_luz"><img class="img-responsive" id="checkbox_f4" src="{{MEDIA_URL}}luzgris.png" onclick="cambiar4()"></label>
-
-			<label for="id_gps"><img class="img-responsive" id="checkbox_f8" src="{{MEDIA_URL}}gpsgris.png" onclick="cambiar8()"></label>
-
-			<label for="id_camara"><img class="img-responsive" id="checkbox_f5" src="{{MEDIA_URL}}camaragris.png" onclick="cambiar5()"></label>
-		
-			<h4> <center>¿Qué  modo de exploración desea utilizar?</h4>
-
-			<label for="sbm"><img class="img-responsive" id="checkbox_f6" src="{{MEDIA_URL}}manualgris.png" onmouseover="cambiar6()" onmouseout="cambiar6alt()"></label>
-			<input type="submit" class="hide-checkbox" name="manual" id="sbm" value="Iniciar exploración manual" />
-
-			<label for="sba"><img class="img-responsive" id="checkbox_f7" src="{{MEDIA_URL}}automaticogris.png" onmouseover="cambiar7()" onmouseout="cambiar7alt()"></label>
-			<input type="submit" class="hide-checkbox" name="automatico" id="sba" value="Iniciar exploración automática" />
 		</form>
-	<div><a href="{% url 'index' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
 	</div>
+
+	<div align="center">
+ 		<button onclick="goBack()">Atrás</button>
+	</div>
+
+
+	<script>
+		function goBack() {
+			window.history.back();
+		}
+	</script> 
+
+	</div>
+
+</div>	
+
 
 {% endblock %}
 

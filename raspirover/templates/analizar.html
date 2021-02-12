@@ -1,23 +1,55 @@
-	{% extends 'base.html' %}
+{% extends 'estructura.html' %}
 
-	{% block content %}	
+{% block titulo %}Analizar{% endblock  %}
+
+
+{% block informacion %} 
+	<ul>
+		<li>En esta sección podrás ver las distintas exploraciones que ha realizado el usuario</li>
+		<li>Haciendo click sobre el boton verde con el nombre de la exploración podrás acceder a sus detalles y ver las gráficas generadas.</li>
+		<li>Tienes la opcion de eliminar haciendo click en eliminar</li>
+	</ul>
+{% endblock %}
+
+{% block contenido %}
+
+	{% include "_messages.html" %} <!-- incluimos el html messages para imprimir los mensajes -->
 	
-	<div><h3>Exploraciones</h3>
-
+<div class="login_wrapper">
+    <div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-dashboard fa-fw"></i> Exploraciones </h3>
+    </div>
 	{% if explo %}
-		<ul>
+		<div class="list-group">
 		{% for x in explo %}
-			 <li><a href =/eliminarExploracion/{{x.id_exploracion}}><font color="#FF0000"><span class="glyphicon glyphicon-remove" style="color:red" aria-hidden="true"></span></font></a>  Nombre: <a href =/detallesExploracion/{{x.id_exploracion}}><font color="#66B266">{{x.nombre}}</font></a> </li>
+			<li class="list-group-item">
+
+			    <a class="label label-success" href =/detallesExploracion/{{x.id_exploracion}}> {{x.nombre}}</a>
+
+			    <a class="label label-danger pull-right" href =/eliminarExploracion/{{x.id_exploracion}}>Eliminar</></a>
+			</li>
 		{% endfor %}
-		</ul>
-		{% else %}
-			<h3><font color="#66B266">Este usuario no tiene exploraciones</font></h3>
-		{% endif %}
+		</div>
+	{% else %}
+	<div class="list-group">
+		<i>Este usuario no tiene exploraciones</i>
 	</div>
+	{% endif %}
 
-	<div align="center" ><a href="{% url 'index' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
+	</div>
+</div>
 
-	{% endblock content %}
+<div align="center">
+	 <button onclick="goBack()">Atrás</button>
+</div>
 
 
+<script>
+function goBack() {
+  window.history.back();
+}
+</script> 
+
+{% endblock %}
 

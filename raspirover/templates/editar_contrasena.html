@@ -1,17 +1,45 @@
-{% extends 'base.html' %}
+{% extends 'estructura.html' %}
 
-{% block title %}Editar contraseña{% endblock title %}
+{% block titulo %}Editar contraseña{% endblock %}
 
-{% block centro %}
+{% block informacion %} 
+	<ul>
+		<li>Seleccione una nueva contraseña de usuario </li>
+	</ul>
+{% endblock %}
 
-	    <h3 class="page-header">Cambiar contraseña</h3>
-        <div class="col-md-6 col-md-offset-3">
-	    <form method="post" action="">
-	        {% csrf_token %}
-	        {{ form.as_p }}
-	        <button class="btn btn-primary" type="submit">Actualizar contraseña</button>
-	        <a href="{% url 'index' %}" class="btn btn-warning" type="submit">Cancelar</a>
-	    </form>
-		</div>	
+{% block contenido %}
+
+
+<a class="hiddenanchor" ></a>
+
+<div class="login_wrapper">
+    <br/>
+    <div class="animate form login_form">
+        <section class="login_content">
+        <form action="" method="post" class="form-register">
+	     <h1>Cambiar Contraseña</h1>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary" type="submit">Actualizar contraseña</button>
+        <a href="{% url 'index' %}" class="btn btn-warning" type="submit">Cancelar</a>
+    </form>
+
+		<div align="center">
+			 <button onclick="goBack()">Atrás</button>
+		</div>
+
+	</div>
+
+</div>
+
+
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script> 
+
 {% endblock %}
 

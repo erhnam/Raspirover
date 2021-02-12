@@ -1,98 +1,101 @@
-{% extends 'base.html' %}
+{% extends 'estructura.html' %}
 
 {% load static %}
 
-{% block title %}Manual{% endblock title %}
+{% block titulo %} Control Manual {% endblock %}
 
-{% block centro %}
+{% block informacion %} 
+	<ul>
+		<li>Utiliza el control de cámara para controlar la cámara</li>
+		<li>Utiliza el control de dirección para controlar el robot</li>
+		<li>Pulsa el botón de apagado cuando decidas acabar con la exploración</li>
+	</ul>
+{% endblock %}
 
-
-     <div id="content" align="center">
-        <img class="img-responsive" width="320" height="200" src="http://192.168.1.52:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">         
-     </div>
-        {% include "datos.html" %}
-     <div>
-        <h5>Control de Cámara 
-		&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;
-        Control de dirección</h5> 
-         
-     </div>
-
-     	   <div class="servo" align="left">
-           
-            <table border="0" cellpadding="1" cellspacing="0">
-                <tr>
-                <button id="cup" type="button" class="btn btn-default btn-mv" aria-label="Top Arrow" onclick="camup();">
-                    <span class="glyphicon glyphicon-arrow-up" style="color:green" aria-hidden="true"></span>
-                </tr>
-				<br>
-                <tr>
-                <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="camleft();">
-                     <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
-                </button>
-                </tr>
-                 <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="camcenter();">
-                     <span class="glyphicon glyphicon-stop" style="color:green" aria-hidden="true"></span>
-                </button>
-                <tr>
-
-                <button type="button" class="btn btn-default btn-mv" aria-label="Right 
-                Arrow" onclick="camright();">
-                     <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
-                </button>
-                </tr><br>
-                <button type="button" id="cdown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" onclick="camdown();">
-                     <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
-                </button>
+{% block contenido %}
 
 
-            </table>
+<div id="content" align="center">
+	     <img class="img-responsive" width="320" height="200" src="http://192.168.1.200:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">
+	<!-- <img class="img-responsive" width="320" height="200" src="{{ MEDIA_URL }}raspirover.png"> -->
 
 
-        </div>      
+	{% include "datos.html" %}
 
-     
+	<div>
+		<h5>Control de Cámara &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Control de dirección</h5> 
+	</div>
 
-        <div class="control" align="right">       
+	<div class="servo" align="left">
 
-            <table border="0" cellpadding="3" cellspacing="0">
-                <tr>
-                <button type="button" id="dup" class="btn btn-default btn-mv" aria-label="Top Arrow" ontouchstart="fwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="fwd()">
-                    <span class="glyphicon glyphicon-arrow-up" style="color:green" aria-hidden="true"></span>
-                </button> 
-                </tr><br>
-                <tr>
-                <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" ontouchstart="lefti()" ontouchend="stop()" onmouseup="stop()" onmousedown="left()">
-                     <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
-                </button>
-                </tr>
-                 <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="stop()">
-                     <span class="glyphicon glyphicon-stop" style="color:red" aria-hidden="true"></span>
-                </button>
-                <tr>
-                <button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" ontouchstart="righti()" ontouchend="stop()" onmouseup="stop()" onmousedown="right()">
-                     <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
-                </button>
-                </tr><br>
-                <button type="button" id="ddown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" ontouchstart="bwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="bwd();">
-                     <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
+		<table border="0" cellpadding="1" cellspacing="0">
 
-                </button>
+			<tr>
+			<button id="cup" type="button" class="btn btn-default btn-mv" aria-label="Top Arrow" onclick="camup();">
+				<span class="glyphicon glyphicon-arrow-up" style="color:green" aria-hidden="true"></span>
+			</tr>
+			<br>
+			<tr>
+			<button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="camleft();">
+				 <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
+			</button>
+			</tr>
+			 <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="camcenter();">
+				 <span class="glyphicon glyphicon-stop" style="color:green" aria-hidden="true"></span>
+			</button>
+			<tr>
 
-             </table>
-        </div>
+			<button type="button" class="btn btn-default btn-mv" aria-label="Right 
+			Arrow" onclick="camright();">
+				 <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
+			</button>
+			</tr><br>
+			<button type="button" id="cdown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" onclick="camdown();">
+				 <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
+			</button>
 
-        <h5>Velocidad</h5> 
-         <div class="speed" align="center">       
-            <button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="speedup();">
-             <span class="glyphicon glyphicon-plus" style="color:red" aria-hidden="true"></span>
-            </button>
-             <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="speeddown();">
-             <span class="glyphicon glyphicon-minus" style="color:blue" aria-hidden="true"></span>
-            </button>
-        </div> 
+		</table>
 
-            <br><a href="{% url 'salir' %}"><button type="button"><span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span></button></a>   
 
-{% endblock centro%}
+	</div>      
+
+	 
+
+	<div class="control" align="right">       
+
+		<table border="0" cellpadding="3" cellspacing="0">
+			<tr>
+			<button type="button" id="dup" class="btn btn-default btn-mv" aria-label="Top Arrow" ontouchstart="fwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="fwd()">
+				<span class="glyphicon glyphicon-arrow-up" style="color:green" aria-hidden="true"></span>
+			</button> 
+			</tr><br>
+			<tr>
+			<button type="button" class="btn btn-default btn-mv" aria-label="Left Arrow" ontouchstart="lefti()" ontouchend="stop()" onmouseup="stop()" onmousedown="left()">
+				 <span class="glyphicon glyphicon-arrow-left" style="color:green" aria-hidden="true"></span>
+			</button>
+			</tr>
+			 <button type="button" class="btn btn-default btn-mv" aria-label="Stop" onclick="stop()">
+				 <span class="glyphicon glyphicon-stop" style="color:red" aria-hidden="true"></span>
+			</button>
+			<tr>
+			<button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" ontouchstart="righti()" ontouchend="stop()" onmouseup="stop()" onmousedown="right()">
+				 <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
+			</button>
+			</tr><br>
+			<button type="button" id="ddown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" ontouchstart="bwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="bwd();">
+				 <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
+
+			</button>
+
+		</table>
+
+	</div>
+
+	<br>
+	<a href="{% url 'salir' %}">
+		<button type="button">
+			<span class="glyphicon glyphicon-off" style="color:red" aria-hidden="true"></span>
+		</button>
+	</a>   
+</div>
+{% endblock %}

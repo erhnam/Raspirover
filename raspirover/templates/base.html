@@ -1,143 +1,35 @@
 <!DOCTYPE html>
-{% load static %}
+{% load staticfiles %} <!-- Para utilizar static -->
 
-<html lang="es">
-
-
-<head>
-<link rel="shortcut icon" type="image/png" href="{{MEDIA_URL}}/favicon.ico"/>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <link rel="icon" href="{{ MEDIA_URL }}favicon.ico">
+    <title>Raspirover</title>
+    <!-- Bootstrap -->
+    <link href="static/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="static/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="static/vendors/nprogress/nprogress.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="static/vendors/animate.css/animate.min.css" rel="stylesheet">
 
-    <title>{% block title %}  {% endblock title %}</title>
+    <!-- Custom Theme Style -->
+    <link href="static/css/custom.min.css" rel="stylesheet">
+  </head>
 
-    <!-- Bootstrap Core CSS -->
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <body class="login">
 
-    <!-- Custom CSS -->
-    <link href="{% static 'bootstrap/css/sb-admin.css' %}" rel="stylesheet">
-
-    <!-- Morris Charts CSS -->
-    <!-- <link href="{% static 'bootstrap/css/plugins/morris.css' %}" rel="stylesheet"> -->
-
-    <!-- Custom Fonts -->
-    <link href="{% static 'bootstrap/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
-
-        <!-- Custom styles for this template -->
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-</head>
-
-<body>
-
-    <div id="wrapper">
-   {% block nav %}
-
-        <!-- Navigation -->
-        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a href="{% url 'index' %}" class="navbar-brand"><img weight="25px" height="25px" src="{{MEDIA_URL}}rr.png"></a>
-                 <a class="navbar-brand">Raspirover</a>
-            </div>
-            <!-- Top Menu Items -->
-            <ul class="nav navbar-right top-nav">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
-                    {% if user.is_authenticated %} {{user.name}} <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{% url 'editar_contrasena' %}">Cambiar contraseña</a></li>
-                        <li><a href="{% url 'editar_foto' %}">Cambiar Foto</a></li>
-                        <li><a href="{% url 'eliminar_usuario' %}">Borrar cuenta</a></l>                    
-                    </ul>
-                  {% endif %}
-                </li>
-            </ul>
-            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
-            <div class="collapse navbar-collapse navbar-ex1-collapse">
-                <ul class="nav navbar-nav side-nav">
-                    <li class="active">
-                        <a href="{% url 'index' %}"> <i class="fa fa-fw fa-home"></i> Inicio </a>
-                    </li>
-                    <li class="active">
-                        <a href="{% url 'sobre_mi' %}"> <i class="fa fa-fw fa-info-circle"></i> Información </a>
-                    </li>
-
-                    {% if user.is_authenticated %} 
-                    <li class="active">
-                        <a href="{% url 'explorar' %}"> <i class="fa fa-fw fa-car"></i> Explorar </a>
-                    </li>
-
-                    <li class="active">
-                        <a href="{% url 'analizar' %}"> <i class="fa fa-fw fa-database"></i> Exploraciones </a>
-                    </li>
-
-                    <li class="active">
-                        <a href="logout"> <i class="fa fa-fw fa-power-off"></i> Cerrar sesión </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </nav>
-
-    {% endblock nav %}
-
-        <div id="page-wrapper">
-
-                {% block content %}  {% endblock content %}
-
-        </div>
-        <!-- /#page-wrapper -->
-
-        <div class="row">
-            
-            <div class="col-sm-3" align="center">
-                {% block izquierda %} {% endblock izquierda %}
-            </div>
-            
-            <div class="col-sm-6" align="center">
-                {% block centro %}  {% endblock centro %}
-            </div>
-
-            <div class="col-sm-3" align="center">
-                {% block derecha %} {% endblock derecha %}
-            </div>
-
-        </div>
-
-
+    <div align="center">
+        <a title="Raspirover" href="{% url 'base' %}"> <img class="img-responsive" width="240" height="120" alig="center" src="{{ MEDIA_URL }}raspirover.png"></a>
     </div>
-    <!-- /#wrapper -->
 
-    <!-- jQuery -->
-    <script src="{% static 'bootstrap/js/jquery.js' %}"></script>
+    {% block cuerpo %} {% endblock %}
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src="{% static 'bootstrap/js/plugins/morris/raphael.min.js' %}"></script>
-    <script src="{% static 'bootstrap/js/plugins/morris/morris.min.js' %}"></script>
-    <script src="{% static 'bootstrap/js/plugins/morris/morris-data.js' %}"></script>
-    <script src="{% static 'js/custom.js' %}"></script>
-    <script src="{% static 'jquery/jquery.js' %}"></script>
-</body>
-
+  </body>
 </html>

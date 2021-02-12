@@ -157,16 +157,8 @@ class HorizRadioRenderer(forms.RadioSelect):
 #Formulario de exploracion
 class ExploracionForm(forms.Form):
 
-	nombre = forms.CharField(label='Título de exploración', required=False, min_length=2, max_length=50)
+	nombre = forms.CharField(label='Nombre de la exploración', required=False, min_length=2, max_length=50)
 	descripcion = forms.CharField(label='Descripción', required=False, max_length=140)
-	tiempo = forms.FloatField(label='Tiempo de disparo de la BBDD (segundos)',required=False)
-	temperatura = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
-	humedad = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
-	gas = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
-	fuego = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
-	luz = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
-	gps = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
-	camara = forms.BooleanField(label='',required=False, widget=forms.CheckboxInput(attrs={'class': 'hide-checkbox'}))
 
 	class Meta:
 		model = Sensores

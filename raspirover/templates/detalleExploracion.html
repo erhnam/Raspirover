@@ -1,49 +1,104 @@
-{% extends 'base.html' %}
+{% extends 'estructura.html' %}
 
-{% block title %}Detalles de Exploración{% endblock %}
+{% block titulo %}Detalles de Exploración{% endblock  %}
 
-{% block content %}	
 
-		<h3>Detalle de Exploración</h3>
-		<ul>
-			<li> Nombre: {{explo.nombre}} </li>
-			<li> Usuario: {{explo.usuariofk}} </li>
-			<li> Fecha: {{explo.fecha}} </li>
-			<li> Descripción: {{explo.descripcion}} </li>
-			<li> Sensores Utilizados: </li>
-			{% for x in sensores %}
-			<ul>
-				{% if x.tipo == 'Temperatura' %}
-				<li> Sensor de temperatura: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{t}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				{% endif %}
+{% block informacion %} 
+	<ul>
+		<li>En esta sección podrás ver los detalles de la exploración</li>
+		<li>En la zona de sensores, haciendo click en el icono de gráfica accederás a ella. </li>
+	</ul>
+{% endblock %}
 
-				{% if x.tipo == 'Humedad' %}
-				<li> Sensor de humedad: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{h}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				{% endif %}
-			
-				{% if x.tipo == 'Gas' %}
-				<li> Sensor de gas LPG: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{g}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				<li> Sensor de monóxido de carbono: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{c}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				<li> Sensor de Humo: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{s}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				{% endif %}
+{% block contenido %}
 
-				{% if x.tipo == 'Fuego' %}
-				<li> Sensor de fuego: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{f}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				{% endif %}
+	{% include "_messages.html" %} <!-- incluimos el html messages para imprimir los mensajes -->
 
-				{% if x.tipo == 'Luz' %}
-				<li> Sensor de luz: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{l}}><font color="#66B266">Mostrar gráfica</font></a> </li>
-				{% endif %}
+<div class="login_wrapper">
+            <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-dashboard fa-fw"></i> Datos de la exploración </h3>
+            </div>
+            <div class="panel-body">
+                <div class="list-group">
+                    <a class="list-group-item">
+                        <i class="fa fa-fw fa-truck"></i> Nombre: 
+                        <span class="label label-success">{{explo.nombre}}</span>
+                    </a>
+                    <a class="list-group-item">
+                        <i class="fa fa-fw fa-user"></i> Usuario:
+                        <span class="label label-success">{{explo.usuariofk}}</span>
+                    </a>
+                    <a class="list-group-item">
+                        <i class="fa fa-fw fa-calendar"></i> Fecha:
+                        <span class="label label-success">{{explo.fecha}}</span>
+                    </a>
+                    <a class="list-group-item">
+                        <i class="fa fa-fw fa-comment"></i> Descripción:
+                        <span class="label label-success">
+                        {% if explo.descripcion == '' %}
+								Sin descripción
+						{% else %}
+			   					{{explo.descripcion}}
 
-				{% if x.tipo == 'Gps' %}
-				<li> Sensor de gps: <a href =/mostrarMapa/{{explo.id_exploracion}}><font color="#66B266">Mostrar mapa</font></a> </li>
-				{% endif %}
-			</ul>			
-			{% endfor %}
-		</ul>
+						{% endif %}
+                         </span>
+                    </a>
+                    <a class="list-group-item">
+                        <span class="label label-success"></span>
+                        <i class="fa fa-fw fa-globe"></i> Sensores:
+                    </a>
+					{% for x in sensores %}
+					
+						{% if x.tipo == 'Temperatura' %}
+						<li class="list-group-item"> Sensor de temperatura: <a align="right" href =/mostrarGrafica/{{explo.id_exploracion}}/{{t}}>
+							<span class="fa fa-fw fa-bar-chart-o pull-right"></span></a>
+						</li>
+						{% endif %}
 
-	 	<br>
-	 	<div align="center" ><a href="{% url 'analizar' %}"><label for="id_analizar"><img class="img-responsive" id="volver" src="{{MEDIA_URL}}volver.png"></label></a></div>
-{% endblock content %}
+						{% if x.tipo == 'Humedad' %}
+						<li class="list-group-item"> Sensor de humedad: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{h}}>
+							<span class="fa fa-fw fa-bar-chart-o pull-right"></span></a>
+						</li>	
+						{% endif %}
+					
+						{% if x.tipo == 'Gas' %}
+						<li class="list-group-item"> Sensor de gas: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{g}}>
+							<span class="fa fa-fw fa-bar-chart-o pull-right"></span></a>
+						</li>	
+						{% endif %}
+
+						{% if x.tipo == 'Presión' %}
+						<li class="list-group-item"> Sensor de Presión: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{p}}>
+							<span class="fa fa-fw fa-bar-chart-o pull-right"></span></a>
+						</li>	
+						{% endif %}
+
+						{% if x.tipo == 'Luz' %}
+						<li class="list-group-item"> Sensor de luz: <a href =/mostrarGrafica/{{explo.id_exploracion}}/{{l}}>
+							<span class="fa fa-fw fa-bar-chart-o pull-right"></span></a>
+						</li>	
+						{% endif %}
+							
+					{% endfor %}
+
+            </div>
+        </div>
+    </div>
+    <div align="center">
+	 <button onclick="goBack()">Atrás</button>
+</div>
+
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script> 
+
+</div>
+
+
+{% endblock %}
 
 

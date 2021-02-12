@@ -2,29 +2,32 @@
 from django.conf.urls import url
 #from . import views
 #from raspirover import views
+#from django.contrib import admin
 from django.contrib import admin
 from raspirover import views as raspirover_views
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.views import logout
+from django.contrib.auth import logout
 
+def logout_view(request):
+    logout(request)
 
 urlpatterns = [
 #        url(r'^admin/', include(admin.site.urls)),    
 	url(r'^admin/', admin.site.urls),
-	url(r'^$', raspirover_views.index, name='index'),
+	url(r'^$',raspirover_views.base, name='base'),
+	url(r'index$', raspirover_views.index, name='index'),
 	url(r'sobre_mi/$', raspirover_views.sobre_mi, name='sobre_mi'), 
 	url(r'gracias/(?P<username>[\w]+)/(?P<login>[\w]+)/$', raspirover_views.gracias, name='gracias'),
 	url(r'registro/$', raspirover_views.registro, name='registro'),
 	url(r'login/$', raspirover_views.login, name='login'),
 	url(r'editar_contrasena/$', raspirover_views.editar_contrasena, name='editar_contrasena'),
 	url(r'editar_foto/$', raspirover_views.editar_foto, name='editar_foto'),
-        url(r'^logout/$', auth_views.logout, name='logout'),
+        url(r'^logout/$', logout_view, name='logout'),
 	url(r'eliminar_usuario/$', raspirover_views.eliminar_usuario, name='eliminar_usuario'), 
 #	url(r'logout/$', 'django.contrib.auth.views.logout', {'next_page': 'index'} ),
 	url(r'explorar/$', raspirover_views.explorar, name='explorar'),
 	url(r'analizar/$', raspirover_views.analizar, name='analizar'), 	 
 	url(r'manual/$', raspirover_views.manual, name='manual'), 	   
-	url(r'auto/$', raspirover_views.auto, name='auto'), 
 	url(r'salir/$', raspirover_views.salir, name='salir'), 	
 	url(r'apagar/$', raspirover_views.apagar, name='apagar'), 	
 	url(r'reboot/$', raspirover_views.reboot, name='reboot'), 	

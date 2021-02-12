@@ -1,41 +1,24 @@
-{% extends 'base.html' %}
+<!-- Pagina principal tras el inicio de sesion de un usuario -->
+{% extends "estructura.html" %}
 
-{% block title %} Index {% endblock title %}
+{% block titulo %}
+Menú Principal
+{% endblock %}
 
-{% block content %}
 
-    {% if user.is_authenticated %}
-        <div class="content" align="center">
-	        <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.png">
-        </div>
-        <div class="content" align="center">
+{% block informacion %} 
+	<ul>
+		En la pantalla del menú principal, podrás elegir entre dos opciones:</br></br>
+		<li>Selecciona la opción explorar para iniciar una exploración.</li>
+		<li>Selecciona la opción analizar para ver los detalles de la exploración y sus gráficas.</li></br>
+	</ul>
+{% endblock %}
 
+
+{% block contenido %}
+	{% include "_messages.html" %} <!-- incluimos el html messages para imprimir los mensajes -->
+	<div id="content" align="center">
+		<img class="img-responsive" width="320" height="240" src="{{ MEDIA_URL }}raspirover.png">
 	</div>
-    {% else %}
-		<div class="content" align="center">
 
-            <a href="{% url 'registro' %}"> <button type="button" class="btn btn-primary"> Registro </button> </a>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-			&nbsp;&nbsp;&nbsp;&nbsp;
-			<a href="{% url 'login' %}"> <button type="button" class="btn btn-success"> Iniciar sesión </button> </a>
-
-			<div class="content" align="center">
-	       		<img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.png">
-        	</div>
-		</div>
-
-	{% endif %}
-
-{% endblock content %}
-
-
-{% block centro %}
-        <a href="{% url 'apagar' %}"> <button type="button" class="btn btn-danger"> Apagar </button> </a>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;
-        <a href="{% url 'reboot' %}"> <button type="button" class="btn btn-warning"> Reiniciar </button> </a>
-
-    	</div>
-{% endblock centro %}
+{% endblock %}

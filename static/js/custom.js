@@ -1,299 +1,271 @@
-function fwd() {
+/**
+ * Resize function without multiple trigger
+ * 
+ * Usage:
+ * $(window).smartresize(function(){  
+ *     // code here
+ * });
+ */
+(function($,sr){
+    // debouncing function from John Hann
+    // http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
+    var debounce = function (func, threshold, execAsap) {
+      var timeout;
 
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
+        return function debounced () {
+            var obj = this, args = arguments;
+            function delayed () {
+                if (!execAsap)
+                    func.apply(obj, args); 
+                timeout = null; 
+            }
 
-	if (isiDevice == false){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=fwd", true);
-		xhttp.send();
-	}
+            if (timeout)
+                clearTimeout(timeout);
+            else if (execAsap)
+                func.apply(obj, args);
+
+            timeout = setTimeout(delayed, threshold || 100); 
+        };
+    };
+
+    // smartresize 
+    jQuery.fn[sr] = function(fn){  return fn ? this.bind('resize', debounce(fn)) : this.trigger(sr); };
+
+})(jQuery,'smartresize');
+/**
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+var CURRENT_URL = window.location.href.split('#')[0].split('?')[0],
+    $BODY = $('body'),
+    $MENU_TOGGLE = $('#menu_toggle'),
+    $SIDEBAR_MENU = $('#sidebar-menu'),
+    $SIDEBAR_FOOTER = $('.sidebar-footer'),
+    $LEFT_COL = $('.left_col'),
+    $RIGHT_COL = $('.right_col'),
+    $NAV_MENU = $('.nav_menu'),
+    $FOOTER = $('footer');
+
+// Sidebar
+$(document).ready(function() {
+    // TODO: This is some kind of easy fix, maybe we can improve this
+    var setContentHeight = function () {
+        // reset height
+        $RIGHT_COL.css('min-height', $(window).height());
+
+        var bodyHeight = $BODY.outerHeight(),
+            footerHeight = $BODY.hasClass('footer_fixed') ? -10 : $FOOTER.height(),
+            leftColHeight = $LEFT_COL.eq(1).height() + $SIDEBAR_FOOTER.height(),
+            contentHeight = bodyHeight < leftColHeight ? leftColHeight : bodyHeight;
+
+        // normalize content
+        contentHeight -= $NAV_MENU.height() + footerHeight;
+
+        $RIGHT_COL.css('min-height', contentHeight);
+    };
+
+    $SIDEBAR_MENU.find('a').on('click', function(ev) {
+        var $li = $(this).parent();
+
+        if ($li.is('.active')) {
+            $li.removeClass('active active-sm');
+            $('ul:first', $li).slideUp(function() {
+                setContentHeight();
+            });
+        } else {
+            // prevent closing menu if we are on child menu
+            if (!$li.parent().is('.child_menu')) {
+                $SIDEBAR_MENU.find('li').removeClass('active active-sm');
+                $SIDEBAR_MENU.find('li ul').slideUp();
+            }
+            
+            $li.addClass('active');
+
+            $('ul:first', $li).slideDown(function() {
+                setContentHeight();
+            });
+        }
+    });
+
+    // toggle small or large menu
+    $MENU_TOGGLE.on('click', function() {
+        if ($BODY.hasClass('nav-md')) {
+            $SIDEBAR_MENU.find('li.active ul').hide();
+            $SIDEBAR_MENU.find('li.active').addClass('active-sm').removeClass('active');
+        } else {
+            $SIDEBAR_MENU.find('li.active-sm ul').show();
+            $SIDEBAR_MENU.find('li.active-sm').addClass('active').removeClass('active-sm');
+        }
+
+        $BODY.toggleClass('nav-md nav-sm');
+
+        setContentHeight();
+    });
+
+    // check active menu
+    $SIDEBAR_MENU.find('a[href="' + CURRENT_URL + '"]').parent('li').addClass('current-page');
+
+    $SIDEBAR_MENU.find('a').filter(function () {
+        return this.href == CURRENT_URL;
+    }).parent('li').addClass('current-page').parents('ul').slideDown(function() {
+        setContentHeight();
+    }).parent().addClass('active');
+
+    // recompute content when resizing
+    $(window).smartresize(function(){  
+        setContentHeight();
+    });
+
+    setContentHeight();
+
+    // fixed sidebar
+    if ($.fn.mCustomScrollbar) {
+        $('.menu_fixed').mCustomScrollbar({
+            autoHideScrollbar: true,
+            theme: 'minimal',
+            mouseWheel:{ preventDefault: true }
+        });
+    }
+});
+// /Sidebar
+
+// Panel toolbox
+$(document).ready(function() {
+    $('.collapse-link').on('click', function() {
+        var $BOX_PANEL = $(this).closest('.x_panel'),
+            $ICON = $(this).find('i'),
+            $BOX_CONTENT = $BOX_PANEL.find('.x_content');
+        
+        // fix for some div with hardcoded fix class
+        if ($BOX_PANEL.attr('style')) {
+            $BOX_CONTENT.slideToggle(200, function(){
+                $BOX_PANEL.removeAttr('style');
+            });
+        } else {
+            $BOX_CONTENT.slideToggle(200); 
+            $BOX_PANEL.css('height', 'auto');  
+        }
+
+        $ICON.toggleClass('fa-chevron-up fa-chevron-down');
+    });
+
+    $('.close-link').click(function () {
+        var $BOX_PANEL = $(this).closest('.x_panel');
+
+        $BOX_PANEL.remove();
+    });
+});
+// /Panel toolbox
+
+// Tooltip
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip({
+        container: 'body'
+    });
+});
+// /Tooltip
+
+// Progressbar
+if ($(".progress .progress-bar")[0]) {
+    $('.progress .progress-bar').progressbar();
+}
+// /Progressbar
+
+// Switchery
+$(document).ready(function() {
+    if ($(".js-switch")[0]) {
+        var elems = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
+        elems.forEach(function (html) {
+            var switchery = new Switchery(html, {
+                color: '#26B99A'
+            });
+        });
+    }
+});
+// /Switchery
+
+// iCheck
+$(document).ready(function() {
+    if ($("input.flat")[0]) {
+        $(document).ready(function () {
+            $('input.flat').iCheck({
+                checkboxClass: 'icheckbox_flat-green',
+                radioClass: 'iradio_flat-green'
+            });
+        });
+    }
+});
+// /iCheck
+
+// Table
+$('table input').on('ifChecked', function () {
+    checkState = '';
+    $(this).parent().parent().parent().addClass('selected');
+    countChecked();
+});
+$('table input').on('ifUnchecked', function () {
+    checkState = '';
+    $(this).parent().parent().parent().removeClass('selected');
+    countChecked();
+});
+
+var checkState = '';
+
+$('.bulk_action input').on('ifChecked', function () {
+    checkState = '';
+    $(this).parent().parent().parent().addClass('selected');
+    countChecked();
+});
+$('.bulk_action input').on('ifUnchecked', function () {
+    checkState = '';
+    $(this).parent().parent().parent().removeClass('selected');
+    countChecked();
+});
+$('.bulk_action input#check-all').on('ifChecked', function () {
+    checkState = 'all';
+    countChecked();
+});
+$('.bulk_action input#check-all').on('ifUnchecked', function () {
+    checkState = 'none';
+    countChecked();
+});
+
+function countChecked() {
+    if (checkState === 'all') {
+        $(".bulk_action input[name='table_records']").iCheck('check');
+    }
+    if (checkState === 'none') {
+        $(".bulk_action input[name='table_records']").iCheck('uncheck');
+    }
+
+    var checkCount = $(".bulk_action input[name='table_records']:checked").length;
+
+    if (checkCount) {
+        $('.column-title').hide();
+        $('.bulk-actions').show();
+        $('.action-cnt').html(checkCount + ' Records Selected');
+    } else {
+        $('.column-title').show();
+        $('.bulk-actions').hide();
+    }
 }
 
-function fwdi() {
+// Accordion
+$(document).ready(function() {
+    $(".expand").on("click", function () {
+        $(this).next().slideToggle(200);
+        $expand = $(this).find(">:first-child");
+
+        if ($expand.text() == "+") {
+            $expand.text("-");
+        } else {
+            $expand.text("+");
+        }
+    });
+});
 
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
 
-	if (isiDevice == true){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=fwd", true);
-		xhttp.send();
-	}
-
-}
-
-
-function left() {
-
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
-
-	if (isiDevice == false){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=left", true);
-		xhttp.send();
-	}
-}
-
-function lefti() {
-
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
-
-        if (isiDevice == true){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=left", true);
-		xhttp.send();
-	}
-
-}
-
-function stop() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=stop", true);
-	xhttp.send();
-}
-
-function right() {
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
-
-	if (isiDevice == false){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=right", true);
-		xhttp.send();
-	}
-}
-
-function righti() {
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
-
-        if (isiDevice == true){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=right", true);
-		xhttp.send();
-	}
-
-}
-
-
-function bwd() {
-	
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
-
-	if (isiDevice != true){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=bwd", true);
-		xhttp.send();
-	}
-}
-
-function bwdi() {
-	
-	var isiDevice = /ipad|iphone|ipod/i.test(navigator.userAgent.toLowerCase());
-
-        if (isiDevice == true){
-		var xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "?cmd=bwd", true);
-		xhttp.send();
-	}
-}
-
-
-function camleft() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=camleft", true);
-	xhttp.send();
-}
-
-function camcenter() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=camcenter", true);
-	xhttp.send();
-}
-
-function camup() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=camup", true);
-	xhttp.send();
-}
-
-function camdown() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=camdown", true);
-	xhttp.send();
-}
-
-function camright() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=camright", true);
-	xhttp.send();
-}
-
-function speedup() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=sup", true);
-	xhttp.send();
-}
-
-function speeddown() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=sdown", true);
-	xhttp.send();
-}
-
-function salir() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open("GET", "?cmd=salir", true);
-	xhttp.send();
-}
-image1 = new Image();
-image1.src = "/media/temperaturagris.png";
-image1alt = new Image();
-image1alt.src = "/media/temperatura.png";
-
-image2 = new Image();
-image2.src = "/media/humedadgris.png";
-image2alt = new Image();
-image2alt.src = "/media/humedad.png";
-
-image3 = new Image();
-image3.src = "/media/gasgris.png";
-image3alt = new Image();
-image3alt.src = "/media/gas.png";
-
-image4 = new Image();
-image4.src = "/media/luzgris.png";
-image4alt = new Image();
-image4alt.src = "/media/luz.png";
-
-image5 = new Image();
-image5.src = "/media/camaragris.png";
-image5alt = new Image();
-image5alt.src = "/media/camara.png";
-
-image6 = new Image();
-image6.src = "/media/manualgris.png";
-image6alt = new Image();
-image6alt.src = "/media/manual.png";
-
-image7 = new Image();
-image7.src = "/media/automaticogris.png";
-image7alt = new Image();
-image7alt.src = "/media/automatico.png";
-
-image8 = new Image();
-image8.src = "/media/gpsgris.png";
-image8alt = new Image();
-image8alt.src = "/media/gps.png";
-
-image9 = new Image();
-image9.src = "/media/fuegogris.png";
-image9alt = new Image();
-image9alt.src = "/media/fuego.png";
-
-function cambiar1() {
-	if (document.getElementById('checkbox_f1').src != image1.src ) {
- 		document.getElementById('checkbox_f1').checked = true;		
- 		document.getElementById('checkbox_f1').src = image1.src;
-
-	} 
-	else {
-		document.getElementById('checkbox_f1').checked = false;
- 		document.getElementById('checkbox_f1').src = image1alt.src;
-	}
-}
-function cambiar2() {
-
-	if (document.getElementById('checkbox_f2').src != image2.src ) {
- 		document.getElementById('checkbox_f2').src = image2.src;
- 		document.getElementById('checkbox_f2').checked = true;
-
-	} 
-	else {
- 		document.getElementById('checkbox_f2').src = image2alt.src;
- 		document.getElementById('checkbox_f2').checked = false;
-
-	}
-}
-function cambiar3() {
-
-	if (document.getElementById('checkbox_f3').src != image3.src ) {
- 		document.getElementById('checkbox_f3').src = image3.src;
- 		document.getElementById('checkbox_f3').checked = true;
-
-	} 
-	else {
- 		document.getElementById('checkbox_f3').src = image3alt.src;
- 		document.getElementById('checkbox_f3').checked = false;
-
-	}
-}
-function cambiar4() {
-
-	if (document.getElementById('checkbox_f4').src != image4.src ) {
- 		document.getElementById('checkbox_f4').src = image4.src;
- 		document.getElementById('checkbox_f4').checked = true;
-
-	} 
-	else {
- 		document.getElementById('checkbox_f4').src = image4alt.src;
- 		document.getElementById('checkbox_f4').checked = false;
-
-	}
-}
-function cambiar5() {
-
-	if (document.getElementById('checkbox_f5').src != image5.src ) {
- 		document.getElementById('checkbox_f5').src = image5.src;
- 		document.getElementById('checkbox_f5').checked = true;
-
-	} 
-	else {
- 		document.getElementById('checkbox_f5').src = image5alt.src;
- 		document.getElementById('checkbox_f5').checked = false;
-
-	}
-}
-
-function cambiar8() {
-
-	if (document.getElementById('checkbox_f8').src != image8.src ) {
- 		document.getElementById('checkbox_f8').src = image8.src;
- 		document.getElementById('checkbox_f8').checked = true;
-
-	} 
-	else {
- 		document.getElementById('checkbox_f8').src = image8alt.src;
- 		document.getElementById('checkbox_f8').checked = false;
-
-	}
-}
-
-
-function cambiar9() {
-
-	if (document.getElementById('checkbox_f9').src != image9.src ) {
- 		document.getElementById('checkbox_f9').src = image9.src;
- 		document.getElementById('checkbox_f9').checked = true;
-
-	} 
-	else {
- 		document.getElementById('checkbox_f9').src = image9alt.src;
- 		document.getElementById('checkbox_f9').checked = false;
-
-	}
-}
-
-function cambiar6() {
- 		document.getElementById('checkbox_f6').src = image6alt.src;
-}
-
-function cambiar6alt() {
- 		document.getElementById('checkbox_f6').src = image6.src;
-}
-
-function cambiar7() {
- 		document.getElementById('checkbox_f7').src = image7alt.src;
-}
-
-function cambiar7alt() {
- 		document.getElementById('checkbox_f7').src = image7.src;
-}
 

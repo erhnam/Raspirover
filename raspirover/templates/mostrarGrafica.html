@@ -1,97 +1,118 @@
-{% extends "base.html" %}
+{% extends 'estructura.html' %}
 
 {% load static %}
 
 {% load chartit %}
 
-{% block title %}Gráfica{% endblock %}
+{% block titulo %} Análisis de {{ explo.nombre }} {% endblock %}
 
-{% block content %}
+{% block informacion %} 
+	<ul>
+		<li>En esta sección podrás ver la gráfica de {{ explo.nombre }} </li>
+		<li>En la zona de inferior se muestra los datos estadísticos mas relevantes. </li>
+	</ul>
+{% endblock %}
 
-        <script src="{% static 'js/highcharts.js' %}"></script>
-        <script src="{% static 'jquery/jquery.min.js' %}"></script>
-    
-        <div id="grafica">{{ chart|load_charts:"grafica" }}</div>
-	<br>
-	<div align = 'center'> 
-		{% if tipo == 'Temperatura' %}		
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}º</font></h3>
-			<h3> <strong>Máximo:</strong> <font color="#FF0000">{{ max }}º</font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}º</font></h3> 
-		{% endif %}
+{% block contenido %}
 
-		{% if tipo == 'Humedad' %}		
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
-			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
-		{% endif %}
+{% include "_messages.html" %} <!-- incluimos el html messages para imprimir los mensajes -->
 
-		{% if tipo == 'Fuego' %}
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }} cm </font></h3>
-			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }} cm </font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }} cm </font></h3> 
-			{% if max < 950 %}		
-				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado fuego !!!</strong> </font></h3>
-			{% else %}
-				<h3>   <font color="#2ecc71"> <strong> Exploración libre de fuego </strong>  </font></h3>
-			{% endif %}
+   <script src="{% static 'js/highcharts.js' %}"></script>
+   <script src="{% static 'jquery/jquery-3.3.1.min.js' %}"></script>
 
-		{% endif %}
+	{{ chart|load_charts:"grafica" }} 
+	<div class="row">
 
-		{% if tipo == 'Gas' %}
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
-			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
-			{% if max > 50 %}		
-				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado gas en el ambiente !!!</strong> </font></h3>
-			{% else %}
-				<h3>   <font color="#2ecc71"> <strong> Exploración con ambiente limpio </strong>  </font></h3>
-			{% endif %}
+	<div class="col-md-8">
+		<div class="row">
+			<div class="col-md-6"></div>
+			<div class="col-md-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+					<div class="card-body" id="grafica" ></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-		{% endif %}
+	<div class="col-md-8">
+	<div class="row">
+			<div class="col-md-6"></div>
+			<div class="col-md-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 align="center" class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i>Datos estadísticos</h3>
+				</div>
+
+				<div align="center" class="panel-body">
+					{% if tipo == 'Temperatura' %}		
+						<h3> <strong>Máximo:</strong> <font color="#FF0000">{{ max }}º</font></h3>
+						<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}º</font></h3>
+						<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}º</font></h3> 
+					{% endif %}
+
+					{% if tipo == 'Humedad' %}		
+						<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
+						<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
+						<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
+					{% endif %}
+
+					{% if tipo == 'Presion' %}
+						<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }} cm </font></h3>
+						<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }} cm </font></h3>
+						<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }} cm </font></h3> 
+						{% if max > 1000 %}		
+							<h3>   <font color=" #FF0000"> <strong>!!! Presión Alta !!!</strong> </font></h3>
+						{% else %}
+							<h3>   <font color="#2ecc71"> <strong> Presión estable </strong>  </font></h3>
+						{% endif %}
+
+					{% endif %}
+
+					{% if tipo == 'Gas' %}
+						<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
+						<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
+						<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
+						{% if max > 50 %}		
+							<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado gas en el ambiente !!!</strong> </font></h3>
+						{% else %}
+							<h3>   <font color="#2ecc71"> <strong> Exploración con ambiente limpio </strong>  </font></h3>
+						{% endif %}
+
+					{% endif %}
 
 
-		{% if tipo == 'Humo' %}
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
-			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
-			{% if max > 50 %}		
-				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado humo en el ambiente !!!</strong> </font></h3>
-			{% else %}
-				<h3>   <font color="#2ecc71"> <strong> Exploración sin humo </strong>  </font></h3>
-			{% endif %}
+					{% if tipo == 'Luz' %}
+						<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}lx</font></h3>
+						<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}lx</font></h3>
+						<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}lx</font></h3> 
+						{% if min < 400 %}		
+							<h3>   <font color=" #FF0000"> <strong>Ha habido momento sin luz</strong> </font></h3>
+						{% else %}
+							<h3>   <font color="#2ecc71"> <strong> Exploración con luz </strong>  </font></h3>
+						{% endif %}
 
-		{% endif %}
+					{% endif %}	
 
-		{% if tipo == 'Co' %}
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}%</font></h3>
-			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}%</font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}%</font></h3> 
-			{% if max > 50 %}		
-				<h3>   <font color=" #FF0000"> <strong>!!! Se ha detectado CO en el ambiente !!!</strong> </font></h3>
-			{% else %}
-				<h3>   <font color="#2ecc71"> <strong> Exploración con ambiente limpio </strong>  </font></h3>
-			{% endif %}
+				</div>
+			</div>
 
-		{% endif %}
-
-
-		{% if tipo == 'Luz' %}
-			<h3> <strong>Media:</strong>  <font color="#2ecc71">{{ avg }}lx</font></h3>
-			<h3> <strong>Máximo:</strong>  <font color="#FF0000">{{ max }}lx</font></h3>
-			<h3> <strong>Mínimo:</strong>  <font color="#3498db">{{ min }}lx</font></h3> 
-			{% if min < 400 %}		
-				<h3>   <font color=" #FF0000"> <strong>Ha habido momento sin luz</strong> </font></h3>
-			{% else %}
-				<h3>   <font color="#2ecc71"> <strong> Exploración con luz </strong>  </font></h3>
-			{% endif %}
-
-		{% endif %}		
-
+			<div align="center">
+				 <button onclick="goBack()">Atrás</button>
+			</div>
+		</div>
 	</div>
 
 
-<div align="center"><a href =/detallesExploracion/{{explo.id_exploracion}}><label for="id_analizar"><img class="img-responsive" src="{{MEDIA_URL}}volver.png"></label></a></div>
+</div>
+</div>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script> 
 
 
 {% endblock %}

@@ -26,7 +26,7 @@ SECRET_KEY = 'cv5+it_13@#(3*9p-p#3zbb7hff(3(iy7l74@_&673-a#8jd8v'
 #DEBUG = True
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.10.1', 'localhost', 'raspirover.local','192.168.1.52',]
+ALLOWED_HOSTS = ['www.raspirover.com', 'raspirover.com', '192.168.10.1', 'localhost', 'raspirover.local','192.168.1.200',]
 
 # Application definition
 
@@ -37,20 +37,18 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
     'raspirover',
     'chartit',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware'
 )
 
 ROOT_URLCONF = 'proyecto.urls'
@@ -58,7 +56,7 @@ ROOT_URLCONF = 'proyecto.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,14 +116,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_ROOT = ''
+#STATIC_ROOT = ''
 
 #STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+# All settings common to all environments
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 STATICFILES_DIRS = ('/home/pi/Raspirover/static/',)
 
 STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/'
+
+
+#STATICFILES_DIRS = ('/static/',)
+
+#ADMIN_MEDIA_PREFIX = '/static/'
 
 #AUTH_PROFILE_MODULE = 'raspirover.Usuario'
 AUTH_USER_MODEL = 'raspirover.Usuario'

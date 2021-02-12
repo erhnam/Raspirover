@@ -1,8 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'estructura.html' %}
 
-{% block title %}Gracias{% endblock title %}
+{% block titulo %}Gracias{% endblock  %}
 
-{% block centro %}
+{% block contenido %}
+
+<div class="row" align="center">
 
     {% if mensaje %}
         <div class="alert alert-danger">
@@ -19,6 +21,6 @@
 	    <h3> Te echaremos de menos...</h3>
     {% endif %}
 
-    
+    </div>    
 {% endblock %}
 

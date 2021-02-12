@@ -1,33 +1,37 @@
 {% extends 'base.html'%}
 
-{% block titulo %} Registro de usuario{% endblock %}
+{% block title %} Registro de usuario{% endblock title%}
 
-{% block centro %}
+{% block content %}
 
-        <div align="center">
-                <h2>Registro Usuario</h2>
-                <form id='form' method='post' action=''> {%csrf_token%}
-                    <h4>Datos personales</h4>
-                    <p>Nickname: {{ form.username }}</p>
-                    <p>E-mail: {{ form.email }}</p>
-                    
-                   <br>
+<div class="container">
+    <div class="card card-login mx-auto mt-5">
+        <div class="card-header">Registro de Usuario</div>
+        <div class="card-body">
 
-                    <h4>Contraseña</h4>
-                    <p>Contraseña: {{ form.password }}</p>
-                    {{ form.password.errors }}
-                    <p>Confirmar contraseña: {{ form.password1 }}</p>
-                    {{ form.password1.errors }}
+            <form id='form' method='post' action=''> 
+                {%csrf_token%}
+                <div class="form-group">
+                    <div class="form-label-group">
+                        {%csrf_token%}
+                        {% for error in form.non_field_errors %}
+                            <div class="form-label-group">
+                                {{error}}
+                            </div>  
+                        {% endfor %}
+                    </div>
+                    {% for field in form %}
+                    <div class="form-group">
+                        <div class="form-label-group">
+                            {{field.errors}}
+                            {{field}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
 
-                    <br><h4>Foto de perfil</h4>
-                    
-                    {{ form.photo }}
-
-                    <br>
-                        <button type="submit" class="btn btn-primary">Registrar</button>
-                    <br>
-                </form> 
         </div>
-    
-    
+    </div>
+</div>
 {% endblock %}

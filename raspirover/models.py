@@ -3,17 +3,16 @@ from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime
 from django.conf import settings
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser, UserManager
-import django_extensions
 
 # Create your models here.
 #Usuario
 class Usuario(AbstractUser):
 	id_usuario = models.AutoField(db_column='ID_Usuario', primary_key=True)
-	photo = models.ImageField(upload_to='profiles', blank=True, null=True)
+#	photo = models.ImageField(upload_to='profiles', blank=True, null=True)
 
 	objects = UserManager()
 
@@ -28,7 +27,7 @@ class Sensor(models.Model):
 	enable = models.BooleanField(default=False)
 
 	def __unicode__(self):
-		return u'%s' % (self.tipo)	
+		return u'%s' % (self.tipo)
 
 	class Meta:
 		db_table = 'Sensor'
@@ -40,7 +39,7 @@ class Lecturas(models.Model):
 	sensor = models.ForeignKey(Sensor, db_column='SensorFK', on_delete=models.CASCADE, null=True)
 
 	def __unicode__(self):
-		return u'%s' % (self.dato)	
+		return u'%s' % (self.dato)
 
 	class Meta:
 		db_table = 'Lecturas'
@@ -62,7 +61,7 @@ class Exploracion(models.Model):
 	class Meta:
 		db_table = 'Exploracion'	
 		#La solucion es añadir este constraint para que no haya dos parejas iguales
-		#unique_together = (("usuariofk", "id_exploracion"),)	
+		unique_together = (("usuariofk", "id_exploracion"),)	
 
 	
 class Sensores(models.Model):
@@ -70,7 +69,7 @@ class Sensores(models.Model):
 	temperatura = models.BooleanField()
 	humedad = models.BooleanField()
 	gas = models.BooleanField()
-	fuego = models.BooleanField()	
+	presion = models.BooleanField()	
 	luz = models.BooleanField()
 	camara = models.BooleanField()
 	descripcion = models.CharField(max_length=140, null=True)

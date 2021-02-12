@@ -4,4 +4,4 @@
 FRAMERATE=24
 HTTP_PORT=8554
 
-LD_LIBRARY_PATH=/opt/mjpg-streamer/ /opt/mjpg-streamer/mjpg_streamer -i "input_raspicam.so -fps $FRAMERATE -q 50 -vf -hf -x 320 -y 200" -o "output_http.so -p $HTTP_PORT -w /opt/mjpg-streamer/www" &
+LD_LIBRARY_PATH=/usr/local/bin/ /usr/local/bin/mjpg_streamer -i "input_raspicam.so -fps $FRAMERATE -q 50 -vf -hf -x 320 -y 200" -o "output_http.so -p $HTTP_PORT -w /opt/mjpg-streamer/www" &

@@ -1,19 +1,38 @@
-{% extends 'base.html' %}
+{% extends "estructura.html" %}
+{% load staticfiles %} <!-- Para utilizar static -->
 
-{% block title %}Sobre mi{% endblock title %}
+{% block titulo %}
+Sobre Raspirover
+{% endblock %}
 
-{% block centro %}
+
+{% block informacion %} 
+	<ul>
+		<li>Información sobre la aplicación Raspirover</br>
+	</ul>
+{% endblock %}
 		
-	    <h3><Center> Raspirover </Center></h3>
-		<h4>Sistema robótico móvil multisensorial con capacidad manual y autónoma de exploración de espacios</h4>
-                <img class="img-responsive" width="320" height="240" alig="center" src="{{ MEDIA_URL }}raspirover.png">
-		<br>
 
-	    <p>Proyeco de fin de grado de informática en la especialidad de computadores en la Universidad de Córdoba, realizado por el alumno Francisco Jesús Arcos Romero en el año 2016-2017 bajo la dirección Don José Manuel Soto Hidalgo, profesor Contratado Doctor y Don Juan Carlos Gámez Granados, profesor en Comisión de Servicios, ambos del Área de Arquitectura y Tecnología de Computadores del Departamento de Arquitectura de computadores, Electrónica y Tecnología Electrónica de la Universidad de Córdoba.</p>
+{% block contenido %}
+	{% include "_messages.html" %} <!-- incluimos el html messages para imprimir los mensajes -->
 
-		<img class="img-responsive" width="150" height="150" src="{{ MEDIA_URL }}uco.png"></a>
+	<div class="row" ALIGN=center>
+		<h1>Raspirover</h1></br>
+		<b>
+SISTEMA ROBÓTICO MÓVIL MULTISENSORIAL CON CAPACIDAD MANUAL Y AUTÓNOMA DE EXPLORACIÓN DE ESPACIOS
+		</b></br></br>
+		<img src="{{ MEDIA_URL }}raspirover.png" alt="pihome" width="200" height="190" /></br>
+		
+		<div class="row">
+			<div class="col-xs-6 col-sm-4"></div>
+			<div class="col-xs-6 col-sm-4">
+				Proyeco de fin de grado de informática en la especialidad de computadores en la Universidad de Córdoba, realizado por el alumno Francisco Jesús Arcos Romero en el año 2016-2017 bajo la dirección Don José Manuel Soto Hidalgo, profesor Contratado Doctor y Don Juan Carlos Gámez Granados, profesor en Comisión de Servicios, ambos del Área de Arquitectura y Tecnología de Computadores del Departamento de Arquitectura de computadores, Electrónica y Tecnología Electrónica de la Universidad de Córdoba.
+				</br></br>
 
-		<p> Correo electrónico de contacto: i32arrof@uco.es </p>
+			</div>
+			<div class="col-xs-6 col-sm-4"></div>
+		</div>
+	</div>
 
 		
 {% endblock %}

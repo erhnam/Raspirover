@@ -2,7 +2,6 @@
 
 <div id="datos">
 
-    {% if stemp == True %}
     <label for="id_temperatura"><img id="checkbox_f1b" src="{{MEDIA_URL}}temperatura.png" >
             {% if temperatura < 15.0 %}      
                 <font color="#00BFFF"> {{temperatura}}º </font>
@@ -12,9 +11,7 @@
                 <font color="#FF0000"> {{temperatura}}º </font>
             {% endif %}
     </label>
-    {% endif %}
     
-    {% if shum == True %}
     <label for="id_humedad"><img id="checkbox_f2b" src="{{MEDIA_URL}}humedad.png" >
             {% if humedad < 30.0 %}      
                 <font color="#00BFFF"> {{humedad}}% </font>
@@ -24,29 +21,15 @@
                 <font color="#FF0000"> {{humedad}}% </font>
             {% endif %}
     </label>
-    {% endif %}
-    
-    {% if sgas == True %}
-    <label for="id_gas"><img id="checkbox_f3b" src="{{MEDIA_URL}}gas.png" >
-            {% if gas > 100 %}      
-                <font color=" #FF0000"> {{gas}} </font>
-            {% else %}
-                <font color="#2ecc71"> {{gas}} </font>
-            {% endif %}
-    </label>
-    {% endif %}
-    
-    {% if sfuego == True %}
-    <label for="id_fuego"><img id="checkbox_f9b" src="{{MEDIA_URL}}fuego.png" >
-            {% if fuego > 100 %}      
-                <font color="#FF0000">{{fuego}}</font>
-            {% else %}
-                <font color="#2ecc71">{{fuego}}</font>
-            {% endif %}
-    </label>
-    {% endif %}
 
-    {% if sluz == True %}
+    <label for="id_presion"><img id="checkbox_f9b" src="{{MEDIA_URL}}presion.png" >
+            {% if presion > 1000 %}      
+                <font color="#FF0000">{{presion}}</font>
+            {% else %}
+                <font color="#2ecc71">{{presion}}</font>
+            {% endif %}
+    </label>
+
     <label for="id_luz"><img id="checkbox_f3b" src="{{MEDIA_URL}}luz.png" >
             {% if luz < 350 %}      
                 <font color=" #FF0000"> <strong> {{luz}} </font>
@@ -54,21 +37,17 @@
                 <font color="#2ecc71"> <strong> {{luz}} </font>
             {% endif %}
     </label>
-    {% endif %}
 
-    {% if sgps == True %}
-    <label for="id_gps"><img id="checkbox_f8b" src="{{MEDIA_URL}}gps.png" > </label>
-    {% endif %}
+    <label for="id_gas"><img id="checkbox_f3b" src="{{MEDIA_URL}}gas.png" >
+            {% if gas < 35.0 %}
+                <font color="#00BFFF"> {{gas}} </font>
+            {% elif gas >= 35.0 and humedad < 150.0 %}
+                <font color="#2ecc71"> {{gas}} </font>
+            {% elif gas >= 150.0 %}
+                <font color="#FF0000"> {{gas}} </font>
+            {% endif %}
+    </label>
     
-    {% if camara == True %}
-    <label for="id_camara"><img id="checkbox_f5b" src="{{MEDIA_URL}}camara.png" ></label>
-    {% endif %}
-
-    {% if camera != True and sgps != True and sluz != True and sgas != True and sfuego != True and stemp != True and shum != True  %}
-    <h2> Exploración sin sensores </h2>
-    {% endif %}
-
-
 </div>
 
 <script type="text/javascript">
@@ -77,6 +56,6 @@
 
         $("#datos").load("{% url 'mostrardatos' %} #datos");
 
-    }, 1500); // This reloads the <div> every 1 second.
+    }, 5000); // This reloads the <div> every 5 second.
 
 </script>
