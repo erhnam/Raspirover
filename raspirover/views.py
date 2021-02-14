@@ -40,6 +40,7 @@ from .forms import *
 from sensors.servo import *
 from sensors.camara import *
 from sensors.driver import *
+from sensors.laser import *
 from timer import *
 from sensores import *
 
@@ -77,6 +78,7 @@ M4 = Motor(H298N3IN3,H298N3IN4)
 M5 = Motor(H298N2IN3,H298N2IN4)
 M6 = Motor(H298N1IN3,H298N1IN4)
 
+LASERPIN = 4
 sensors = Sensors()
 
 sensors.start()
@@ -84,6 +86,9 @@ sensors.start()
 driver = Driver(M1,M2,M3,M4,M5,M6,S1,S3,S4,S6)
 
 driver.Parar()
+
+laser = Laser(LASERPIN)
+laser.setup()
 
 ########################## MANAGER DE TAREAS ##########################
 
@@ -670,6 +675,7 @@ def Izquierda():
 @login_required(login_url='index')
 def manual(request):
 	global driver
+	global laser
 #	global servoHor
 #	global servoVer
 
@@ -693,14 +699,14 @@ def manual(request):
 		#Parar los motores
 		elif (control == "stop"):
 			driver.Parar()
+
 		#Aumentar velocidad
 		elif (control == "sup"):
-			velocidad = velocidad + 10
-			driver.SetSpeed(velocidad)
+			laser.on()
+
 		#Disminuir velocidad
 		elif (control == "sdown"):
-			velocidad = velocidad - 10
-			driver.SetSpeed(velocidad)
+			laser.off()
 
 		#Control de la cámara
 		#Mover a la izquierda

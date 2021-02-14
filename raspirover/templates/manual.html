@@ -14,11 +14,8 @@
 
 {% block contenido %}
 
-
 <div id="content" align="center">
-	     <img class="img-responsive" width="320" height="200" src="http://192.168.1.200:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">
-	<!-- <img class="img-responsive" width="320" height="200" src="{{ MEDIA_URL }}raspirover.png"> -->
-
+	     <img class="img-responsive" width="6400" height="480" src="http://192.168.1.200:8554/?action=stream" onerror=src="{{ MEDIA_URL }}raspirover.png">
 
 	{% include "datos.html" %}
 
@@ -45,10 +42,10 @@
 			</button>
 			<tr>
 
-			<button type="button" class="btn btn-default btn-mv" aria-label="Right 
-			Arrow" onclick="camright();">
+			<button type="button" class="btn btn-default btn-mv" aria-label="Right Arrow" onclick="camright();">
 				 <span class="glyphicon glyphicon-arrow-right" style="color:green" aria-hidden="true"></span>
 			</button>
+
 			</tr><br>
 			<button type="button" id="cdown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" onclick="camdown();">
 				 <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
@@ -60,9 +57,7 @@
 	</div>      
 
 	 
-
 	<div class="control" align="right">       
-
 		<table border="0" cellpadding="3" cellspacing="0">
 			<tr>
 			<button type="button" id="dup" class="btn btn-default btn-mv" aria-label="Top Arrow" ontouchstart="fwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="fwd()">
@@ -84,11 +79,20 @@
 			</tr><br>
 			<button type="button" id="ddown" class="btn btn-default btn-mv" aria-label="Bottom Arrow" ontouchstart="bwdi()" ontouchend="stop()" onmouseup="stop()" onmousedown="bwd();">
 				 <span class="glyphicon glyphicon-arrow-down" style="color:green" aria-hidden="true"></span>
-
 			</button>
 
 		</table>
 
+	</div>
+
+	<h5>Láser</h5> 
+	<div class="speed" align="center">       
+		<button type="button" id="lon" class="btn btn-default btn-mv" aria-label="Left Arrow" onclick="speedup()">
+			 <span class="glyphicon glyphicon-screenshot" style="color:red" aria-hidden="true"></span>
+		</button>
+		 <button type="button" id="loff" class="btn btn-default btn-mv" aria-label="Stop" onclick="speeddown()">
+			 <span class="glyphicon glyphicon-ban-circle" style="color:blue" aria-hidden="true"></span>
+		</button>
 	</div>
 
 	<br>
