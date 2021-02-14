@@ -8,7 +8,6 @@ from sensors.TSL2561 import TSL2561
 import time
 import math
 import globales
-from threading import Timer
 
 sys.path.append('./sensors')
 
@@ -20,10 +19,8 @@ class Singleton (type):
 		return cls._instances[cls]
 
 class Sensors(threading.Thread, metaclass=Singleton):
-	def __init__ (self, interval):
-		self._timer = None
-		self.interval = interval
-		self.is_running = True
+	def __init__ (self):
+		threading.Thread.__init__(self)
 		self.qv_temp = None
 		self.qv_humi = None
 		self.qv_pressure = None
@@ -36,30 +33,16 @@ class Sensors(threading.Thread, metaclass=Singleton):
 
 		self.tsl2561 = TSL2561(qvalue=self.qv_light)
 
-		self.start()
-
-	def _run(self):
-		self.is_running = True
-		self.start()
-		self.getValues()
-
-	def start(self):
-		if self.is_running:
-			self._timer = Timer(self.interval, self._run)
-			self._timer.start()
-			self.is_running = True
+		self._running = True
 
 	def getValues(self):
-		self.bme680.get_sensor_data()
 		if self.bme680.get_sensor_data():
-			print("Obteniendo dato")
 			globales.temperatura = round(self.bme680.data.temperature,1)
 			globales.humedad = round(self.bme680.data.humidity,1)
 			globales.presion = self.bme680.data.pressure
 			globales.gas = int(round(math.log(self.bme680.data.gas_resistance) + 0.04 * globales.humedad))
-			print(globales.temperatura)
+
 		globales.luz = self.tsl2561.lux()
 
 	def stop (self):
-		self._timer.cancel()
 		self.is_running = False

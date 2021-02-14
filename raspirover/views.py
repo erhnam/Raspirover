@@ -80,9 +80,7 @@ M6 = Motor(H298N1IN3,H298N1IN4)
 
 LASERPIN = 4
 
-sensors = Sensors(15) #15 segundos
-
-sensors.start()
+sensors = Sensors()
 
 driver = Driver(M1,M2,M3,M4,M5,M6,S1,S3,S4,S6)
 
@@ -94,6 +92,7 @@ laser.setup()
 ########################## MANAGER DE TAREAS ##########################
 
 scheduler = Scheduler()
+scheduler.AddTask(15, sensors.getValues)
 
 ########################## VOLTAJE ##########################
 
@@ -103,7 +102,6 @@ scheduler = Scheduler()
 #bateria.start_timer()
 
 #Creacion de los Servos
-
 
 ########################## INICIO  ###############################
 
@@ -186,6 +184,7 @@ def explorar(request):
 			dbexplo = Exploracion(nombre=nombre, tiempo=request.session['tiempo'], usuariofk=request.user, descripcion=descripcion)
 			dbexplo.save()
 
+			#añade nueva tarea
 			scheduler.AddTask( request.session['tiempo'], BBDD, args=[request, dbexplo.id_exploracion] )
 
 			request.session['dbexplo'] = dbexplo.id_exploracion
@@ -214,6 +213,8 @@ def explorar(request):
 			#Se crea un timer de x segundos definidos por la variable tiempo
 
 			camara_start()
+
+			print("añadida tarea de sensores")
 
 			scheduler.StartAllTasks()
 

@@ -12,12 +12,10 @@ class Task(threading.Timer):
 
 	#Funcion principal de ejecucion
 	def run(self):
-		time.sleep(2)
 		while self.running == 1:
 			self.finished.wait (self.interval)
-			self.function (*self.args, **self.kwargs)
+			self.function(*self.args, **self.kwargs)
 		self.cancel()
-		time.sleep(2)
 		return
 
 	#Función que inicia el timer
