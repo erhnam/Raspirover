@@ -16,7 +16,6 @@ class Task(threading.Timer):
 		while self.running == 1:
 			self.finished.wait (self.interval)
 			self.function (*self.args, **self.kwargs)
-		print("Tarea Finalizada...\n")
 		self.cancel()
 		time.sleep(2)
 		return
@@ -42,15 +41,12 @@ class Scheduler(object):
 
 	#Funcion que ejecuta todas las tareas
 	def StartAllTasks( self ):
-		print("Iniciando tareas...\n")
 		for task in self._tasks:
 			task.start_timer()
 
 	#Funcion que para y borra todas las tareas
 	def StopAllTasks( self ):
-		print("Parando tareas...\n")
 		for task in self._tasks:
-#			print("Parando hilo %s\n" % (task))
 			task.stop()
 
 		#Vacía la lista de tareas

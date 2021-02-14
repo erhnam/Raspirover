@@ -79,7 +79,8 @@ M5 = Motor(H298N2IN3,H298N2IN4)
 M6 = Motor(H298N1IN3,H298N1IN4)
 
 LASERPIN = 4
-sensors = Sensors()
+
+sensors = Sensors(15) #15 segundos
 
 sensors.start()
 
@@ -167,6 +168,7 @@ def analizar(request):
 def explorar(request):
 
 	global scheduler
+	global sensors
 
 	#Si es método post
 	if request.method == "POST":
@@ -176,7 +178,7 @@ def explorar(request):
 		if form.is_valid():
 			#Se extraen los valores del formulario
 			cleaned_data = form.cleaned_data
-			request.session['tiempo'] = 5.0
+			request.session['tiempo'] = 30.0
 			nombre = cleaned_data.get('nombre')
 			descripcion = cleaned_data.get('descripcion')
 
@@ -184,7 +186,7 @@ def explorar(request):
 			dbexplo = Exploracion(nombre=nombre, tiempo=request.session['tiempo'], usuariofk=request.user, descripcion=descripcion)
 			dbexplo.save()
 
-			scheduler.AddTask( (request.session['tiempo']), BBDD, args=[request, dbexplo.id_exploracion] )
+			scheduler.AddTask( request.session['tiempo'], BBDD, args=[request, dbexplo.id_exploracion] )
 
 			request.session['dbexplo'] = dbexplo.id_exploracion
 
