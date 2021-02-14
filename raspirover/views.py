@@ -92,7 +92,6 @@ laser.setup()
 ########################## MANAGER DE TAREAS ##########################
 
 scheduler = Scheduler()
-scheduler.AddTask(15, sensors.getValues)
 
 ########################## VOLTAJE ##########################
 
@@ -215,6 +214,8 @@ def explorar(request):
 			camara_start()
 
 			print("añadida tarea de sensores")
+
+			scheduler.AddTask(15, sensors.getValues)
 
 			scheduler.StartAllTasks()
 
